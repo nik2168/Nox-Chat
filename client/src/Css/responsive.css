@@ -1,0 +1,227 @@
+@media (max-width: 800px) {
+  .navbar {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100vw;
+    height: 100px;
+    padding-top: 2rem;
+    background-color: #212b36;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
+    z-index: 3;
+    position: absolute;
+  }
+
+  .Icondiv {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .NavIcon {
+    width: 65x;
+    height: 65px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
+  }
+
+  .NavIcons {
+    margin-bottom: 1rem;
+    width: 3.3rem;
+    height: 3.3rem;
+    border-radius: 10px;
+    background-color: #2d99ff;
+    color: #f9fafb;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .navbar span {
+    color: #f9fafb;
+    font-weight: 1000;
+    font-size: 0.8rem;
+    margin: 0.3rem;
+  }
+
+  .navbar img {
+    width: 3.5rem;
+    height: 3.5rem;
+    border: 2px solid #f9fafb;
+    transition: all 0.4s ease-in-out;
+  }
+
+  .navbar img:hover {
+    border: 2px solid #2d99ff;
+  }
+
+  .navbar hr {
+    margin-bottom: 1rem;
+    width: 80%;
+    border: 1px solid #494850;
+    visibility: hidden;
+  }
+
+  .navbar.active .profile {
+    position: absolute;
+    top: 3%;
+    left: 0%;
+    width: 100vw;
+    height: 97vh;
+    padding-top: 3rem;
+    border-radius: 0rem;
+    border-top-right-radius: 3rem;
+    border-top-left-radius: 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(7px);
+    box-shadow: 0 10px 15px rgb(0 0 0 / 20%);
+    z-index: 6;
+  }
+
+  .NavIcons {
+    margin-bottom: 1rem;
+    width: 2.3rem;
+    height: 2.3rem;
+    border-radius: 10px;
+    background-color: #2d99ff;
+    color: #f9fafb;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .profile {
+    position: absolute;
+    top: 7%;
+    left: 4%;
+    width: 0%;
+    height: 0%;
+    border-radius: 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff2d;
+    backdrop-filter: blur(20px);
+    background-blend-mode: overlay;
+    box-shadow: 0 10px 15px rgb(0 0 0 / 20%);
+    z-index: -4;
+    overflow: hidden;
+    transition: all 0.6s ease-out;
+  }
+
+  .profileclose {
+    height: 2rem;
+    width: 2rem;
+    position: absolute;
+    right: 2rem;
+    top: 2rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .profile h1 {
+    position: absolute;
+    top: 1%;
+    left: 1%;
+    font-size: 1.8rem;
+    color: #f9fafb;
+    visibility: hidden;
+  }
+
+  .profileimgdiv {
+    height: 20%;
+    width: 100%;
+    padding-left: 6%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #f9fafb;
+    padding-bottom: 4rem;
+  }
+
+  .profileimgdiv img {
+    height: 30vw;
+    width: 30vw;
+    border-radius: 2rem;
+  }
+
+  .profileimgdiv p {
+    font-size: 0.8rem;
+  }
+
+  .profiledata textarea {
+    width: 100%;
+    height: 15%;
+    color: #454f5b;
+    border-radius: 19px;
+    background-color: #dfe3e8;
+    padding-right: 1rem;
+    font-weight: 500;
+    padding-top: 3px;
+    border: none;
+    outline: none;
+    padding-left: 1rem;
+    font-size: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .profile h3 {
+    margin-top: 1rem;
+    font-size: 2rem;
+  }
+
+  .profile h4 {
+    margin-left: 1rem;
+    font-size: 1.5rem;
+    color: #f9fafb;
+  }
+
+  .profiledata {
+    width: 100%;
+    height: 50%;
+    padding-right: 10%;
+    padding-left: 10%;
+    display: flex;
+    margin-top: 3rem;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .allchats {
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+  }
+
+  .chat {
+    position: absolute;
+    height: 100vh;
+    width: 100vw;
+    z-index: 0;
+  }
+
+  .chatdefault {
+    position: absolute;
+    height: 100vh;
+    width: 100vw;
+    z-index: 0;
+  }
+}

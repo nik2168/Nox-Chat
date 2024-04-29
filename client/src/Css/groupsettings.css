@@ -1,0 +1,192 @@
+.groupsettings {
+  position: absolute;
+  top: 0rem;
+  left: 200%;
+  z-index: 7;
+  right: 3rem;
+  height: 100%;
+  width: 100%;
+  z-index: 3;
+  opacity: 1;
+  display: flex;
+  background-color: #212b36;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  overflow: hidden;
+  padding: 0.5rem;
+  transition: all 0.2s ease-in;
+}
+
+.groupsettings.active {
+  transform: translate-x(100%);
+  position: absolute;
+  top: 0rem;
+  left: 0rem;
+  z-index: 7;
+  border-top-right-radius: 1rem;
+  border-bottom-left-radius: 1rem;
+  border-bottom-right-radius: 1rem;
+  right: 3rem;
+  height: 100%;
+  width: 100%;
+  z-index: 3;
+  opacity: 1;
+  display: flex;
+  background-color: #212b36;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  overflow: hidden;
+  padding: 0.5rem;
+  transition: all 0.6s ease-in-out;
+}
+
+.gsaddmembers{
+    background-color: #161c24;
+  width: 100%;
+  height: fit-content;
+  border-radius: 1rem;
+  margin-bottom: 3rem;
+}
+
+.groupsettingsmembersdiv {
+  background-color: #161c24;
+  width: 100%;
+  height: fit-content;
+  border-radius: 1rem;
+    overflow-y: scroll;
+
+}
+
+.groupsettingsmembers {
+  height: 4rem;
+  width: 100%;
+  border-top: 1px solid #212b36;
+  border-bottom: 1px solid #212b36;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  align-items: center;
+  color: #C4CDD5;
+}
+
+.groupsettingsimage {
+  width: 3rem;
+  height: 3rem;
+  margin-right: 1rem;
+  border-radius: 50%;
+}
+
+.gsimagediv{
+  height: 6rem;
+  width: 6rem;
+  border-radius: 1rem;
+  background-color: #C4CDD5;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.gsimage{
+  width: 5.8rem;
+  height: 5.8rem;
+  border-radius: 1rem;
+  object-fit: cover;
+
+}
+
+.gsremovebtn{
+  width: 20%;
+  height: 100%;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  color: orange;
+display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  transition: all 0.3s ease-in;
+}
+
+.gsremovebtn:hover{
+  color: red;
+}
+
+.gsexit {
+  height: 4rem;
+  width: 100%;
+  border-top: 1px solid #212b36;
+  border-bottom: 1px solid #212b36;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2rem;
+  background-color: #161c24;
+  border-radius: 1rem;
+}
+
+.gsexitbtn{
+    width: 50%;
+  height: 100%;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  color: red;
+  font-weight: 600;
+display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  font-size: 1.3rem;
+  opacity: 0.8;
+  transition: all 0.3s ease-in;
+}
+
+.gsexitbtn:hover{
+  opacity: 1;
+}
+
+.clearchatdiv {
+  height: 4rem;
+  width: 100%;
+  border-top: 1px solid #212b36;
+  border-bottom: 1px solid #212b36;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 0.8rem;
+  background-color: #161c24;
+  border-radius: 1rem;
+}
+
+.clearchat{
+    width: 50%;
+  height: 100%;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  color: darkgoldenrod;
+  font-weight: 600;
+display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  font-size: 1.3rem;
+  opacity: 0.8;
+  transition: all 0.3s ease-in;
+}
+
+.clearchat:hover{
+  opacity: 1;
+}
