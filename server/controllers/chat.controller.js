@@ -3,8 +3,7 @@ const Chat = require("../models/chat.model.js");
 const User = require("../models/user.model.js");
 const { emitEvent } = require("../utils/features.js");
 
-
-const avatar = {
+const tempavatar = {
   public_id: "asd8a797",
   url: "akjshdgiaerhg",
 };
@@ -24,21 +23,17 @@ const newGroupChat = async (req, res) => {
 
     const temp = await Chat.create({
       name: name,
-      groupChat: true,
-      avatar,
+      groupChat: false,
+      avatar: tempavatar,
       creator: req.userId,
       members: [...members, req.userId],
     });
-   
 
     emitEvent(req, ALERT, allMembers, `Welcome to ${name} group !`);
 
     emitEvent(req, REFETCH_CHATS, members);
 
-                    return res
-                      .status(201)
-                      .json({ success: true, message: "group  created !" });
-
+    return res.status(201).json({ success: true, message: "group  created !" });
   } catch (err) {
     return res.status(400).json({
       success: false,
@@ -48,42 +43,82 @@ const newGroupChat = async (req, res) => {
   }
 };
 
-
 // get personal chats
 const getMyChats = async (req, res) => {
-
   try {
-
-    const chats = await Chat.find({ members: req.userId }).populate(
+    const chats = await Chat.find({ members: req.userId, groupChat: false }).populate(
       "members",
       "name avatar"
     ); // will provide the user details from the members key. ...
 
-   const transformChats = chats.map((_id, name, avatar, groupChat, members) => {
+    const transformChats = chats.map(
+      ({ _id, name, avatar, groupChat, members }) => {
+        const othermember = members.find(
+          (i) => i._id.toString() !== req.userId.toString()
+        );
 
-  const othermember = groupChat ? avatar : members.find((i) => i._id.toString() != req.userId.toString());
+        return {
+          _id,
+          name: othermember?.name,
+          avatar: othermember?.avatar,
+          groupChat,
+          members: members.reduce((pre, cur) => {
+            if (cur._id.toString() !== req.userId.toString()) {
+              pre.push(cur._id);
+            }
+            return pre;
+          }, []),
+          // lastMessage: lastMessage
+        };
+      }
+    );
 
-    return {
-        _id: _id,
-         name: groupChat? name : othermember.name,
-         avatar: othermember.avatar,
-         groupChat,
-         members,
-        // lastMessage: lastMessage
-    }
-   })
-
-   
- return res.status(200).json({success: true, chat: chats})
-
-
+    return res.status(200).json({ success: true, mychats: transformChats });
   } catch (err) {
     return res.status(400).json({
       success: false,
-      message: "Error while creating new group :",
+      message: "Error while getting personal chats :",
       err,
     });
   }
 };
 
-module.exports = { newGroupChat, getMyChats };
+
+// get all of my group chats
+const getMyGroups = async (req, res) => {
+
+  try{
+  const groupChats = await Chat.find({
+    members: req.userId,
+    groupChat: true,
+  }).populate("members", "name avatar");
+
+      const transformGroupChats = groupChats.map(
+        ({ _id, name, avatar, groupChat, members }) => {
+
+          return {
+            _id,
+            name: name,
+            avatar: avatar,
+            groupChat,
+            members: members.reduce((pre, cur) => {
+              if (cur._id.toString() !== req.userId.toString()) {
+                pre.push(cur._id);
+              }
+              return pre;
+            }, []),
+            // lastMessage: lastMessage
+          };
+        }
+      );
+
+ return res.status(200).json({ success: true, Groups: transformGroupChats });
+
+  }catch(err){
+    res.status(400).json({success: false, message: 'Error while fetching personal groups', Error: err})
+  }
+
+
+};
+
+module.exports = { newGroupChat, getMyChats, getMyGroups };
