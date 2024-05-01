@@ -1,8 +1,16 @@
 const express = require("express");
-const app = express();
-const userrouter = require("./routes/user.routes.js");
+
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const cookieParser = require("cookie-parser");
+const { createUser } = require("./seeders/user.seeder.js");
+
+// routes import
+const userRoutes = require("./routes/user.routes.js");
+const chatRoutes = require("./routes/chat.routes.js");
+
+const app = express();
+app.use(cookieParser());
 
 dotenv.config({
   path: "./.env",
@@ -23,4 +31,6 @@ mongoose
     console.log("Error while connecting to db", err);
   });
 
-app.use("/", userrouter);
+
+app.use("/user", userRoutes);
+app.use("/chat", chatRoutes);

@@ -1,5 +1,5 @@
-const { secret } = require('../configs/auth.config.js')
 const jwt = require('jsonwebtoken')
+
 const cookieObj = {
     maxAge: 15 * 24 * 60 * 60 * 1000,
     sameSite: 'none',
@@ -10,10 +10,15 @@ const cookieObj = {
 
 const sendToken = (res, user, code, message) => {
  
-const token = jwt.sign({userid: user.userid}, secret, {expiresIn: 15 * 24 * 60 * 60 * 1000})
+const token = jwt.sign({userid: user.userid}, process.env.secret, {expiresIn: 15 * 24 * 60 * 60 * 1000})
 
 res.status(code).cookie('nox_token', token, cookieObj).send({success: true, message, user})
 
 }
 
-module.exports = {sendToken}
+const emitEvent = (req, event, users, data) => {
+    console.log('Event emitting', event)
+    return ;
+}
+
+module.exports = {sendToken, emitEvent}

@@ -1,6 +1,17 @@
 const express = require("express");
 const router = express.Router();
 
+// controllers
+const {
+  createUser,
+  userLogin,
+  userProfile,
+  logout,
+  searchUser,
+} = require("../controllers/user.controller.js");
+
+
+
 // middle wares
 const { singleAvatar } = require("../middlewares/multer.js");
 const {
@@ -9,12 +20,7 @@ const {
 } = require("../middlewares/user.mw.js");
 const { isAuthenticate } = require("../middlewares/auth.mw.js");
 
-// controllers
-const {
-  createUser,
-  userLogin,
-  userProfile,
-} = require("../controllers/user.controller.js");
+
 
 // Create a new user in database and saved in cookie
 router.post("/signup", singleAvatar, verifySignUpBody, createUser);
@@ -22,7 +28,9 @@ router.post("/signup", singleAvatar, verifySignUpBody, createUser);
 router.post("/login", singleAvatar, verifyLoginBody, userLogin);
 
 // after this all routes need authentication that user must be logged in to access these routes ...
-router.get("/profile", isAuthenticate, userProfile);
-
+router.use(isAuthenticate); // authenticate a user with cookie
+router.get("/profile", userProfile);
+router.get("/logout", logout);
+router.get("/search", searchUser);
 
 module.exports = router;

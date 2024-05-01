@@ -28,14 +28,12 @@ const createUser = async (req, res) => {
     });
 
     // generate a new jwt token
-    const token = jwt.sign({ username: newUser.username }, process.env.secret, {
-      expiresIn: 15 * 24 * 60 * 60 * 1000, // 15 days ...
-    });
+    const token = jwt.sign({ _id: newUser._id }, process.env.secret);
 
     // If everything is fine then send the jwt token in cookie
     return res
       .status(201)
-      .cookie("nox_token", token, cookieObj)
+      .cookie(process.env.TOKEN_NAME, token, cookieObj)
       .json({ success: true, message: "User Created!", newUser });
   } catch (err) {
     return res.status(500).send("Error while creating the user", err);
@@ -59,18 +57,12 @@ const userLogin = async (req, res) => {
     if (!checkPassword) return res.status(400).send("Incorrect Password !");
 
     // generate a new jwt token
-    const token = jwt.sign(
-      { username: checkUser.username },
-      process.env.secret,
-      {
-        expiresIn: 15 * 24 * 60 * 60 * 1000, // 15 days ...
-      }
-    );
+    const token = jwt.sign({ _id: checkUser._id }, process.env.secret);
 
     // If everything is fine then send the jwt token in cookie
     return res
       .status(200)
-      .cookie("nox_token", token, cookieObj)
+      .cookie(process.env.TOKEN_NAME, token, cookieObj)
       .json({ success: true, message: "Login Success!", checkUser });
   } catch (err) {
     return res
@@ -82,13 +74,42 @@ const userLogin = async (req, res) => {
 // user Profile
 const userProfile = async (req, res) => {
   try {
+    const getUser = await User.findById(req.userId).select("-password"); // default
+
+    if (!getUser) return res.status(400).send("User not exist");
+
     res.status(200).json({
       success: true,
-      user: "user data",
+      user: getUser,
     });
   } catch (err) {
-    res.status(500).send("Error while fetching user profile");
+    res.status(500).send("Error while fetching user profile :", err);
   }
 };
 
-module.exports = { createUser, userLogin, userProfile };
+// logout
+const logout = async (req, res) => {
+  return res
+    .status(200)
+    .cookie(process.env.TOKEN_NAME, "", { ...cookieObj, maxAge: 0 })
+    .json({
+      success: true,
+      message: "log out successfully !",
+    });
+};
+
+// find a user
+const searchUser = async (req, res) => {
+
+const { name } = req.query;
+
+try{
+  res.status(200).json({ success: true, message: `${name}`});
+
+}catch(err){
+  res.status(400).json({success: false, message: 'Error while searching the user: ', err})
+}
+
+};
+
+module.exports = { createUser, userLogin, userProfile, logout, searchUser };
