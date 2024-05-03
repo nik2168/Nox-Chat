@@ -1,5 +1,6 @@
+const Chat = require("../models/chat.model.js");
 const User = require("../models/user.model.js");
-const { faker } = require("@faker-js/faker");
+const { faker, simpleFaker } = require("@faker-js/faker");
 
 const createUser = async (numUsers) => {
   try {
@@ -30,5 +31,9 @@ const createUser = async (numUsers) => {
     process.exit(1);
   }
 };
+
+
+
+
 
 module.exports = { createUser };

@@ -1,12 +1,21 @@
-const { ALERT, REFETCH_CHATS } = require("../constants/events.js");
+const {
+  ALERT,
+  REFETCH_CHATS,
+  NEW_ATTACHMENT,
+  NEW_MESSAGE_ALERT,
+} = require("../constants/events.js");
 const Chat = require("../models/chat.model.js");
+const Message = require("../models/message.model.js");
 const User = require("../models/user.model.js");
 const { emitEvent } = require("../utils/features.js");
+
 
 const tempavatar = {
   public_id: "asd8a797",
   url: "akjshdgiaerhg",
 };
+
+
 
 // create New Group
 const newGroupChat = async (req, res) => {
@@ -42,6 +51,8 @@ const newGroupChat = async (req, res) => {
     });
   }
 };
+
+
 
 // get personal chats
 const getMyChats = async (req, res) => {
@@ -83,6 +94,8 @@ const getMyChats = async (req, res) => {
   }
 };
 
+
+
 // get all of my group chats
 const getMyGroups = async (req, res) => {
   try {
@@ -101,12 +114,13 @@ const getMyGroups = async (req, res) => {
   }
 };
 
+
+
 // add members to the group
 const addMembers = async (req, res) => {
   const { chatId, new_members } = req.body;
 
   try {
-    
     const curGroup = await Chat.findById(chatId);
 
     if (!curGroup) {
@@ -123,40 +137,52 @@ const addMembers = async (req, res) => {
       });
     }
 
-    if (!curGroup.groupChat) { // if curgroup is not a group
+    if (!curGroup.groupChat) {
+      // if curgroup is not a group
       return res.status(400).json({
         success: false,
         message: "Its not a Group to add members",
-     });
+      });
     }
 
-    if (curGroup.creator.toString() !== req.userId.toString()) { // if admin is not doing it
+    if (curGroup.creator.toString() !== req.userId.toString()) {
+      // if admin is not doing it
       return res.status(400).json({
         success: false,
         message: "You're not a admin... Are you?",
       });
     }
 
-    const uniqueMembers = new_members.filter((i) => !curGroup.members.includes(i)) // if admin send a members to add in group who is already in the group this will check it
-   curGroup.members = [...curGroup.members, ...uniqueMembers]
+    const uniqueMembers = new_members.filter(
+      (i) => !curGroup.members.includes(i)
+    ); // if admin send a members to add in group who is already in the group this will check it
+    curGroup.members = [...curGroup.members, ...uniqueMembers];
 
-   if(curGroup.members.length > 10) res.status(400).json({success: true, message: 'Group length must be upto 10'}) // members upto 10 only
-   
-   await curGroup.save(); // save added members
+    if (curGroup.members.length > 10)
+      res
+        .status(400)
+        .json({ success: true, message: "Group length must be upto 10" }); // members upto 10 only
 
+    await curGroup.save(); // save added members
 
-   // show the added new members update in the group chat ...
-   const newMembersPromise = new_members.map((i) => User.findById(i, "name"))
-   const newMembers = await Promise.all(newMembersPromise)
+    // show the added new members update in the group chat ...
+    const newMembersPromise = new_members.map((i) => User.findById(i, "name"));
+    const newMembers = await Promise.all(newMembersPromise);
 
-   const allMembersName = newMembers.map((i) => i.name).join(",")
+    const allMembersName = newMembers.map((i) => i.name).join(",");
 
-  emitEvent(req, ALERT, curGroup.members, `${allMembersName} added to this group `)
+    emitEvent(
+      req,
+      ALERT,
+      curGroup.members,
+      `${allMembersName} added to this group `
+    );
 
-  emitEvent(req, REFETCH_CHATS, curGroup.members)
+    emitEvent(req, REFETCH_CHATS, curGroup.members);
 
-   return res.status(200).json({success: true,  message: "New members added successfully!"})
-    
+    return res
+      .status(200)
+      .json({ success: true, message: "New members added successfully!" });
   } catch (err) {
     return res.status(400).json({
       success: false,
@@ -167,11 +193,11 @@ const addMembers = async (req, res) => {
 };
 
 
+
 const removeMembers = async (req, res) => {
   const { chatId, remove_members } = req.body;
 
   try {
-
     let curGroup = await Chat.findById(chatId);
 
     if (!curGroup) {
@@ -188,116 +214,341 @@ const removeMembers = async (req, res) => {
       });
     }
 
-    if (!curGroup.groupChat) { // if curgroup is not a group
+    if (!curGroup.groupChat) {
+      // if curgroup is not a group
       return res.status(400).json({
         success: false,
         message: "Its not a Group",
-     });
+      });
     }
 
-    if (curGroup.creator.toString() !== req.userId.toString()) { // if admin is not doing it
+    if (curGroup.creator.toString() !== req.userId.toString()) {
+      // if admin is not doing it
       return res.status(400).json({
         success: false,
         message: "You're not a admin... Are you?",
       });
     }
 
+    const uniqueMembers = remove_members.filter((i) =>
+      curGroup.members.includes(i)
+    ); // if admin send a members to remove from group who is already in the group this will check it
+    const filteredMember = curGroup.members.filter(
+      (i) => !uniqueMembers.includes(i.toString())
+    );
+    curGroup.members = [...filteredMember];
 
-    const uniqueMembers = remove_members.filter((i) => curGroup.members.includes(i)) // if admin send a members to remove from group who is already in the group this will check it
-      const filteredMember = curGroup.members.filter((i) => !uniqueMembers.includes(i.toString()))
-    curGroup.members  = [...filteredMember];
+    if (curGroup.members.length < 2)
+      res
+        .status(400)
+        .json({ success: true, message: "Group size must be atleast 2" }); // members upto 10 only
 
+    await curGroup.save(); // save removed members
 
-   if(curGroup.members.length < 2) res.status(400).json({success: true, message: 'Group size must be atleast 2'}) // members upto 10 only
-   
-   await curGroup.save(); // save removed members
+    // show the added new members update in the group chat ...
+    const newMembersPromise = uniqueMembers.map((i) =>
+      User.findById(i, "name")
+    );
+    const newMembers = await Promise.all(newMembersPromise);
 
-   // show the added new members update in the group chat ...
-   const newMembersPromise = uniqueMembers.map((i) => User.findById(i, "name"))
-   const newMembers = await Promise.all(newMembersPromise)
+    const allMembersName = newMembers.map((i) => i.name).join(",");
 
-   const allMembersName = newMembers.map((i) => i.name).join(",")
-   console.log(allMembersName)
+    emitEvent(
+      req,
+      ALERT,
+      curGroup.members,
+      `${allMembersName} removed from this group `
+    );
 
-  emitEvent(req, ALERT, curGroup.members, `${allMembersName} removed from this group `)
+    emitEvent(req, REFETCH_CHATS, curGroup.members);
 
-  emitEvent(req, REFETCH_CHATS, curGroup.members)
-
-   return res.status(200).json({success: true,  message: "Members removed successfully!"})
-    
+    return res
+      .status(200)
+      .json({ success: true, message: "Members removed successfully!" });
   } catch (err) {
     return res.status(400).json({
       success: false,
       message: "Error while removing members from the groups",
       Error: err,
     });
-  };
-}
+  }
+};
 
 
 
 const leaveGroup = async (req, res) => {
+  const chatId = req.params.id;
 
-   const chatId = req.params.id
+  try {
+    const curGroup = await Chat.findById(chatId);
 
- try{
+    if (!curGroup) {
+      return res.status(404).json({
+        success: false,
+        message: "Group not found to add members",
+      });
+    }
 
-  const curGroup = await Chat.findById(chatId)
+    if (!curGroup.groupChat) {
+      return res.status(404).json({
+        success: false,
+        message: "This group is not a group lol",
+      });
+    }
 
-  if (!curGroup) {
-    return res.status(404).json({
+    curGroup.members = curGroup.members.filter(
+      (i) => i.toString() !== req.userId.toString()
+    );
+
+    if (req.userId.toString() === curGroup.creator.toString()) {
+      curGroup.creator = curGroup.members[0];
+    }
+
+    if (curGroup.members.length < 2)
+      res
+        .status(400)
+        .json({ success: false, message: "Group must have atleast 2 members" });
+
+    await curGroup.save();
+
+    const leftUser = await User.findById(req.userId, "name");
+
+    emitEvent(
+      req,
+      ALERT,
+      curGroup.members,
+      `${leftUser.name} has left the group `
+    );
+
+    emitEvent(req, REFETCH_CHATS, curGroup.members);
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Members left the group successfully!" });
+  } catch (err) {
+    res.status(400).json({
       success: false,
-      message: "Group not found to add members",
+      Message: "Error while leaving the group",
+      Error: err,
     });
   }
+};
 
-  if(!curGroup.groupChat){
-    return res.status(404).json({
+// send phots, video and stufff. ....
+const sendAttachments = async (req, res) => {
+  const { chatId } = req.body;
+
+  try {
+    // const {chat, user}  = await Promise.all([Chat.findById(chatId), User.findById(req.userId, "name")])
+    const chat = await Chat.findById(chatId);
+    const user = await User.findById(req.userId, "name");
+
+    if (!chat)
+      res
+        .status(400)
+        .json({ success: false, Message: "Error while finding the chatId" });
+
+    const files = req.files || [];
+
+    if (files.length < 1)
+      return res
+        .status(400)
+        .json({ success: "false", Message: "please provide attachment!" });
+
+    const attachments = [];
+
+    const messageForRealTime = {
+      content: "",
+      attachments,
+      chat: chatId,
+      sender: {
+        id: user._id,
+        name: user.name,
+      },
+    };
+
+    const messageForDb = {
+      content: "",
+      attachments,
+      chat: chatId,
+      sender: req.userId,
+    };
+
+    const message = await Message.create(messageForDb);
+
+    emitEvent(req, NEW_ATTACHMENT, chat.members, {
+      message: messageForRealTime,
+      chatId,
+    });
+    emitEvent(req, NEW_MESSAGE_ALERT, chat.members, { chatId });
+
+    res.status(201).json({
+      success: true,
+      Message: message,
+    });
+  } catch (err) {
+    res.status(400).json({
       success: false,
-      message: "This group is not a group lol"
-    })
+      message: "error while sending the attachments",
+      Error: err,
+    });
   }
+};
+
+
+const getChatDetails = async (req, res) => {
+  try {
+    if (req.query.populate === "true") { // will send members with name and avatar
+      const chat = await Chat.findById(req.params.id).populate(
+        "members",
+        "name avatar"
+      ).lean();
+
+      if (!chat)
+        res.status(400).json({ success: false, Message: "chat not found" });
+
+      chat.members = chat.members.map((_id, name, avatar) => {
+        return { _id, name, avatar: avatar.url };
+      });
+
+      return res.status(200).json({ success: true, message: chat });
+    }
+  
+    // without populate in members else
+    else {
+      const chat = await Chat.findById(req.params.id);
+      if (!chat)
+        res.status(400).json({
+          success: false,
+          Message: "chat not found",
+        });
+      return res.status(200).json({ success: true, message: chat });
+    }
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: "error while fetching chat details",
+      Error: err,
+    });
+  }
+};
 
 
 
-  curGroup.members = curGroup.members.filter((i) => i.toString() !== req.userId.toString())
+const  renameGroup  = async (req, res) => {
 
-   if (req.userId.toString() === curGroup.creator.toString()) {
-    curGroup.creator = curGroup.members[0]
-   }
+  const {name} = req.body
 
-   if(curGroup.members.length < 2) res.status(400).json({success : false, message: 'Group must have atleast 2 members'})
+try{
+
+  const curGroup = await Chat.findById(req.params.id)
+
+  if(!curGroup) return res.status(400).json({ success: false, Message: "group not found" });
+
+  if(!curGroup.groupChat) return res.status(400).json({ success: false, Message: "Its not a group" });
+
+  curGroup.name = name
 
   await curGroup.save()
 
- 
- const leftUser = await User.findById(req.userId, "name")
+  res.status(201).json({success: true, Message: "Group name changed successfully!"})
 
-  emitEvent(
-    req,
-    ALERT,
-    curGroup.members,
-    `${leftUser.name} has left the group `
-  );
-
-  emitEvent(req, REFETCH_CHATS, curGroup.members);
-
-  return res
-    .status(200)
-    .json({ success: true, message: "Members left the group successfully!" });
-    
-
- }catch(err){
-  res.status(400).json({success: false, Message : 'Error while leaving the group', Error: err})
- }
-
+} catch (err) {
+    res.status(400).json({
+      success: false,
+      message: "error while fetching chat details",
+      Error: err,
+    });
+  }
 }
 
 
-const sendAttachments = async (req, res) => {
 
- res.send('Attachment send successfully !')
+const  deleteChat  = async (req, res) => {
 
+
+try{
+
+  const curGroup = await Chat.findById(req.params.id)
+
+  if(!curGroup) return res.status(400).json({ success: false, Message: "group not found" });
+
+  if(curGroup.groupChat && curGroup.creator.toString() !== req.userId.toString()) return res.status(400).json({ success: false, Message: "Only Admin can delete Group"});
+  
+  if(!curGroup.groupChat && !curGroup.members.includes(req.userId.toString())) return res.status(400).json({ success: false, Message: "Do you even know what you are doing brahh?"});
+
+  const members = curGroup.members
+
+  // we need to delete all group data from cloudinary and database
+
+
+  const messages = await Message.find({chat: req.params.id, attachments: { $exists: true, $ne:[]}}) // $exists will return if the field exist & even if it has null val
+                                                                                                    // $ne will return only the query doc without null values
+  const public_ids = [];
+
+  messages.forEach(({attachments}) => {
+    attachments.forEach(({public_id}) => {
+      public_ids.push(public_id);
+    })
+  })
+
+
+  await Promise.all([
+    // delete public_ids from cloudinary,
+    curGroup.deleteOne(),
+    Message.deleteMany({chat: req.params.id}),
+  ])
+
+
+
+  emitEvent(req, ALERT, members, "Guys the group is deleted by that stupid admin!")
+  emitEvent(req, REFETCH_CHATS, members)
+
+  return res.status(201).json({success: true, Message: "Group deleted successfully!"})
+
+} catch (err) {
+    res.status(400).json({
+      success: false,
+      message: "error while deleting the grouchat/chat details",
+      Error: err,
+    });
+  }
+}
+
+
+
+const getMessages = async (req, res) => {
+
+  const chatId = req.params.id
+
+try{
+
+  const { page = 1 } = req.query
+
+  const limit = 20;
+  const skip = (page - 1) * limit;
+
+  const [messages, totalMessagesCount] = await Promise.all([Message.find({chat: chatId})
+  .sort({createdAt: -1})
+  .skip(skip)
+  .limit(limit)
+  .populate("sender", "name avatar")
+  .lean(),
+
+  Message.countDocuments({chat: chatId}),
+  ])
+
+  const totalPages = Math.ceil(totalMessagesCount/limit) || 0; // math ceil will roundoff the value
+  
+  res.status(200).json({success: true, messages: messages.reverse(), totalPages })
+
+}catch(err){
+res.status(400).json({
+      success: false,
+      message: "error while deleting the grouchat/chat details",
+      Error: err,
+})
+}
 }
 
 
@@ -310,4 +561,8 @@ module.exports = {
   removeMembers,
   leaveGroup,
   sendAttachments,
+  getChatDetails,
+  renameGroup,
+  deleteChat,
+  getMessages,
 };

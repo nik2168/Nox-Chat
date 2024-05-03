@@ -3,11 +3,15 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
-const { createUser } = require("./seeders/user.seeder.js");
+const {
+  createSingleChats,
+  createGroupChats,
+} = require("./seeders/chat.seeder.js");
 
 // routes import
 const userRoutes = require("./routes/user.routes.js");
 const chatRoutes = require("./routes/chat.routes.js");
+const { createMessagesInAChat } = require("./seeders/message.seeder.js");
 
 const app = express();
 app.use(cookieParser());

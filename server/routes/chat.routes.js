@@ -12,6 +12,10 @@ const {
   removeMembers,
   leaveGroup,
   sendAttachments,
+  getChatDetails,
+  renameGroup,
+  deleteChat,
+  getMessages,
 } = require("../controllers/chat.controller.js");
 
 
@@ -37,7 +41,11 @@ router.get("/groups", getMyGroups);
 
 router.get("/leave/:id", leaveGroup)
 
-router.post("/messages", attachmentsMulter, sendAttachments)
+router.post("/messages", attachmentsMulter, sendAttachments) // attachments
+
+router.get('/messages/:id', getMessages)
+
+router.route("/:id").get(getChatDetails).post(renameGroup).delete(deleteChat);
 
 
 module.exports = router;
