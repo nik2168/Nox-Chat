@@ -8,7 +8,7 @@ const tempavatar = {
   url: "akjshdgiaerhg",
 };
 
-
+// single chat seeder
 const createSingleChats = async (chatsCount) => {
   try {
     const users = await User.find().select("_id");
