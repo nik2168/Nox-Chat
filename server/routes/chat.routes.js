@@ -22,6 +22,17 @@ const {
 // middle wares
 const { isAuthenticate } = require("../middlewares/auth.mw.js");
 const { attachmentsMulter } = require("../middlewares/multer.js");
+const {
+  createGroupValidator,
+  validateHandler,
+  addMembersValidator,
+  removeMembersValidator,
+  leaveGroupValidator,
+  sendAttachmentsValidator,
+  renameGroupValidator,
+  deleteChatValidator,
+  getMessagesValidator,
+} = require("../lib/validators.js");
 
 
 
@@ -29,23 +40,27 @@ const { attachmentsMulter } = require("../middlewares/multer.js");
 
 router.use(isAuthenticate); // authenticate a user with cookie
 
-router.post("/creategroup", newGroupChat);
+router.post("/creategroup", createGroupValidator(), validateHandler, newGroupChat);
 
-router.put("/addmembers", addMembers);
+router.put("/addmembers", addMembersValidator(), validateHandler, addMembers);
 
-router.delete("/removemembers", removeMembers);
+router.delete("/removemembers", removeMembersValidator(), validateHandler, removeMembers);
 
 router.get("/chats", getMyChats);
 
 router.get("/groups", getMyGroups);
 
-router.get("/leave/:id", leaveGroup)
+router.get("/leave/:id", leaveGroupValidator(), validateHandler, leaveGroup)
 
-router.post("/messages", attachmentsMulter, sendAttachments) // attachments
+router.post("/messages", attachmentsMulter, sendAttachmentsValidator(), validateHandler, sendAttachments) // attachments
 
-router.get('/messages/:id', getMessages)
+router.get('/messages/:id', getMessagesValidator(), validateHandler,getMessages)
 
-router.route("/:id").get(getChatDetails).post(renameGroup).delete(deleteChat);
+router
+  .route("/:id")
+  .get(getChatDetails)
+  .post(renameGroupValidator(),  validateHandler,renameGroup)
+  .delete(deleteChatValidator(), validateHandler, deleteChat);
 
 
 module.exports = router;

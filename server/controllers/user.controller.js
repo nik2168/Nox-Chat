@@ -1,6 +1,11 @@
 const User = require("../models/user.model.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const Chat = require("../models/chat.model.js");
+const Message = require("../models/message.model.js");
+const { emitEvent } = require("../utils/features.js");
+const { NEW_REQUEST, REFETCH_CHATS } = require("../constants/events.js");
+const Request = require("../models/request.model.js");
 
 const cookieObj = {
   maxAge: 15 * 24 * 60 * 60 * 1000,
@@ -91,7 +96,7 @@ const userProfile = async (req, res) => {
 const logout = async (req, res) => {
   return res
     .status(200)
-    .cookie(process.env.TOKEN_NAME, "", { ...cookieObj, maxAge: 0 })
+    .cookie(process.env.TOKEN_NAME, "", { ...cookieObj, maxAge: 0 }) // remove the cookie from user to logout by sending a new empty cookie with age zero.
     .json({
       success: true,
       message: "log out successfully !",
@@ -100,16 +105,196 @@ const logout = async (req, res) => {
 
 // find a user
 const searchUser = async (req, res) => {
+  const queryName = req.query.name;
 
-const { name } = req.query;
+  try {
+    const myChats = await Chat.find({ members: req.userId, groupChat: false });
 
-try{
-  res.status(200).json({ success: true, message: `${name}`});
+    const friends = myChats
+      .map((chat) => chat.members)
+      .flat()
+      .filter((i) => i.toString() !== req.userId.toString());
 
-}catch(err){
-  res.status(400).json({success: false, message: 'Error while searching the user: ', err})
-}
+    const allUsersExceptMyFriends = await User.find({
+      _id: { $nin: friends },
+      name: { $regex: queryName, $options: "i" },
+    });
 
+    const users = allUsersExceptMyFriends.map(({ name, avatar, _id }) => {
+      return {
+        name,
+        _id,
+        avatar: avatar.url,
+      };
+    });
+
+    res.status(200).json({ success: true, message: users });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: "Error while searching the user: ",
+      err,
+    });
+  }
 };
 
-module.exports = { createUser, userLogin, userProfile, logout, searchUser };
+// send friend request
+const sendFriendRequest = async (req, res) => {
+  const { userId } = req.body;
+
+  try {
+    const request = await Request.findOne({
+      $or: [
+        { sender: req.userId, receiver: userId },
+        { sender: userId, receiver: req.userId },
+      ],
+    });
+
+    if (request)
+      return res
+        .status(400)
+        .json({ success: true, message: "request already sent" });
+
+    await Request.create({
+      sender: req.userId,
+      receiver: userId,
+    });
+
+    emitEvent(req, NEW_REQUEST, [userId]);
+
+    res
+      .status(200)
+      .json({ success: true, message: "request sent successfully !" });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: "Error while sending friend request !",
+    });
+  }
+};
+
+// accept firend request
+const acceptFriendRequest = async (req, res) => {
+  const { requestId, accept } = req.body;
+
+  try {
+    // fetch req form req id
+    const request = await Request.findById(requestId)
+      .populate("sender", "name")
+      .populate("receiver", "name");
+
+    if (!request) {
+      return res
+        .status(400)
+        .json({ success: true, message: "request not found !" });
+    }
+
+    if (request.receiver._id.toString() !== req.userId.toString()) {
+      return res
+        .status(401)
+        .json({ success: true, message: "You are not authorised !" });
+    }
+
+    if (!accept) {
+      // if user accepted the request
+      await request.deleteOne();
+
+      return res
+        .status(201)
+        .json({ success: true, message: "request rejected !" });
+    }
+
+    const members = [request.sender._id, request.receiver._id]; // members will be user itself and the req sender
+
+    await Promise.all([
+      Chat.create({
+        // will create a chat of both members together
+        name: request.sender.name,
+        members,
+        avatar,
+      }),
+      request.deleteOne(), // will delete the request at the end
+    ]);
+
+    emitEvent(req, REFETCH_CHATS, members); // refetch the chats of user
+
+    return res.status(200).json({
+      // finally you know what this is ...... ain't you?
+      success: true,
+      message: "request accepted successfully !",
+      senderId: request.sender._id,
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: "Error while accepting friend request !",
+    });
+  }
+};
+
+const getNotifications = async (req, res) => {
+  try {
+    const allrequests = await Request.find({ receiver: req.userId }).populate(
+      "sender",
+      "name avatar"
+    );
+
+    const notifications = allrequests.map(({ _id, sender }) => {
+      return {
+        _id: _id,
+        sender: {
+          _id: sender._id,
+          name: sender.name,
+          avatar: sender.avatar.url,
+        },
+      };
+    });
+
+    res.status(200).json({ success: true, Notifications: notifications });
+  } catch (err) {
+    return res.status(400).json({
+      success: false,
+      Message: "Error while fetching the notifications",
+    });
+  }
+};
+
+const getUserFriends = async (req, res) => {
+  const chatId = req.query.chatId;
+
+  try {
+    const userChats = await Chat.find({
+      members: req.userId,
+      groupChat: false,
+    }).populate("members", "name avatar");
+
+    const allmembers = userChats
+      .map((chat) => chat.members)
+      .flat()
+      .filter((i) => i._id.toString() !== req.userId.toString());
+    if (chatId) {
+      const chatFriends = await Chat.findById(chatId);
+      const getfriends = allmembers.filter((i) => !chatFriends.members.includes(i._id));
+
+      return res.status(200).json({ success: true, allFreinds: getfriends });
+    }
+
+    return res.status(200).json({ success: true, allFriends: allmembers });
+  } catch (err) {
+    res
+      .status(400)
+      .json({ success: false, Message: "Error while fetching User's friends" });
+  }
+};
+
+module.exports = {
+  createUser,
+  userLogin,
+  userProfile,
+  logout,
+  searchUser,
+  sendFriendRequest,
+  acceptFriendRequest,
+  getNotifications,
+  getUserFriends,
+};

@@ -8,9 +8,11 @@ const {
   userProfile,
   logout,
   searchUser,
+  sendFriendRequest,
+  acceptFriendRequest,
+  getNotifications,
+  getUserFriends,
 } = require("../controllers/user.controller.js");
-
-
 
 // middle wares
 const { singleAvatar } = require("../middlewares/multer.js");
@@ -19,8 +21,11 @@ const {
   verifySignUpBody,
 } = require("../middlewares/user.mw.js");
 const { isAuthenticate } = require("../middlewares/auth.mw.js");
-
-
+const {
+  validateHandler,
+  sendFriendRequestValidator,
+  acceptFriendRequestValidator,
+} = require("../lib/validators.js");
 
 // Create a new user in database and saved in cookie
 router.post("/signup", singleAvatar, verifySignUpBody, createUser);
@@ -32,5 +37,20 @@ router.use(isAuthenticate); // authenticate a user with cookie
 router.get("/profile", userProfile);
 router.get("/logout", logout);
 router.get("/search", searchUser);
+router.get("/search", searchUser);
+router.put(
+  "/sendrequest",
+  sendFriendRequestValidator(),
+  validateHandler,
+  sendFriendRequest
+);
+router.put(
+  "/acceptrequest",
+  acceptFriendRequestValidator(),
+  validateHandler,
+  acceptFriendRequest,
+);
+router.get("/notifications", getNotifications);
+router.get("/userfriends", getUserFriends);
 
 module.exports = router;

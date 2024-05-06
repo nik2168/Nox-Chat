@@ -35,7 +35,7 @@ const newGroupChat = async (req, res) => {
       groupChat: true,
       avatar: tempavatar,
       creator: req.userId,
-      members: [...members, req.userId],
+      members: allMembers,
     });
 
     emitEvent(req, ALERT, allMembers, `Welcome to ${name} group !`);
