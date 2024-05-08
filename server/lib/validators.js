@@ -85,6 +85,9 @@ const acceptFriendRequestValidator = () => [
   body("accept", "please provide a accept in body").notEmpty().isBoolean()
 ];
 
+const adminValidator = () => [
+  body("secretKey", "Please enter secret key").notEmpty()
+]
 
 
 module.exports = {
@@ -100,4 +103,5 @@ module.exports = {
   getMessagesValidator,
   sendFriendRequestValidator,
   acceptFriendRequestValidator,
+  adminValidator,
 };

@@ -94,6 +94,8 @@ const userProfile = async (req, res) => {
 
 // logout
 const logout = async (req, res) => {
+
+  try{
   return res
     .status(200)
     .cookie(process.env.TOKEN_NAME, "", { ...cookieObj, maxAge: 0 }) // remove the cookie from user to logout by sending a new empty cookie with age zero.
@@ -101,6 +103,9 @@ const logout = async (req, res) => {
       success: true,
       message: "log out successfully !",
     });
+  }catch(err){
+    res.status(400).json({success: false, message: 'error while we trying to logout'})
+  }
 };
 
 // find a user

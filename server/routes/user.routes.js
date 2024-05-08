@@ -37,10 +37,9 @@ router.use(isAuthenticate); // authenticate a user with cookie
 router.get("/profile", userProfile);
 router.get("/logout", logout);
 router.get("/search", searchUser);
-router.get("/search", searchUser);
 router.put(
   "/sendrequest",
-  sendFriendRequestValidator(),
+  sendFriendRequestValidator(), 
   validateHandler,
   sendFriendRequest
 );
