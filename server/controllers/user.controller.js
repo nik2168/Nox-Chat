@@ -24,6 +24,12 @@ const createUser = async (req, res) => {
   const { name, username, password, bio } = req.body;
 
   try {
+    const file = req.file;
+    console.log(file);
+
+    if (!file)
+      res.status(400).json({ sucess: false, message: "Please Upload file" });
+
     const newUser = await User.create({
       name,
       username,
@@ -41,6 +47,12 @@ const createUser = async (req, res) => {
       .cookie(process.env.TOKEN_NAME, token, cookieObj)
       .json({ success: true, message: "User Created!", newUser });
   } catch (err) {
+    if (err.code === 11000) {
+      const error = Object.keys(err.keyPattern).join(",");
+      return res
+        .status(400)
+        .json({ success: false, message: `Duplicate field ${error}` });
+    }
     return res.status(500).send("Error while creating the user", err);
   }
 };
@@ -94,17 +106,18 @@ const userProfile = async (req, res) => {
 
 // logout
 const logout = async (req, res) => {
-
-  try{
-  return res
-    .status(200)
-    .cookie(process.env.TOKEN_NAME, "", { ...cookieObj, maxAge: 0 }) // remove the cookie from user to logout by sending a new empty cookie with age zero.
-    .json({
-      success: true,
-      message: "log out successfully !",
-    });
-  }catch(err){
-    res.status(400).json({success: false, message: 'error while we trying to logout'})
+  try {
+    return res
+      .status(200)
+      .cookie(process.env.TOKEN_NAME, "", { ...cookieObj, maxAge: 0 }) // remove the cookie from user to logout by sending a new empty cookie with age zero.
+      .json({
+        success: true,
+        message: "log out successfully !",
+      });
+  } catch (err) {
+    res
+      .status(400)
+      .json({ success: false, message: "error while we trying to logout" });
   }
 };
 
@@ -135,7 +148,18 @@ const searchUser = async (req, res) => {
 
     res.status(200).json({ success: true, message: users });
   } catch (err) {
-    res.status(400).json({
+         
+if (err.name === "CastError") {
+  const path = err.path;
+  err.message = `Invalid format of ${path}`;
+
+  return res.status(400).json({
+    success: false,
+    message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
+  });
+}
+
+return   res.status(400).json({
       success: false,
       message: "Error while searching the user: ",
       err,
@@ -230,7 +254,18 @@ const acceptFriendRequest = async (req, res) => {
       senderId: request.sender._id,
     });
   } catch (err) {
-    res.status(400).json({
+         
+if (err.name === "CastError") {
+  const path = err.path;
+  err.message = `Invalid format of ${path}`;
+
+  return res.status(400).json({
+    success: false,
+    message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
+  });
+}
+
+ return   res.status(400).json({
       success: false,
       message: "Error while accepting friend request !",
     });
@@ -257,6 +292,17 @@ const getNotifications = async (req, res) => {
 
     res.status(200).json({ success: true, Notifications: notifications });
   } catch (err) {
+         
+if (err.name === "CastError") {
+  const path = err.path;
+  err.message = `Invalid format of ${path}`;
+
+  return res.status(400).json({
+    success: false,
+    message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
+  });
+}
+
     return res.status(400).json({
       success: false,
       Message: "Error while fetching the notifications",
@@ -279,14 +325,27 @@ const getUserFriends = async (req, res) => {
       .filter((i) => i._id.toString() !== req.userId.toString());
     if (chatId) {
       const chatFriends = await Chat.findById(chatId);
-      const getfriends = allmembers.filter((i) => !chatFriends.members.includes(i._id));
+      const getfriends = allmembers.filter(
+        (i) => !chatFriends.members.includes(i._id)
+      );
 
       return res.status(200).json({ success: true, allFreinds: getfriends });
     }
 
     return res.status(200).json({ success: true, allFriends: allmembers });
   } catch (err) {
-    res
+         
+if (err.name === "CastError") {
+  const path = err.path;
+  err.message = `Invalid format of ${path}`;
+
+  return res.status(400).json({
+    success: false,
+    message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
+  });
+}
+
+ return   res
       .status(400)
       .json({ success: false, Message: "Error while fetching User's friends" });
   }

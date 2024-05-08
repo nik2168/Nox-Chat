@@ -54,11 +54,11 @@ const leaveGroupValidator = () => [
 
 const sendAttachmentsValidator = () => [
   body("chatId", "please provide a chatId").notEmpty(),
-  body("files", "please provide attachment")
-    .notEmpty()
-    .withMessage("Please provide attachment")
-    .isArray({ min: 1, max: 5 })
-    .withMessage("Please provide atleast 1-5 file"),
+  // check("files", "please provide attachment")  // check didn't caught the files error so will use in controller itself
+  //   .notEmpty()
+  //   .withMessage("Please provide attachment")
+  //   .isArray({ min: 1, max: 5 })
+  //   .withMessage("Please provide atleast 1-5 file"),
 ];
 
 const renameGroupValidator = () => [

@@ -9,13 +9,10 @@ const Message = require("../models/message.model.js");
 const User = require("../models/user.model.js");
 const { emitEvent } = require("../utils/features.js");
 
-
 const tempavatar = {
   public_id: "asd8a797",
   url: "akjshdgiaerhg",
 };
-
-
 
 // create New Group
 const newGroupChat = async (req, res) => {
@@ -51,8 +48,6 @@ const newGroupChat = async (req, res) => {
     });
   }
 };
-
-
 
 // get personal chats
 const getMyChats = async (req, res) => {
@@ -94,8 +89,6 @@ const getMyChats = async (req, res) => {
   }
 };
 
-
-
 // get all of my group chats
 const getMyGroups = async (req, res) => {
   try {
@@ -113,8 +106,6 @@ const getMyGroups = async (req, res) => {
     });
   }
 };
-
-
 
 // add members to the group
 const addMembers = async (req, res) => {
@@ -184,6 +175,16 @@ const addMembers = async (req, res) => {
       .status(200)
       .json({ success: true, message: "New members added successfully!" });
   } catch (err) {
+    if (err.name === "CastError") {
+      const path = err.path;
+      err.message = `Invalid format of ${path}`;
+
+      return res.status(400).json({
+        success: false,
+        message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
+      });
+    }
+
     return res.status(400).json({
       success: false,
       message: "Error while adding member to the groups",
@@ -191,8 +192,6 @@ const addMembers = async (req, res) => {
     });
   }
 };
-
-
 
 const removeMembers = async (req, res) => {
   const { chatId, remove_members } = req.body;
@@ -266,6 +265,17 @@ const removeMembers = async (req, res) => {
       .status(200)
       .json({ success: true, message: "Members removed successfully!" });
   } catch (err) {
+
+    if (err.name === "CastError") {
+      const path = err.path;
+      err.message = `Invalid format of ${path}`;
+
+      return res.status(400).json({
+        success: false,
+        message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
+      });
+    }
+
     return res.status(400).json({
       success: false,
       message: "Error while removing members from the groups",
@@ -273,8 +283,6 @@ const removeMembers = async (req, res) => {
     });
   }
 };
-
-
 
 const leaveGroup = async (req, res) => {
   const chatId = req.params.id;
@@ -326,6 +334,17 @@ const leaveGroup = async (req, res) => {
       .status(200)
       .json({ success: true, message: "Members left the group successfully!" });
   } catch (err) {
+     
+if (err.name === "CastError") {
+  const path = err.path;
+  err.message = `Invalid format of ${path}`;
+
+  return res.status(400).json({
+    success: false,
+    message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
+  });
+}
+
     res.status(400).json({
       success: false,
       Message: "Error while leaving the group",
@@ -339,16 +358,23 @@ const sendAttachments = async (req, res) => {
   const { chatId } = req.body;
 
   try {
+    const files = req.files || [];
+
+    if (files.length < 1 && files.length > 5) {
+      return res.status(400).json({
+        success: false,
+        Message: "please upload attachment upto 5",
+      });
+    }
+
     // const {chat, user}  = await Promise.all([Chat.findById(chatId), User.findById(req.userId, "name")])
     const chat = await Chat.findById(chatId);
     const user = await User.findById(req.userId, "name");
 
     if (!chat)
-      res
+      return res
         .status(400)
         .json({ success: false, Message: "Error while finding the chatId" });
-
-    const files = req.files || [];
 
     if (files.length < 1)
       return res
@@ -387,7 +413,17 @@ const sendAttachments = async (req, res) => {
       Message: message,
     });
   } catch (err) {
-    res.status(400).json({
+    if (err.name === "CastError") {
+      const path = err.path;
+      err.message = `Invalid format of ${path}`;
+
+      return res.status(400).json({
+        success: false,
+        message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
+      });
+    }
+
+    return res.status(400).json({
       success: false,
       message: "error while sending the attachments",
       Error: err,
@@ -395,14 +431,13 @@ const sendAttachments = async (req, res) => {
   }
 };
 
-
 const getChatDetails = async (req, res) => {
   try {
-    if (req.query.populate === "true") { // will send members with name and avatar
-      const chat = await Chat.findById(req.params.id).populate(
-        "members",
-        "name avatar"
-      ).lean();
+    if (req.query.populate === "true") {
+      // will send members with name and avatar
+      const chat = await Chat.findById(req.params.id)
+        .populate("members", "name avatar")
+        .lean();
 
       if (!chat)
         res.status(400).json({ success: false, Message: "chat not found" });
@@ -413,7 +448,7 @@ const getChatDetails = async (req, res) => {
 
       return res.status(200).json({ success: true, message: chat });
     }
-  
+
     // without populate in members else
     else {
       const chat = await Chat.findById(req.params.id);
@@ -425,6 +460,61 @@ const getChatDetails = async (req, res) => {
       return res.status(200).json({ success: true, message: chat });
     }
   } catch (err) {
+    if (err.name === "CastError") {
+      const path = err.path;
+      err.message = `Invalid format of ${path}`;
+
+      return res.status(400).json({
+        success: false,
+        message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
+      });
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: "error while fetching chat details",
+      Error: err,
+    });
+  }
+};
+
+const renameGroup = async (req, res) => {
+  const { name } = req.body;
+
+  try {
+    const curGroup = await Chat.findById(req.params.id);
+
+    if (!curGroup)
+      return res
+        .status(400)
+        .json({ success: false, Message: "group not found" });
+
+    if (!curGroup.groupChat)
+      return res
+        .status(400)
+        .json({ success: false, Message: "Its not a group" });
+
+    curGroup.name = name;
+
+    await curGroup.save();
+
+    res
+      .status(201)
+      .json({ success: true, Message: "Group name changed successfully!" });
+  } catch (err) {
+
+         
+if (err.name === "CastError") {
+  const path = err.path;
+  err.message = `Invalid format of ${path}`;
+
+  return res.status(400).json({
+    success: false,
+    message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
+  });
+}
+
+
     res.status(400).json({
       success: false,
       message: "error while fetching chat details",
@@ -433,125 +523,133 @@ const getChatDetails = async (req, res) => {
   }
 };
 
+const deleteChat = async (req, res) => {
+  try {
+    const curGroup = await Chat.findById(req.params.id);
 
+    if (!curGroup)
+      return res
+        .status(400)
+        .json({ success: false, Message: "group not found" });
 
-const  renameGroup  = async (req, res) => {
+    if (
+      curGroup.groupChat &&
+      curGroup.creator.toString() !== req.userId.toString()
+    )
+      return res
+        .status(400)
+        .json({ success: false, Message: "Only Admin can delete Group" });
 
-  const {name} = req.body
+    if (
+      !curGroup.groupChat &&
+      !curGroup.members.includes(req.userId.toString())
+    )
+      return res
+        .status(400)
+        .json({
+          success: false,
+          Message: "Do you even know what you are doing brahh?",
+        });
 
-try{
+    const members = curGroup.members;
 
-  const curGroup = await Chat.findById(req.params.id)
+    // we need to delete all group data from cloudinary and database
 
-  if(!curGroup) return res.status(400).json({ success: false, Message: "group not found" });
+    const messages = await Message.find({
+      chat: req.params.id,
+      attachments: { $exists: true, $ne: [] },
+    }); // $exists will return if the field exist & even if it has null val
+    // $ne will return only the query doc without null values
+    const public_ids = [];
 
-  if(!curGroup.groupChat) return res.status(400).json({ success: false, Message: "Its not a group" });
-
-  curGroup.name = name
-
-  await curGroup.save()
-
-  res.status(201).json({success: true, Message: "Group name changed successfully!"})
-
-} catch (err) {
-    res.status(400).json({
-      success: false,
-      message: "error while fetching chat details",
-      Error: err,
+    messages.forEach(({ attachments }) => {
+      attachments.forEach(({ public_id }) => {
+        public_ids.push(public_id);
+      });
     });
-  }
+
+    await Promise.all([
+      // delete public_ids from cloudinary,
+      curGroup.deleteOne(),
+      Message.deleteMany({ chat: req.params.id }),
+    ]);
+
+    emitEvent(
+      req,
+      ALERT,
+      members,
+      "Guys the group is deleted by that stupid admin!"
+    );
+    emitEvent(req, REFETCH_CHATS, members);
+
+    return res
+      .status(201)
+      .json({ success: true, Message: "Group deleted successfully!" });
+  } catch (err) {
+         
+if (err.name === "CastError") {
+  const path = err.path;
+  err.message = `Invalid format of ${path}`;
+
+  return res.status(400).json({
+    success: false,
+    message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
+  });
 }
 
-
-
-const  deleteChat  = async (req, res) => {
-
-
-try{
-
-  const curGroup = await Chat.findById(req.params.id)
-
-  if(!curGroup) return res.status(400).json({ success: false, Message: "group not found" });
-
-  if(curGroup.groupChat && curGroup.creator.toString() !== req.userId.toString()) return res.status(400).json({ success: false, Message: "Only Admin can delete Group"});
-  
-  if(!curGroup.groupChat && !curGroup.members.includes(req.userId.toString())) return res.status(400).json({ success: false, Message: "Do you even know what you are doing brahh?"});
-
-  const members = curGroup.members
-
-  // we need to delete all group data from cloudinary and database
-
-
-  const messages = await Message.find({chat: req.params.id, attachments: { $exists: true, $ne:[]}}) // $exists will return if the field exist & even if it has null val
-                                                                                                    // $ne will return only the query doc without null values
-  const public_ids = [];
-
-  messages.forEach(({attachments}) => {
-    attachments.forEach(({public_id}) => {
-      public_ids.push(public_id);
-    })
-  })
-
-
-  await Promise.all([
-    // delete public_ids from cloudinary,
-    curGroup.deleteOne(),
-    Message.deleteMany({chat: req.params.id}),
-  ])
-
-
-
-  emitEvent(req, ALERT, members, "Guys the group is deleted by that stupid admin!")
-  emitEvent(req, REFETCH_CHATS, members)
-
-  return res.status(201).json({success: true, Message: "Group deleted successfully!"})
-
-} catch (err) {
     res.status(400).json({
       success: false,
       message: "error while deleting the grouchat/chat details",
       Error: err,
     });
   }
-}
-
-
+};
 
 const getMessages = async (req, res) => {
+  const chatId = req.params.id;
 
-  const chatId = req.params.id
+  try {
+    const { page = 1 } = req.query;
 
-try{
+    const limit = 20;
+    const skip = (page - 1) * limit;
 
-  const { page = 1 } = req.query
+    const [messages, totalMessagesCount] = await Promise.all([
+      Message.find({ chat: chatId })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate("sender", "name avatar")
+        .lean(),
 
-  const limit = 20;
-  const skip = (page - 1) * limit;
+      Message.countDocuments({ chat: chatId }),
+    ]);
 
-  const [messages, totalMessagesCount] = await Promise.all([Message.find({chat: chatId})
-  .sort({createdAt: -1})
-  .skip(skip)
-  .limit(limit)
-  .populate("sender", "name avatar")
-  .lean(),
+    const totalPages = Math.ceil(totalMessagesCount / limit) || 0; // math ceil will roundoff the value
 
-  Message.countDocuments({chat: chatId}),
-  ])
+    res
+      .status(200)
+      .json({ success: true, messages: messages.reverse(), totalPages });
+      
+  } catch (err) {
+     
+if (err.name === "CastError") {
+  const path = err.path;
+  err.message = `Invalid format of ${path}`;
 
-  const totalPages = Math.ceil(totalMessagesCount/limit) || 0; // math ceil will roundoff the value
-  
-  res.status(200).json({success: true, messages: messages.reverse(), totalPages })
+  return res.status(400).json({
+    success: false,
+    message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
+  });
+}
 
-}catch(err){
-res.status(400).json({
+    return res.status(400).json({
       success: false,
       message: "error while deleting the grouchat/chat details",
       Error: err,
-})
-}
-}
-
-
+    });
+  }
+};
 
 module.exports = {
   newGroupChat,
