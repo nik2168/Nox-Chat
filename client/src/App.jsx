@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ProtectRoute from "./components/Auth/ProtectRoute";
 import Loaders from "./components/Loaders/Loaders";
 
+
 const Home = lazy(() => import("./pages/Home"));
 const Login = lazy(() => import("./pages/Login"));
 const Chat = lazy(() => import("./pages/Chat"));
@@ -15,7 +16,7 @@ const ChatsManagement = lazy(() => import("./pages/Admin/ChatManagement"))
 const Messages = lazy(() => import("./pages/Admin/MessageManagement"))
 
 
-let user = false;
+let user = true;
 
 const App = () => {
   return (
