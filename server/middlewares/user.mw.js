@@ -3,7 +3,6 @@ const User = require('../models/user.model.js')
 const verifySignUpBody = async (req, res, next) => {
 
    const {name, password, bio, username} = req.body
-   console.log(name, password, bio, username)
 
     try{
     if(!name) return res.status(400).send("Please provide the name")

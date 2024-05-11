@@ -1,7 +1,12 @@
-import React, { lazy, Suspense } from "react";
+import React, { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ProtectRoute from "./components/Auth/ProtectRoute";
 import Loaders from "./components/Loaders/Loaders";
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { userExists, userNotExists } from "./redux/reducer/authslice";
+import { server } from "./constants/config.js";
+import { Toaster } from "react-hot-toast";
 
 
 const Home = lazy(() => import("./pages/Home"));
@@ -9,17 +14,29 @@ const Login = lazy(() => import("./pages/Login"));
 const Chat = lazy(() => import("./pages/Chat"));
 const Groups = lazy(() => import("./pages/Groups"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const AdminLogin = lazy(() => import("./pages/Admin/AdminLogin"))
-const Dashboard = lazy(() => import("./pages/Admin/Dashboard"))
-const UsersManagement = lazy(() => import("./pages/Admin/UserManagement"))
-const ChatsManagement = lazy(() => import("./pages/Admin/ChatManagement"))
-const Messages = lazy(() => import("./pages/Admin/MessageManagement"))
+const AdminLogin = lazy(() => import("./pages/Admin/AdminLogin"));
+const Dashboard = lazy(() => import("./pages/Admin/Dashboard"));
+const UsersManagement = lazy(() => import("./pages/Admin/UserManagement"));
+const ChatsManagement = lazy(() => import("./pages/Admin/ChatManagement"));
+const Messages = lazy(() => import("./pages/Admin/MessageManagement"));
 
-
-let user = true;
 
 const App = () => {
-  return (
+
+  const {user, loader} = useSelector(state => state.auth)
+
+const dispatch = useDispatch()
+
+  useEffect(() => {
+    axios
+      .get(`${server}/api/v1/user/profile`)
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => dispatch(userNotExists()));
+  }, [dispatch]);
+
+  return loader? <Loaders></Loaders> :(
     <BrowserRouter>
       <Suspense fallback={<Loaders />}>
         <Routes>
@@ -46,6 +63,7 @@ const App = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
+      <Toaster position="bottom-center"/>
     </BrowserRouter>
   );
 };

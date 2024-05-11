@@ -1,10 +1,4 @@
-const { userSocketIds } = require("../app")
 
+const getBase64 = (file) => `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
 
-const getSockets = (users) => {
-    console.log(users)
-    const sockets = users.map((user) => userSocketIds.get(user._id.toString()))
-    return sockets
-}
-
-module.exports = {getSockets}
+module.exports = {getBase64 };

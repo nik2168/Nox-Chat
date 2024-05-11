@@ -6,10 +6,16 @@ import {
   useName,
   usePassword,
   useUserName,
-  useFileValidator,
 } from "../hooks/InputValidator";
+import axios from "axios";
+import { server } from "../constants/config";
+import { useDispatch, useSelector } from "react-redux";
+import { userExists, userNotExists } from "../redux/reducer/authslice"; // alt + shift + o
+import toast from "react-hot-toast";
 
 const Login = () => {
+  const dispatch = useDispatch();
+
   const contain = useRef(); // for container's singnin & singup animation
   const currentImage = useRef();
   const [check, setcheck] = useState(""); // for errors in inputs
@@ -17,27 +23,87 @@ const Login = () => {
   const { user, setuser, userFlag, userErr } = useUserName("");
   const { bio, setbio, bioFlag, bioErr } = useBio("");
   const { pass, setpass, passFlag, passErr } = usePassword("");
-  const { file, setFile, fileFlag, fileErr } = useFileValidator();
+  const [file, setFile] = useState('')
+  const [image, setImage] = useState('')
 
-  const signUpSubmitHandler = (e) => {
+
+  // SIGN UP
+  const signUpSubmitHandler = async (e) => {
     e.preventDefault();
+
     if (!nameFlag) setcheck(nameErr);
     else if (!userFlag) setcheck(userErr);
     else if (!bioFlag) setcheck(bioErr);
     else if (!passFlag) setcheck(passErr);
-    else if (!fileFlag) setcheck(fileErr);
+    else if (!file) setcheck('avatar ???');
     else setcheck("");
+
+    const formdata = new FormData();
+
+    formdata.append("name", curname);
+    formdata.append("username", user);
+    formdata.append("password", pass);
+    formdata.append("bio", bio);
+    formdata.append("avatar", file);
+    
+    const config = {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    };
+
+    try {
+      const data = await axios.post(
+        `${server}/api/v1/user/signup`,
+        formdata,
+        config
+      );
+      dispatch(userExists(true));
+      toast.success(data.message);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Something went wrong");
+    }
   };
 
-  const signInSubmitHandler = (e) => {
+
+  // LOGIN
+  const signInSubmitHandler = async (e) => {
     e.preventDefault();
-    console.log('Sign In')
+
+    const config = {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    try {
+      const { data } = await axios.post(
+        `${server}/api/v1/user/login`,
+        { username: user, password: pass },
+        config
+      );
+      dispatch(userExists(true));
+      toast.success(data.message);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "something went wrong !");
+    }
   };
 
+
+
+ // IMG 
   const handleImageChange = (e) => {
-    if (e.target.files[0].size > 3000000) setcheck("Img size must be < 1mb");
-    setFile(URL.createObjectURL(e.target.files[0]));
+    if (e.target.files[0].size > 3000000) {
+      setcheck("Img size must be upto 3mb");
+      return;
+    }
+    setImage(URL.createObjectURL(e.target.files[0]));
+    setFile(e.target.files[0])
   };
+
+
 
   return (
     <div className="container" id="container" ref={contain}>
@@ -66,7 +132,7 @@ const Login = () => {
             }}
           >
             <div className="image-border">
-              <img src={file} className="image-border" />
+              <img src={image} className="image-border" />
             </div>
 
             <div
@@ -168,6 +234,14 @@ const Login = () => {
             value={pass}
             onChange={(e) => setpass(e.currentTarget.value)}
           />
+          {check && (
+            <span
+              className="validationWarning"
+              style={{ color: "red", fontWeight: "800" }}
+            >
+              {check}
+            </span>
+          )}
           <a href="#">Forget Your Password?</a>
           <button>Sign In</button>
         </form>

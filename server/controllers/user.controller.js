@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Chat = require("../models/chat.model.js");
 const Message = require("../models/message.model.js");
-const { emitEvent } = require("../utils/features.js");
+const { emitEvent, uploadFilesToCloudinary } = require("../utils/features.js");
 const { NEW_REQUEST, REFETCH_CHATS } = require("../constants/events.js");
 const Request = require("../models/request.model.js");
 
@@ -14,21 +14,22 @@ const cookieObj = {
   secure: true,
 };
 
-const avatar = {
-  public_id: "asd8a797",
-  url: "akjshdgiaerhg",
-};
-
 // SIGN UP :
 const createUser = async (req, res) => {
   const { name, username, password, bio } = req.body;
-
   try {
-    const file = req.file;
-    console.log(file);
 
+    const file = req.file;
+    
     if (!file)
-      res.status(400).json({ sucess: false, message: "Please Upload file" });
+      res.status(400).json({ sucess: false, message: "Please Upload avatar" });
+
+    const result = await uploadFilesToCloudinary([file]);
+
+    const avatar = {
+      public_id: result[0].public_id,
+      url: result[0].url,
+    };
 
     const newUser = await User.create({
       name,
@@ -53,7 +54,9 @@ const createUser = async (req, res) => {
         .status(400)
         .json({ success: false, message: `Duplicate field ${error}` });
     }
-    return res.status(500).send("Error while creating the user", err);
+    return res
+      .status(500)
+      .json({ message: "error while trying to signup", Error: err });
   }
 };
 
@@ -80,11 +83,11 @@ const userLogin = async (req, res) => {
     return res
       .status(200)
       .cookie(process.env.TOKEN_NAME, token, cookieObj)
-      .json({ success: true, message: "Login Success!", checkUser });
+      .json({ success: true, message: "Login Success!" });
   } catch (err) {
     return res
       .status(500)
-      .json({ Error: "Error while creating the user", Des: err });
+      .json({ message: "Error while creating the user", des: err });
   }
 };
 
@@ -148,18 +151,17 @@ const searchUser = async (req, res) => {
 
     res.status(200).json({ success: true, message: users });
   } catch (err) {
-         
-if (err.name === "CastError") {
-  const path = err.path;
-  err.message = `Invalid format of ${path}`;
+    if (err.name === "CastError") {
+      const path = err.path;
+      err.message = `Invalid format of ${path}`;
 
-  return res.status(400).json({
-    success: false,
-    message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
-  });
-}
+      return res.status(400).json({
+        success: false,
+        message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
+      });
+    }
 
-return   res.status(400).json({
+    return res.status(400).json({
       success: false,
       message: "Error while searching the user: ",
       err,
@@ -254,18 +256,17 @@ const acceptFriendRequest = async (req, res) => {
       senderId: request.sender._id,
     });
   } catch (err) {
-         
-if (err.name === "CastError") {
-  const path = err.path;
-  err.message = `Invalid format of ${path}`;
+    if (err.name === "CastError") {
+      const path = err.path;
+      err.message = `Invalid format of ${path}`;
 
-  return res.status(400).json({
-    success: false,
-    message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
-  });
-}
+      return res.status(400).json({
+        success: false,
+        message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
+      });
+    }
 
- return   res.status(400).json({
+    return res.status(400).json({
       success: false,
       message: "Error while accepting friend request !",
     });
@@ -292,16 +293,15 @@ const getNotifications = async (req, res) => {
 
     res.status(200).json({ success: true, Notifications: notifications });
   } catch (err) {
-         
-if (err.name === "CastError") {
-  const path = err.path;
-  err.message = `Invalid format of ${path}`;
+    if (err.name === "CastError") {
+      const path = err.path;
+      err.message = `Invalid format of ${path}`;
 
-  return res.status(400).json({
-    success: false,
-    message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
-  });
-}
+      return res.status(400).json({
+        success: false,
+        message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
+      });
+    }
 
     return res.status(400).json({
       success: false,
@@ -334,18 +334,17 @@ const getUserFriends = async (req, res) => {
 
     return res.status(200).json({ success: true, allFriends: allmembers });
   } catch (err) {
-         
-if (err.name === "CastError") {
-  const path = err.path;
-  err.message = `Invalid format of ${path}`;
+    if (err.name === "CastError") {
+      const path = err.path;
+      err.message = `Invalid format of ${path}`;
 
-  return res.status(400).json({
-    success: false,
-    message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
-  });
-}
+      return res.status(400).json({
+        success: false,
+        message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
+      });
+    }
 
- return   res
+    return res
       .status(400)
       .json({ success: false, Message: "Error while fetching User's friends" });
   }

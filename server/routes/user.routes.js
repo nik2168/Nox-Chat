@@ -27,6 +27,9 @@ const {
   acceptFriendRequestValidator,
 } = require("../lib/validators.js");
 
+
+
+// User API
 // Create a new user in database and saved in cookie
 router.post("/signup", singleAvatar, verifySignUpBody, createUser);
 // Login a existing user

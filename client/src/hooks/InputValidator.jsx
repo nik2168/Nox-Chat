@@ -49,9 +49,9 @@ export const useBio = (def) => {
   const [bio, setbio] = useState(def);
   let bioFlag = true;
   let bioErr = "No Error"
-  if(bio.length >= 10) {
+  if(bio.length > 40) {
     bioFlag =  false;
-    bioErr = "bio length must be < 10"
+    bioErr = "bio length must be < 40"
   }
   return { bio, setbio,  bioFlag, bioErr};
 };
@@ -72,9 +72,9 @@ export const usePassword = (def) => {
    let smallAlpha = false;
    let size = false;
 
-   if (name.length > 6) size = true;
-   for (let i = 0; i < name.length; i++) {
-     let code = name.charCodeAt(i);
+   if (pass.length > 6) size = true;
+   for (let i = 0; i < pass.length; i++) {
+     let code = pass.charCodeAt(i);
 
      if (code >= 48 && code >= 57) digit = true;
      if (code > 64 && code < 91) capitalAlpha = true;
@@ -88,6 +88,7 @@ export const usePassword = (def) => {
        specialCharacter = true;
    }
    passFlag = specialCharacter && digit && capitalAlpha && smallAlpha && size;
+
    if(!passFlag) passErr = "password must have special char, capital & small alphbat and a digit"
 
   return { pass, setpass, passFlag, passErr};
