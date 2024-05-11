@@ -1,19 +1,18 @@
-import React, { memo, useEffect, useRef, useState } from "react";
 import {
   Add,
-  Send,
-  MoreVert,
-  EmojiEmotions,
-  PhotoAlbumRounded as PhotoIcon,
-  VideoCameraBackRounded as VideoIcon,
   DocumentScannerRounded as DocumentIcon,
+  EmojiEmotions,
+  MoreVert,
+  PhotoAlbumRounded as PhotoIcon,
   PollRounded as PollIcon,
+  Send,
+  VideoCameraBackRounded as VideoIcon,
 } from "@mui/icons-material";
-import ChatSettings from '../components/ChatComp/ChatSettings'
-import Messages from '../components/ChatComp/Messages'
+import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import AppLayout from "../components/AppLayout/AppLayout";
-import { samplemessage } from "../assets/rawmessages";
+import ChatSettings from '../components/ChatComp/ChatSettings';
+import Messages from '../components/ChatComp/Messages';
 import GroupSettings from "../components/ChatList/groupsettings";
 
  const curuser = {

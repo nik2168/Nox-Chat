@@ -15,7 +15,12 @@ const isAuthenticate = (req, res, next) => {
 
     next();
   } catch (err) {
-    res.status(400).send("error while authenticating the user !");
+    res
+      .status(400)
+      .json({
+        success: false,
+        message: "error while authenticating the user !",
+      });
   }
 };
 
@@ -41,8 +46,8 @@ const adminAuthenticate = (req, res, next) => {
         .json({ success: false, message: "You are not authorized !" });
 
     next();
-  } catch (err) {
-    res.status(400).send("error while authenticating the admin !");
+  } catch (err){
+    res.status(400).json({success: false, message: "error while authenticating the admin !"});
   }
 };
 

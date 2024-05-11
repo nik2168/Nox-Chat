@@ -87,6 +87,7 @@ const Login = () => {
       dispatch(userExists(true));
       toast.success(data.message);
     } catch (err) {
+      console.log(err)
       toast.error(err?.response?.data?.message || "something went wrong !");
     }
   };

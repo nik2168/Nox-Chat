@@ -158,3 +158,84 @@ main {
   z-index: 6;
   overflow: hidden;
 }
+
+.profileclose {
+  height: 2rem;
+  width: 2rem;
+  position: absolute;
+  right: 2rem;
+  top: 2rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.profile h1 {
+  position: absolute;
+  top: 1%;
+  font-size: 2rem;
+  color: #f9fafb;
+}
+
+.profileimgdiv {
+  height: 100%;
+  width: 40%;
+  padding-left: 6%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #f9fafb;
+}
+
+.profileimgdiv img {
+  height: 20vw;
+  width: 20vw;
+  border-radius: 2rem;
+}
+
+.profileimgdiv p {
+  font-size: 0.8rem;
+}
+
+.profiledata textarea {
+  width: 88%;
+  height: 20%;
+  color: #454f5b;
+  border-radius: 19px;
+  background-color: #dfe3e8;
+  padding-right: 1rem;
+  font-weight: 500;
+  padding-top: 3px;
+  border: none;
+  outline: none;
+  padding-left: 1rem;
+  font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.profile h3 {
+  margin-top: 1rem;
+  font-size: 2.4rem;
+}
+
+.profile h4 {
+  margin-left: 1rem;
+  font-size: 1.8rem;
+  color: #f9fafb;
+}
+
+.profiledata {
+  width: 60%;
+  height: 70%;
+  padding-right: 6%;
+  padding-left: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}

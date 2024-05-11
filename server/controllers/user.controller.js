@@ -70,11 +70,13 @@ const userLogin = async (req, res) => {
       "+password"
     );
     if (!checkUser)
-      return res.status(400).send("User not found with this username");
+      return res
+        .status(400)
+        .json({ success: false, message: "User not found!" });
 
     // check if the password is correct
     const checkPassword = await bcrypt.compare(password, checkUser.password);
-    if (!checkPassword) return res.status(400).send("Incorrect Password !");
+    if (!checkPassword) return res.status(400).json({success: false, message: "Incorrect password!"});
 
     // generate a new jwt token
     const token = jwt.sign({ _id: checkUser._id }, process.env.secret);

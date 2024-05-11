@@ -7,7 +7,7 @@ const {
 const Chat = require("../models/chat.model.js");
 const Message = require("../models/message.model.js");
 const User = require("../models/user.model.js");
-const { emitEvent } = require("../utils/features.js");
+const { emitEvent, uploadFilesToCloudinary } = require("../utils/features.js");
 
 const tempavatar = {
   public_id: "asd8a797",
@@ -25,12 +25,22 @@ const newGroupChat = async (req, res) => {
         .json({ success: false, message: "group must have 1 member" });
     }
 
-    const allMembers = [...members, req.userId];
+       const file = req.file;
+
+
+      const result = await uploadFilesToCloudinary([file]);
+
+      const avatar = {
+        public_id: result[0].public_id,
+        url: result[0].url,
+      };
+
+            const allMembers = [...members, req.userId];
 
     const temp = await Chat.create({
       name: name,
       groupChat: true,
-      avatar: tempavatar,
+      avatar,
       creator: req.userId,
       members: allMembers,
     });
@@ -54,7 +64,6 @@ const getMyChats = async (req, res) => {
   try {
     const chats = await Chat.find({
       members: req.userId,
-      groupChat: false,
     }).populate("members", "name avatar"); // will provide the user details from the members key. ...
 
     const transformChats = chats.map(
@@ -65,8 +74,8 @@ const getMyChats = async (req, res) => {
 
         return {
           _id,
-          name: othermember?.name,
-          avatar: othermember?.avatar,
+          name: groupChat? name : othermember?.name,
+          avatar: groupChat? avatar:  othermember?.avatar.url,
           groupChat,
           members: members.reduce((pre, cur) => {
             if (cur._id.toString() !== req.userId.toString()) {
@@ -265,7 +274,6 @@ const removeMembers = async (req, res) => {
       .status(200)
       .json({ success: true, message: "Members removed successfully!" });
   } catch (err) {
-
     if (err.name === "CastError") {
       const path = err.path;
       err.message = `Invalid format of ${path}`;
@@ -334,16 +342,15 @@ const leaveGroup = async (req, res) => {
       .status(200)
       .json({ success: true, message: "Members left the group successfully!" });
   } catch (err) {
-     
-if (err.name === "CastError") {
-  const path = err.path;
-  err.message = `Invalid format of ${path}`;
+    if (err.name === "CastError") {
+      const path = err.path;
+      err.message = `Invalid format of ${path}`;
 
-  return res.status(400).json({
-    success: false,
-    message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
-  });
-}
+      return res.status(400).json({
+        success: false,
+        message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
+      });
+    }
 
     res.status(400).json({
       success: false,
@@ -502,18 +509,15 @@ const renameGroup = async (req, res) => {
       .status(201)
       .json({ success: true, Message: "Group name changed successfully!" });
   } catch (err) {
+    if (err.name === "CastError") {
+      const path = err.path;
+      err.message = `Invalid format of ${path}`;
 
-         
-if (err.name === "CastError") {
-  const path = err.path;
-  err.message = `Invalid format of ${path}`;
-
-  return res.status(400).json({
-    success: false,
-    message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
-  });
-}
-
+      return res.status(400).json({
+        success: false,
+        message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
+      });
+    }
 
     res.status(400).json({
       success: false,
@@ -544,12 +548,10 @@ const deleteChat = async (req, res) => {
       !curGroup.groupChat &&
       !curGroup.members.includes(req.userId.toString())
     )
-      return res
-        .status(400)
-        .json({
-          success: false,
-          Message: "Do you even know what you are doing brahh?",
-        });
+      return res.status(400).json({
+        success: false,
+        Message: "Do you even know what you are doing brahh?",
+      });
 
     const members = curGroup.members;
 
@@ -586,16 +588,15 @@ const deleteChat = async (req, res) => {
       .status(201)
       .json({ success: true, Message: "Group deleted successfully!" });
   } catch (err) {
-         
-if (err.name === "CastError") {
-  const path = err.path;
-  err.message = `Invalid format of ${path}`;
+    if (err.name === "CastError") {
+      const path = err.path;
+      err.message = `Invalid format of ${path}`;
 
-  return res.status(400).json({
-    success: false,
-    message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
-  });
-}
+      return res.status(400).json({
+        success: false,
+        message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
+      });
+    }
 
     res.status(400).json({
       success: false,
@@ -630,18 +631,16 @@ const getMessages = async (req, res) => {
     res
       .status(200)
       .json({ success: true, messages: messages.reverse(), totalPages });
-      
   } catch (err) {
-     
-if (err.name === "CastError") {
-  const path = err.path;
-  err.message = `Invalid format of ${path}`;
+    if (err.name === "CastError") {
+      const path = err.path;
+      err.message = `Invalid format of ${path}`;
 
-  return res.status(400).json({
-    success: false,
-    message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
-  });
-}
+      return res.status(400).json({
+        success: false,
+        message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
+      });
+    }
 
     return res.status(400).json({
       success: false,

@@ -1,43 +1,46 @@
+import { Skeleton } from '@mui/material';
 import React from 'react'
 import { Link } from 'react-router-dom';
 
 
-const SingleChats = ({userdata, handleDeleteChatOpen}) => {
+const SingleChats = ({data, isLoading}) => {
+
+  const myChats = data?.mychats
+console.log(myChats)
+
   return (
     <>
-      {userdata?.map((i, index) => {
+    {isLoading? <Skeleton/> : <>
+    {myChats?.map((chat, index) => {
         const {
-          userid,
+          _id,
           name,
           avatar,
-          isOnline,
           groupChat,
-          membets,
-          lastMessage,
-          lastMessageTime,
-          notifications,
-          chats,
-        } = i;
+          members,
+        } = chat;
         if(groupChat) return;
         return (
           <div
-            onContextMenu={(e) => handleDeleteChatOpen(e, userid, groupChat)}
+            // onContextMenu={(e) => handleDeleteChatOpen(e, _id, groupChat)}
             className="person-div"
             key={index}
           >
             <div className="person-dp">
-              <img src={avatar} alt="" className="person-image" />
-              {isOnline && <div className="online"></div>}
+              <img src={avatar.url} alt="" className="person-image"/>
+              {false && <div className="online"></div>}
             </div>
-            <Link to={`/chat/${userid}`} className="person-details">
+            <Link to={`/chat/${_id}`} className="person-details">
               <h5>{name}</h5>
-              <span>{lastMessage}</span>
+              <span>{"lastMessage"}</span>
             </Link>
-            <span className="person-time">{lastMessageTime}</span>
-            <span className="person-notification-count">{notifications}</span>
+            <span className="person-time">{"09:23 am"}</span>
+            <span className="person-notification-count">{"2"}</span>
           </div>
         );
       })}
+    </>
+}
     </>
   );
 }

@@ -29,9 +29,10 @@ const dispatch = useDispatch()
 
   useEffect(() => {
     axios
-      .get(`${server}/api/v1/user/profile`)
+      .get(`${server}/api/v1/user/profile`, {withCredentials: true})
       .then((res) => {
-        console.log(res);
+        const userData = res.data.user
+        dispatch(userExists(userData))
       })
       .catch((err) => dispatch(userNotExists()));
   }, [dispatch]);

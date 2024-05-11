@@ -1,7 +1,20 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Group, Call, Chat, Settings, Close } from "@mui/icons-material";
+import {
+  Group,
+  Call,
+  Chat,
+  Settings,
+  Close,
+  Logout,
+} from "@mui/icons-material";
+import axios from "axios";
+import { server } from "../../constants/config";
+import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { userNotExists } from "../../redux/reducer/authslice";
 
-const Navbar = ({setnav, curnav}) => {
+const Navbar = ({ setnav, curnav }) => {
+  const dispatch = useDispatch()
   const [bio, setbio] = useState(
     "Life is too short to argue just say no bio only physics! 😎"
   );
@@ -10,18 +23,32 @@ const Navbar = ({setnav, curnav}) => {
   const maintag = useRef();
 
   useEffect(() => {
-     const allicons = document.querySelectorAll(".NavIcons");
-     allicons[0].classList.add('active')
-  }, [])
+    const allicons = document.querySelectorAll(".NavIcons");
+    allicons[0].classList.add("active");
+  }, []);
 
   const handleNav = (e) => {
-    const curIcon = e.currentTarget
-    const allicons = document.querySelectorAll('.NavIcons');
-    for(let i = 0; i < allicons.length; i++){
-      allicons[i].classList.remove('active')
+    const curIcon = e.currentTarget;
+    const allicons = document.querySelectorAll(".NavIcons");
+    for (let i = 0; i < allicons.length; i++) {
+      allicons[i].classList.remove("active");
     }
-    curIcon.classList.add('active')
-  }
+    curIcon.classList.add("active");
+  };
+
+  const logoutHandler = async (e) => {
+    handleNav(e);
+    setnav("settings");
+    try {
+      const { data } = await axios.get(`${server}/api/v1/user/logout`, {
+        withCredentials: true,
+      });
+      toast.success(data?.message);
+      dispatch(userNotExists())
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "something went wrong !");
+    }
+  };
 
   return (
     <nav className="navbar" ref={maintag}>
@@ -104,7 +131,7 @@ const Navbar = ({setnav, curnav}) => {
           value="calls"
           onClick={(e) => {
             handleNav(e);
-            setnav("calls");
+            setnav("groups");
           }}
         >
           <Call />
@@ -112,13 +139,10 @@ const Navbar = ({setnav, curnav}) => {
         <hr />
         <li
           className="NavIcons divsettings"
-          value='settings'
-          onClick={(e) => {
-            handleNav(e);
-            setnav("settings");
-          }}
+          value="settings"
+          onClick={logoutHandler}
         >
-          <Settings />
+          <Logout />
         </li>
       </ul>
     </nav>
