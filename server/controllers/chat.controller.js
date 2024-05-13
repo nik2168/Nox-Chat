@@ -24,18 +24,19 @@ const newGroupChat = async (req, res) => {
         .status(400)
         .json({ success: false, message: "group must have 1 member" });
     }
+    const allMembers = [...members, req.userId];
 
-       const file = req.file;
+    const file = req.file;
 
-
+    let avatar = ""
+    if (file) {
       const result = await uploadFilesToCloudinary([file]);
 
-      const avatar = {
+      avatar = {
         public_id: result[0].public_id,
         url: result[0].url,
       };
-
-            const allMembers = [...members, req.userId];
+    }
 
     const temp = await Chat.create({
       name: name,
@@ -74,8 +75,8 @@ const getMyChats = async (req, res) => {
 
         return {
           _id,
-          name: groupChat? name : othermember?.name,
-          avatar: groupChat? avatar:  othermember?.avatar.url,
+          name: groupChat ? name : othermember?.name,
+          avatar: groupChat ? avatar?.url : othermember?.avatar?.url,
           groupChat,
           members: members.reduce((pre, cur) => {
             if (cur._id.toString() !== req.userId.toString()) {

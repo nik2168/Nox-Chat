@@ -151,7 +151,7 @@ const searchUser = async (req, res) => {
       };
     });
 
-    res.status(200).json({ success: true, message: users });
+    res.status(200).json({ success: true, users: users });
   } catch (err) {
     if (err.name === "CastError") {
       const path = err.path;

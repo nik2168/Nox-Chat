@@ -136,7 +136,6 @@ const Navbar = ({ setnav, curnav }) => {
         >
           <Call />
         </li>
-        <hr />
         <li
           className="NavIcons divsettings"
           value="settings"

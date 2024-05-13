@@ -25,16 +25,21 @@ const GroupChats = ({ data, isLoading }) => {
                 <div className="person-dp">
                   <div className="groupbg1"> </div>
                   <div className="groupbg2"></div>
-                  <img src={avatar.url} alt="" className="group-image" />
+                  <img
+                    src={
+                      avatar ||
+                      "https://res.cloudinary.com/dki615p7n/image/upload/v1715486888/default_avatar_tvgr8w.jpg"
+                    }
+                    alt=""
+                    className="group-image"
+                  />
                 </div>
                 <Link to={`/chat/${_id}`} className="person-details">
                   <h5>{name}</h5>
                   <span>{"lastMessage"}</span>
                 </Link>
                 <span className="person-time">{"03:03 am"}</span>
-                <span className="person-notification-count">
-                  {'3'}
-                </span>
+                <span className="person-notification-count">{"3"}</span>
               </div>
             );
           })}

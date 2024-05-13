@@ -7,7 +7,7 @@ export const useSearchFilter= (query, obj) => {
         let flag = true;
 
         while(j < query.length && j < name.length){
-            if(query[j] != name[j]){
+            if(query[j].toLowerCase() != name[j].toLowerCase()){
               flag = false
               break;
             }

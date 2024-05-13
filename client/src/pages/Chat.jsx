@@ -13,7 +13,7 @@ import { useParams } from "react-router-dom";
 import AppLayout from "../components/AppLayout/AppLayout";
 import ChatSettings from '../components/ChatComp/ChatSettings';
 import Messages from '../components/ChatComp/Messages';
-import GroupSettings from "../components/ChatList/groupsettings";
+import GroupSettings from "../components/ChatComp/groupsettings";
 
  const curuser = {
    _id: "1",

@@ -6,7 +6,6 @@ import { Link } from 'react-router-dom';
 const SingleChats = ({data, isLoading}) => {
 
   const myChats = data?.mychats
-console.log(myChats)
 
   return (
     <>
@@ -27,7 +26,14 @@ console.log(myChats)
             key={index}
           >
             <div className="person-dp">
-              <img src={avatar.url} alt="" className="person-image"/>
+              <img
+                src={
+                  avatar ||
+                  "https://res.cloudinary.com/dki615p7n/image/upload/v1715486888/default_avatar_tvgr8w.jpg"
+                }
+                alt=""
+                className="person-image"
+              />
               {false && <div className="online"></div>}
             </div>
             <Link to={`/chat/${_id}`} className="person-details">

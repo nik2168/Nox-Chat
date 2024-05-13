@@ -4,18 +4,18 @@ import Title from "../shared/Title";
 import "../../Css/navbar.css";
 import "../../Css/allchats.css";
 import "../../Css/chat.css";
-import "../../Css/responsive.css";
 import "../../Css/creategroup.css";
 import "../../Css/groupsettings.css";
+import "../../Css/responsiveAllChats.css";
+import "../../Css/responsiveChat.css";
+import "../../Css/responsiveNavbar.css";
 import { userdata } from "../../assets/rawusers";
 
 import AllChats from "../ChatList/allChats";
 
-
 const AppLayout = () => (WrapComp) => {
   return (props) => {
     const [curnav, setnav] = useState("chats");
-
 
     return (
       <>

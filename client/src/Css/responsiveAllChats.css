@@ -1,13 +1,15 @@
+@media (max-width: 800px) {
 .allchats {
-  width: 30rem;
+  width: 100vw;
   height: 100vh;
   background-color: #161c24;
   position: relative;
+  z-index: 6;
 }
 
 .allchats-header {
   height: 20vh;
-  width: 30rem;
+  width: 100%;
   position: absolute;
   background-color: #161c24;
   z-index: 1;
@@ -31,80 +33,6 @@
   padding: 0;
 }
 
-.allchats-notifications {
-  height: 2.3rem;
-  width: 2.3rem;
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  transition: 0.4s ease-out;
-  position: absolute;
-  right: 8rem;
-  z-index: 5;
-}
-
-.allchats-notifications:hover {
-  background-color: #212b36;
-}
-
-
-.allchats-addusers {
-  height: 2.3rem;
-  width: 2.3rem;
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  transition: 0.4s ease-out;
-  position: absolute;
-  right: 5rem;
-  z-index: 5;
-}
-
-.allchats-addusers:hover {
-  background-color: #212b36;
-}
-
-.addusers-article{
-  background-color: white;
-  height: 0;
-  width: 0;
-    max-width: 0rem;
-  border-radius: 1.3rem;
-  position: absolute;
-  opacity: 0;
-  top: 5rem;
-  right: 6rem;
-  z-index: 9;
-    transition: 0.4s ease-out;
-    background-color: #ffffff1d;
-  backdrop-filter: blur(20px);
-}
-
-.addusers-article.active{
-  background-color: white;
-  height: 60vh;
-  width: 70vw;
-  max-width: 20rem;
-  opacity: 1;
-  border-radius: 1.3rem;
-  position: absolute;
-  top: 5rem;
-  right: 6rem;
-  z-index: 9;
-    background-color: #ffffff1d;
-  backdrop-filter: blur(20px);
-}
-
-
-.allchats-addusers img{
-  width: 4rem;
-  height: 4rem
-}
-
 .allchats-addgroup {
   height: 2.3rem;
   width: 2.3rem;
@@ -118,7 +46,6 @@
   right: 2rem;
   z-index: 5;
 }
-
 
 .allchats-addgroup:hover {
   background-color: #212b36;
@@ -157,7 +84,7 @@
 }
 
 .allchats-users {
-  width: 30rem;
+  width: 100%;
   padding-top: 20vh;
   padding-bottom: 25vh;
   height: 100vh;
@@ -290,4 +217,6 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+
 }
