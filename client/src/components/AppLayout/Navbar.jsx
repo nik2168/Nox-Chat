@@ -1,25 +1,22 @@
-import React, { useEffect, useRef, useState } from "react";
-import {
-  Group,
-  Call,
-  Chat,
-  Settings,
-  Close,
-  Logout,
-} from "@mui/icons-material";
+import { Call, Chat, Close, Group, Logout } from "@mui/icons-material";
 import axios from "axios";
-import { server } from "../../constants/config";
+import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { server } from "../../constants/config";
 import { userNotExists } from "../../redux/reducer/authslice";
+import { transformImage } from "../../lib/features";
+import moment from "moment";
 
 const Navbar = ({ setnav, curnav }) => {
-  const dispatch = useDispatch()
-  const [bio, setbio] = useState(
-    "Life is too short to argue just say no bio only physics! 😎"
-  );
-  const [about, setabout] = useState("I am a Cs StudentStudent😏");
+  const dispatch = useDispatch();
 
+  const { user } = useSelector((state) => state.auth);
+  const { avatar, bio, createdAt, name, username } = user;
+  const joinDate = new Date(createdAt);
+  
+
+  const [curbio, setbio] = useState(bio);
   const maintag = useRef();
 
   useEffect(() => {
@@ -36,6 +33,7 @@ const Navbar = ({ setnav, curnav }) => {
     curIcon.classList.add("active");
   };
 
+  // logout User
   const logoutHandler = async (e) => {
     handleNav(e);
     setnav("settings");
@@ -44,7 +42,7 @@ const Navbar = ({ setnav, curnav }) => {
         withCredentials: true,
       });
       toast.success(data?.message);
-      dispatch(userNotExists())
+      dispatch(userNotExists());
     } catch (err) {
       toast.error(err?.response?.data?.message || "something went wrong !");
     }
@@ -58,11 +56,7 @@ const Navbar = ({ setnav, curnav }) => {
           maintag.current.classList.add("active");
         }}
       >
-        <img
-          src="https://randomuser.me/api/portraits/women/63.jpg"
-          alt=""
-          className="NavIcon"
-        />
+        <img src={avatar.url} alt="avatar" className="NavIcon" />
       </div>
       <article className="profile">
         <h1>Profile</h1>
@@ -80,26 +74,16 @@ const Navbar = ({ setnav, curnav }) => {
           />
         </div>
         <div className="profileimgdiv">
-          <img
-            src="https://randomuser.me/api/portraits/women/63.jpg"
-            alt=""
-            className="profileimg"
-          />
-          <h3>Natasha</h3>
-          <p>Joined 3 months ago</p>
+          <img src={avatar.url} alt="" className="profileimg" />
+          <h3>{name}</h3>
+          <p>{moment(joinDate).format('MM/DD/YYYY')}</p>
         </div>
         <div className="profiledata">
           <h4>Bio</h4>
           <textarea
             type="text"
-            value={bio}
+            value={curbio}
             onChange={(e) => setbio(e.currentTarget.value)}
-          />
-          <h4>About</h4>
-          <textarea
-            type="text"
-            value={about}
-            onChange={(e) => setabout(e.currentTarget.value)}
           />
         </div>
       </article>

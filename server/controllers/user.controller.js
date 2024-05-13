@@ -98,14 +98,14 @@ const userProfile = async (req, res) => {
   try {
     const getUser = await User.findById(req.userId).select("-password"); // default
 
-    if (!getUser) return res.status(400).send("User not exist");
+    if (!getUser) return res.status(400).json({success: true, message: "User not exist"});
 
     res.status(200).json({
       success: true,
       user: getUser,
     });
   } catch (err) {
-    res.status(500).send("Error while fetching user profile :", err);
+    res.status(500).json({success: true, message: "Error while fetching user profile", err});
   }
 };
 

@@ -70,6 +70,7 @@ main {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  transition: all 0.4s ease-in;
   align-items: center;
 }
 
@@ -87,16 +88,16 @@ main {
 }
 
 .divchat:hover {
-  background-color: #2d99ff;
+  background-color: #6e7277;
 }
 .divgroup:hover {
-  background-color: #2d99ff;
+  background-color: #6e7277;
 }
 .divcall:hover {
-  background-color: #2d99ff;
+  background-color: #6e7277;
 }
 .divsettings:hover {
-  background-color: #2d99ff;
+  background-color: #6e7277;
 }
 
 .navbar span {

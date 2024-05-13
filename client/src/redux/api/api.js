@@ -24,15 +24,16 @@ const api = createApi({
             providesTags: ["User"]
         }),
 
-        sendRequest: builder.query({
+        sendRequest: builder.mutation({
             query: (_id) => ({
                 url: '/user/sendrequest',
-                method: "POST",
+                method: "PUT",
                 credentials: "include",
                 body: {
                     userId: _id,
                 },
-            })
+            }),
+            invalidatesTags: ["User"]
         })
 
     }),
@@ -40,4 +41,4 @@ const api = createApi({
 
 export default api;
 
-export const {useMyChatsQuery, useLazySearchUserQuery} =  api
+export const {useMyChatsQuery, useLazySearchUserQuery, useSendRequestMutation} =  api
