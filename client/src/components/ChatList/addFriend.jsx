@@ -1,15 +1,28 @@
-import { Add, AddCircle, Search } from "@mui/icons-material";
+import { Add, AddCircle, Search, SendTwoTone } from "@mui/icons-material";
 import React, { useEffect, useRef, useState } from "react";
 import { useAsyncMutation } from "../../hooks/hook";
 import {
   useLazySearchUserQuery,
   useSendRequestMutation
 } from "../../redux/api/api";
+import { Button } from "@mui/material";
 
 
 const AddFriends = () => {
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState([]);
+
+
+
+  // send Friend Request
+  const [sendRequest, isLoadingSendRequest] = useAsyncMutation(
+    useSendRequestMutation
+  );
+
+  const handleSendRequest = async (_id) => {
+    sendRequest("Sending friend request !", _id);
+  };
+
 
   // fetch users except friends
   const [searchUser] = useLazySearchUserQuery("");
@@ -24,18 +37,12 @@ const AddFriends = () => {
     return () => {
       clearTimeout(timeOutId);
     };
-  }, [search]);
-
-  const addUserWindow = useRef();
+  }, [search, isLoadingSendRequest]);
 
 
-  // send Friend Request
- const [sendRequest, isLoadingSendRequest ] = useAsyncMutation(useSendRequestMutation)
 
+  const addUserWindow = useRef(); // open close window
 
-  const handleSendRequest = async (_id) => {
-    sendRequest("Sending friend request !", _id)
-    };
 
 
   // open and close the addUsers window
@@ -131,10 +138,11 @@ const AddFriends = () => {
                   onClick={(e) => handleSendRequest(e.currentTarget.value)}
                 >
                   {
-                  <AddCircle
-                    sx={{ color: "#2d99ff", width: "2rem", height: "2rem" }}
-                    onClick={(e) => (e.currentTarget.style.color = "white")}
-                  />}
+                    <AddCircle
+                      sx={{ color: "#2d99ff", width: "2rem", height: "2rem" }}
+                      onClick={(e) => (e.currentTarget.style.color = "white")}
+                    />
+                  }
                 </button>
               </li>
             );

@@ -12,7 +12,7 @@ const Home = ({userdata}) => {
       </div>
       <h1>Welcome To Project NOX</h1>
       <p>
-        Your personal messages are <strong>end-to-end encrypted</strong>
+        Your personal messages are not <strong>end-to-end encrypted</strong>
       </p>
     </section>
   );

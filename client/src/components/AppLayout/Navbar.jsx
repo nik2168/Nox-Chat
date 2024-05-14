@@ -59,7 +59,6 @@ const Navbar = ({ setnav, curnav }) => {
         <img src={avatar.url} alt="avatar" className="NavIcon" />
       </div>
       <article className="profile">
-        <h1>Profile</h1>
         <div
           className="profileclose"
           onClick={() => {
@@ -74,12 +73,12 @@ const Navbar = ({ setnav, curnav }) => {
           />
         </div>
         <div className="profileimgdiv">
-          <img src={avatar.url} alt="" className="profileimg" />
-          <h3>{name}</h3>
-          <p>{moment(joinDate).format('MM/DD/YYYY')}</p>
+          <img src={avatar.url} alt=""  />
         </div>
+        <div className="blackDiv"></div>
+        <h3>{name} - ({username})</h3>
+        <p className="profilepara">Joined On: {moment(joinDate).format("MM/DD/YYYY")}</p>
         <div className="profiledata">
-          <h4>Bio</h4>
           <textarea
             type="text"
             value={curbio}

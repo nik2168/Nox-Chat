@@ -141,15 +141,15 @@ main {
   box-shadow: 0 10px 15px rgb(0 0 0 / 20%);
   z-index: 4;
   overflow: hidden;
-  transition: all 0.6s ease-out;
+  transition: all 0.4s ease-out;
 }
 
 .navbar.active .profile {
   position: absolute;
   top: 10%;
   left: 10%;
-  width: 80%;
-  height: 80%;
+  width: 70vh;
+  height: 70vh;
   border-radius: 3rem;
   display: flex;
   flex-direction: row;
@@ -164,11 +164,13 @@ main {
 }
 
 .profileclose {
+    position: absolute;
+  z-index: 10;
   height: 2rem;
   width: 2rem;
   position: absolute;
-  right: 2rem;
-  top: 2rem;
+  right: 1rem;
+  top: 1rem;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -184,38 +186,53 @@ main {
 
 .profileimgdiv {
   height: 100%;
-  width: 40%;
-  padding-left: 6%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   color: #f9fafb;
+  position: absolute;
 }
 
 .profileimgdiv img {
-  height: 20vw;
-  width: 20vw;
-  border-radius: 2rem;
+  height: 100%;
+  width: 100%;
+  border-radius: 3rem;
+  border: none;
+  object-fit: cover;
+}
+.profileimgdiv img:hover {
+border: none;
 }
 
-.profileimgdiv p {
-  font-size: 0.8rem;
+.blackDiv{
+  position: absolute;
+  z-index: 9;
+  height: 100%;
+  width: 800%;
+  top: 63%;
+  background-color: black;
+  filter: blur(80px);
 }
 
-.profiledata textarea {
+.profiledata textarea{
+      position: absolute;
+     bottom: -3rem;
+    left: 2rem;
+  z-index: 10;
   width: 88%;
   height: 20%;
-  color: #454f5b;
+  color: #f9fafb;
   border-radius: 19px;
-  background-color: #dfe3e8;
   padding-right: 1rem;
+  background-color: transparent;
   font-weight: 500;
   padding-top: 3px;
   border: none;
   outline: none;
   padding-left: 1rem;
-  font-size: 1rem;
+  font-size: 0.8rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -223,15 +240,26 @@ main {
 }
 
 .profile h3 {
+    position: absolute;
+    bottom: 5rem;
+    font-size: 2.3rem;
+    color: #f9fafb;
+    left: 3rem;
+  z-index: 10;
   margin-top: 1rem;
-  font-size: 2.4rem;
 }
 
-.profile h4 {
-  margin-left: 1rem;
-  font-size: 1.8rem;
-  color: #f9fafb;
+.profilepara {
+    position: absolute;
+    bottom: 3.3rem;
+    font-size: 0.8rem;
+    color: #f9fafb;
+    left: 3rem;
+    font-weight: 600;
+  z-index: 10;
+  margin-top: 1rem;
 }
+
 
 .profiledata {
   width: 60%;

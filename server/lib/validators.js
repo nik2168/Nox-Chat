@@ -89,6 +89,12 @@ const adminValidator = () => [
   body("secretKey", "Please enter secret key").notEmpty()
 ]
 
+const profileDataUpdateValidator = () => [
+  body("username", "please provide a username in body").notEmpty(),
+  body("bio", "please provide a bio in body").notEmpty(),
+  body("name", "please provide a name in body").notEmpty(),
+];
+
 
 module.exports = {
   registerValidator,
@@ -103,5 +109,6 @@ module.exports = {
   getMessagesValidator,
   sendFriendRequestValidator,
   acceptFriendRequestValidator,
+  profileDataUpdateValidator,
   adminValidator,
 };

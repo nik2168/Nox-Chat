@@ -18,9 +18,8 @@ const cookieObj = {
 const createUser = async (req, res) => {
   const { name, username, password, bio } = req.body;
   try {
-
     const file = req.file;
-    
+
     if (!file)
       res.status(400).json({ sucess: false, message: "Please Upload avatar" });
 
@@ -76,7 +75,10 @@ const userLogin = async (req, res) => {
 
     // check if the password is correct
     const checkPassword = await bcrypt.compare(password, checkUser.password);
-    if (!checkPassword) return res.status(400).json({success: false, message: "Incorrect password!"});
+    if (!checkPassword)
+      return res
+        .status(400)
+        .json({ success: false, message: "Incorrect password!" });
 
     // generate a new jwt token
     const token = jwt.sign({ _id: checkUser._id }, process.env.secret);
@@ -98,14 +100,55 @@ const userProfile = async (req, res) => {
   try {
     const getUser = await User.findById(req.userId).select("-password"); // default
 
-    if (!getUser) return res.status(400).json({success: true, message: "User not exist"});
+    if (!getUser)
+      return res.status(400).json({ success: true, message: "User not exist" });
 
     res.status(200).json({
       success: true,
       user: getUser,
     });
   } catch (err) {
-    res.status(500).json({success: true, message: "Error while fetching user profile", err});
+    res.status(500).json({
+      success: true,
+      message: "Error while fetching user profile",
+      err,
+    });
+  }
+};
+
+// profile Update
+const profileDataUpdate = async (req, res) => {
+
+  const {name, username, bio} = req.body
+
+  try {
+    const getUser = await User.findById(req.userId).select("-password"); // default
+
+    if (!getUser)
+      return res.status(400).json({ success: true, message: "User not exist" });
+
+    const checkUser = await User.findOne({username: username})
+
+    if(checkUser) res.status(400).json({ success: true, message: "username already exist !" })
+
+    const update =  {
+       name: name,
+       username: username,
+       bio: bio,
+      }
+ 
+      await User.findOneAndUpdate({_id: req.userId}, update)
+    
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully !",
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: true,
+      message: "Error while updating user profile",
+      err,
+    });
   }
 };
 
@@ -293,7 +336,7 @@ const getNotifications = async (req, res) => {
       };
     });
 
-    res.status(200).json({ success: true, Notifications: notifications });
+    res.status(200).json({ success: true, notifications: notifications });
   } catch (err) {
     if (err.name === "CastError") {
       const path = err.path;
@@ -356,6 +399,7 @@ module.exports = {
   createUser,
   userLogin,
   userProfile,
+  profileDataUpdate,
   logout,
   searchUser,
   sendFriendRequest,

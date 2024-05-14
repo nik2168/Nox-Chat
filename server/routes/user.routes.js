@@ -6,6 +6,7 @@ const {
   createUser,
   userLogin,
   userProfile,
+  profileDataUpdate,
   logout,
   searchUser,
   sendFriendRequest,
@@ -25,6 +26,7 @@ const {
   validateHandler,
   sendFriendRequestValidator,
   acceptFriendRequestValidator,
+  profileDataUpdateValidator,
 } = require("../lib/validators.js");
 
 
@@ -38,6 +40,7 @@ router.post("/login", singleAvatar, verifyLoginBody, userLogin);
 // after this all routes need authentication that user must be logged in to access these routes ...
 router.use(isAuthenticate); // authenticate a user with cookie
 router.get("/profile", userProfile);
+router.put("/updateprofiledata", profileDataUpdateValidator(), validateHandler, profileDataUpdate);
 router.get("/logout", logout);
 router.get("/search", searchUser);
 router.put(

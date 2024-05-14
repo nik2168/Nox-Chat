@@ -49,6 +49,60 @@
   background-color: #212b36;
 }
 
+.notificationHeading{
+  width: 100%;
+  height: 3rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.notifications-article{
+   background-color: white;
+  height: 0;
+  width: 0;
+    max-width: 0rem;
+  border-radius: 1.3rem;
+  position: absolute;
+  opacity: 0;
+  top: 5rem;
+  right: 9rem;
+  z-index: 0;
+    transition: 0.4s ease-out;
+    background-color: #ffffff1d;
+  backdrop-filter: blur(20px);
+}
+
+.notifications-article.active{
+  background-color: white;
+  height: 60vh;
+  width: 70vw;
+  max-width: 18rem;
+  opacity: 1;
+  border-radius: 1.3rem;
+  position: absolute;
+  top: 5rem;
+  right: 9rem;
+  z-index: 9;
+    background-color: #ffffff1d;
+  backdrop-filter: blur(20px);
+}
+
+.friendlistdivs p{
+ color: #dfe3e8;
+ font-weight: 600;
+ font-size: 0.8rem;
+ transition: all 0.4s ease-out;
+}
+
+.accept:hover{
+color: #2d99ff;
+}
+
+.cancel:hover{
+color: red;
+}
 
 .allchats-addusers {
   height: 2.3rem;
@@ -78,7 +132,7 @@
   opacity: 0;
   top: 5rem;
   right: 6rem;
-  z-index: 9;
+  z-index: 0;
     transition: 0.4s ease-out;
     background-color: #ffffff1d;
   backdrop-filter: blur(20px);

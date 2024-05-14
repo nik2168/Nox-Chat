@@ -34,6 +34,14 @@ const api = createApi({
                 },
             }),
             invalidatesTags: ["User"]
+        }),
+
+        fetchRequests: builder.query({
+            query: () => ({
+                url: '/user/notifications',
+                credentials: 'include',
+            }),
+            providesTags: ['Request']
         })
 
     }),
@@ -41,4 +49,4 @@ const api = createApi({
 
 export default api;
 
-export const {useMyChatsQuery, useLazySearchUserQuery, useSendRequestMutation} =  api
+export const {useMyChatsQuery, useLazySearchUserQuery, useSendRequestMutation, useFetchRequestsQuery} =  api
