@@ -1,29 +1,46 @@
-import { AddCircle, Notifications, DoneRounded, CancelSharp, CancelScheduleSend, ChangeCircleRounded, Close } from "@mui/icons-material";
+import {
+  AddCircle,
+  Notifications,
+  DoneRounded,
+  CancelSharp,
+  CancelScheduleSend,
+  ChangeCircleRounded,
+  Close,
+} from "@mui/icons-material";
 import React, { useRef } from "react";
-import { useFetchRequestsQuery } from "../../redux/api/api";
-import { useErrors } from "../../hooks/hook";
+import { useFetchRequestsQuery, useRequestResponseMutation } from "../../redux/api/api";
+import { useAsyncMutation, useErrors } from "../../hooks/hook";
 
 const CurNotifications = () => {
 
-const notificationsWindow = useRef()
 
-const {data, isError, error, isLoading, reFetch} = useFetchRequestsQuery()
+  const notificationsWindow = useRef(); // open close notificationw window
 
+
+   // Fetch requests for curr user
+  const { data, isError, error, isLoading, reFetch } = useFetchRequestsQuery();
   useErrors([{ isError, error }]);
 
-  const users = [
-    { name: "Nikhil", _id: "1543465", avatar: "" },
-    { name: "Dharambir", _id: "24154315", avatar: "" },
-  ];
+  // accept or decline requests handler
+       const [requestRes, isLoadingRequestRes ] = useAsyncMutation(useRequestResponseMutation)
 
-    // window close/open
-    const handleNotificationsWindow = () => {
-      if (!notificationsWindow.current.classList.contains("active")) {
-        notificationsWindow.current.classList.add("active");
-        return;
-      }
-      notificationsWindow.current.classList.remove("active");
-    };
+  const handleSendRequest = (e, accept) => {
+      console.log(e.currentTarget.value, accept)
+        const data = {
+          requestId: e.currentTarget.value,
+          accept,
+        };
+        requestRes("responding to the request ...", data)
+  }
+
+  // window close/open
+  const handleNotificationsWindow = () => {
+    if (!notificationsWindow.current.classList.contains("active")) {
+      notificationsWindow.current.classList.add("active");
+      return;
+    }
+    notificationsWindow.current.classList.remove("active");
+  };
 
   return (
     <>
@@ -38,8 +55,11 @@ const {data, isError, error, isLoading, reFetch} = useFetchRequestsQuery()
         <div className="notificationHeading">
           <h3>Notifications</h3>
         </div>
+        {data?.notifications?.length === 0 && <div className="notificationHeading" style={{padding: "1rem"}}>
+          <p>Relax, you don't have any new notification !</p>
+        </div>}
         <ul className="friendlist">
-          {data?.notifications?.map(({ _id, sender}, index) => {
+          {data?.notifications?.map(({ _id, sender }, index) => {
             return (
               <li className="friendlistdivs" key={index} value={_id} style={{}}>
                 <div
@@ -93,18 +113,10 @@ const {data, isError, error, isLoading, reFetch} = useFetchRequestsQuery()
                     justifyContent: "center",
                     alignItems: "center",
                   }}
-                  value={sender._id}
-                  onClick={(e) => handleSendRequest()}
+                  value={_id}
+                  onClick={(e) => handleSendRequest(e, false)}
                 >
-                  {
-                    // <Close
-                    //   sx={{ color: "white", width: "2rem", height: "2rem" }}
-                    //   onClick={(e) => (e.currentTarget.style.color = "white")}
-                    // />
-                    <p className="cancel">
-                      cancel
-                    </p>
-                  }
+                  {<p className="cancel">cancel</p>}
                 </button>
                 <button
                   style={{
@@ -120,15 +132,11 @@ const {data, isError, error, isLoading, reFetch} = useFetchRequestsQuery()
                     marginRight: "0.5rem",
                     marginLeft: "1rem",
                   }}
-                  value={sender._id}
-                  onClick={(e) => handleSendRequest()}
+                  value={_id}
+                  onClick={(e) => handleSendRequest(e, true)}
                 >
                   {
-                    // <DoneRounded
-                    //   sx={{ color: "white", width: "2rem", height: "2rem" }}
-                    //   onClick={(e) => (e.currentTarget.style.color = "white")}
-                    // />
-                    <p className="accept" >
+                    <p className="accept" style={{ color: "#2d99ff" }}>
                       accept
                     </p>
                   }

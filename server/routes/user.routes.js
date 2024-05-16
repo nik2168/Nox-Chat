@@ -7,6 +7,7 @@ const {
   userLogin,
   userProfile,
   profileDataUpdate,
+  updateProfilePicture,
   logout,
   searchUser,
   sendFriendRequest,
@@ -41,20 +42,24 @@ router.post("/login", singleAvatar, verifyLoginBody, userLogin);
 router.use(isAuthenticate); // authenticate a user with cookie
 router.get("/profile", userProfile);
 router.put("/updateprofiledata", profileDataUpdateValidator(), validateHandler, profileDataUpdate);
+router.put("/updateprofilepicture", singleAvatar, updateProfilePicture)
 router.get("/logout", logout);
 router.get("/search", searchUser);
+
 router.put(
   "/sendrequest",
   sendFriendRequestValidator(), 
   validateHandler,
   sendFriendRequest
 );
+
 router.put(
   "/acceptrequest",
   acceptFriendRequestValidator(),
   validateHandler,
   acceptFriendRequest,
 );
+
 router.get("/notifications", getNotifications);
 router.get("/userfriends", getUserFriends);
 

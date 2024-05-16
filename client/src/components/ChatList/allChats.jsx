@@ -19,21 +19,8 @@ import CurNotifications from "./CurNotifications";
 
 const AllChats = ({ curnav }) => {
   // for create group
-  const creategroup = useRef();
-  const groupnext = useRef();
-  const friendlistref = useRef();
-  const [selectedmembers, setMember] = useState([]);
-  const [newgroup, setNewGroup] = useState({
-    userid: "4",
-    name: "",
-    avatar: "",
-    groupChat: true,
-    members: [],
-    lastMessage: "Hi Guys!",
-    lastMessageTime: "11:30",
-    notifications: "1",
-    chats: ["hi guys", "our new group is here!🫵"],
-  });
+  
+
   const { file, setFile, fileFlag, fileErr } = useFileValidator("");
   const { curname, setname, nameFlag, nameErr } = useName("");
 
@@ -50,6 +37,7 @@ const AllChats = ({ curnav }) => {
   return (
     <section className="allchats">
       <div className="allchats-header">
+        
         <div className="allchats-div">
           {curnav === "chats" && <h1>Chats</h1>}
           {curnav === "groups" && <h1>Groups</h1>}
@@ -59,64 +47,9 @@ const AllChats = ({ curnav }) => {
           <CurNotifications />
 
           <AddFriends />
-
-          <div
-            className="allchats-addgroup"
-            onClick={() => {
-              if (!creategroup.current.classList.contains("groupactive")) {
-                creategroup.current.classList.add("groupactive");
-                return;
-              }
-              creategroup.current.classList.remove("groupactive");
-              creategroup.current.classList.remove("move");
-              setMember([]);
-              for (const child of friendlistref.current.children) {
-                child.lastChild.lastChild.checked = false;
-              }
-              setname("");
-              setFile("");
-              setNewGroup({
-                userid: "4",
-                name: "",
-                avatar: "",
-                groupChat: true,
-                members: [],
-                lastMessage: "Hi Guys!",
-                lastMessageTime: "11:30",
-                notifications: "1",
-                chats: ["hi guys", "our new group is here!🫵"],
-              });
-              groupnext.current.classList.remove("active");
-            }}
-          >
-            <NoteAddOutlined />
-          </div>
-          <CreateGroup
-            creategroup={creategroup}
-            userdata={userdata}
-            groupnext={groupnext}
-            selectedmembers={selectedmembers}
-            setMember={setMember}
-            friendlistref={friendlistref}
-          />
-          <GroupNext
-            selectedmembers={selectedmembers}
-            groupnext={groupnext}
-            userdata={userdata}
-            creategroup={creategroup}
-            setMember={setMember}
-            friendlistref={friendlistref}
-            newgroup={newgroup}
-            setNewGroup={setNewGroup}
-            curname={curname}
-            setname={setname}
-            nameFlag={nameFlag}
-            nameErr={nameErr}
-            file={file}
-            setFile={setFile}
-            fileFlag={fileFlag}
-            fileErr={fileErr}
-          />
+          
+          <CreateGroup />
+           
         </div>
 
         <div className="search-div">

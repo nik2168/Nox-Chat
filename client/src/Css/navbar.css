@@ -199,6 +199,17 @@ main {
   height: 100%;
   width: 100%;
   border-radius: 3rem;
+  filter: blur(80px);
+  transition: all 0.8s ease-out;
+  border: none;
+  object-fit: cover;
+}
+
+.navbar.active .profileimgdiv img {
+  height: 100%;
+  width: 100%;
+  border-radius: 3rem;
+  filter: blur(0px);
   border: none;
   object-fit: cover;
 }
@@ -218,7 +229,7 @@ border: none;
 
 .profiledata textarea{
       position: absolute;
-     bottom: -3rem;
+     bottom: -3.3rem;
     left: 2rem;
   z-index: 10;
   width: 88%;
@@ -239,20 +250,57 @@ border: none;
   align-items: center;
 }
 
-.profile h3 {
+.nameUsername  {
     position: absolute;
-    bottom: 5rem;
-    font-size: 2.3rem;
+    bottom: 4.3rem;
+    font-size: 2rem;
+    font-weight: 1000;
     color: #f9fafb;
+    height: 5rem;
+    text-align: center;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
     left: 3rem;
   z-index: 10;
   margin-top: 1rem;
 }
 
+.nameUsername  .textarea1{
+
+    font-size: 2rem;
+    font-weight: 1000;
+    background-color: transparent;
+    width: max-content;
+    height: 2.3rem;
+    background-color: transparent;
+    color: #f9fafb;
+    border: none;
+    outline: none;
+  z-index: 10;
+  margin: 0;
+  border: 0;
+}
+
+.nameUsername  .textarea2{
+    font-size: 1.3rem;
+    font-weight: 1000;
+    width: 40%;
+    color: #f9fafb;
+     border: none;
+    outline: none;
+    background-color: transparent;
+    height: 2.3rem;
+ margin: 0;
+  border: 0;
+}
+
 .profilepara {
     position: absolute;
-    bottom: 3.3rem;
-    font-size: 0.8rem;
+    bottom: 3.6rem;
+    font-size: 1rem;
     color: #f9fafb;
     left: 3rem;
     font-weight: 600;
@@ -271,3 +319,4 @@ border: none;
   justify-content: center;
   align-items: flex-start;
 }
+

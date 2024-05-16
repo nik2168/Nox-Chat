@@ -1,12 +1,13 @@
-import { Call, Chat, Close, Group, Logout } from "@mui/icons-material";
+import { Call, Chat, Close, Group, Logout, CameraAlt } from "@mui/icons-material";
 import axios from "axios";
+import moment from "moment";
 import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { server } from "../../constants/config";
 import { userNotExists } from "../../redux/reducer/authslice";
-import { transformImage } from "../../lib/features";
-import moment from "moment";
+import { useUpdateProfileMutation, useUpdateProfilePictureMutation } from "../../redux/api/api";
+import { useAsyncMutation } from "../../hooks/hook";
 
 const Navbar = ({ setnav, curnav }) => {
   const dispatch = useDispatch();
@@ -14,10 +15,44 @@ const Navbar = ({ setnav, curnav }) => {
   const { user } = useSelector((state) => state.auth);
   const { avatar, bio, createdAt, name, username } = user;
   const joinDate = new Date(createdAt);
-  
 
+  const [curImage, setImage] = useState(avatar.url)
+  const [file, setFile] = useState()
   const [curbio, setbio] = useState(bio);
+  const [curname, setname] = useState(name);
+  const [curusername, setusername] = useState(username);
+  const [ischange, setchange] = useState(false) // will update profile only if any value changes
   const maintag = useRef();
+
+  // profile picture update
+  const handleImageChange = (e) => {
+    setImage(URL.createObjectURL(e.target.files[0]));
+    setFile(e.target.files[0]);
+  }
+
+  const [sendDpRequest, isLoadingDpRequest] = useAsyncMutation(
+    useUpdateProfilePictureMutation
+  );
+
+const handleDpUpdate = async () => {
+  const formdata = new FormData()
+  formdata.append("avatar", file)
+   await sendDpRequest("Updating profile picture !", formdata)
+}
+
+  // profile update
+  const [sendRequest, isLoadingSendRequest] = useAsyncMutation(
+    useUpdateProfileMutation
+  );
+
+  const handleProfileUpdate = async() => {
+    const arg = {
+      bio: curbio,
+      name: curname,
+      username: curusername,
+    }
+       await sendRequest("Updating user profile !", arg );
+  };
 
   useEffect(() => {
     const allicons = document.querySelectorAll(".NavIcons");
@@ -56,13 +91,20 @@ const Navbar = ({ setnav, curnav }) => {
           maintag.current.classList.add("active");
         }}
       >
-        <img src={avatar.url} alt="avatar" className="NavIcon" />
+        <img src={curImage} alt="avatar" className="NavIcon" />
       </div>
       <article className="profile">
         <div
           className="profileclose"
           onClick={() => {
             maintag.current.classList.remove("active");
+            if (ischange) {
+              handleProfileUpdate();
+            }
+            if(file){
+            handleDpUpdate();
+            }
+            setchange(false);
           }}
         >
           <Close
@@ -72,17 +114,77 @@ const Navbar = ({ setnav, curnav }) => {
             }}
           />
         </div>
+
+
         <div className="profileimgdiv">
-          <img src={avatar.url} alt=""  />
+          <img src={curImage} alt="avatar" />
         </div>
+        <div
+          className="photo imageInput"
+          style={{
+            backgroundColor: "transparent",
+            position: "absolute",
+            right: "2rem",
+            bottom: "2rem",
+            zIndex: "11",
+          }}
+        >
+          <CameraAlt
+            sx={{
+              color: "white",
+              position: "absolute",
+              backgroundColor: "grey",
+              borderRadius: "50%",
+              zIndex: -1,
+            }}
+          />
+          <input
+            type="file"
+            id="image"
+            onChange={(e) => handleImageChange(e)}
+            style={{
+              margin: "0px",
+              padding: "0px",
+              height: "1.3rem",
+              width: "1.3rem",
+              position: "relative",
+              opacity: 0,
+            }}
+          />
+        </div>
+
+
+
         <div className="blackDiv"></div>
-        <h3>{name} - ({username})</h3>
-        <p className="profilepara">Joined On: {moment(joinDate).format("MM/DD/YYYY")}</p>
+        <div className="nameUsername">
+          <textarea
+            className="textarea1"
+            name="name"
+            value={curname}
+            onChange={(e) => {
+              setname(e.currentTarget.value);
+              setchange(true);
+            }}
+          ></textarea>
+          <textarea
+            className="textarea2"
+            name="username"
+            value={curusername}
+            onChange={(e) => {
+              setusername(e.currentTarget.value);
+              setchange(true);
+            }}
+          ></textarea>
+        </div>
+        <p className="profilepara">Joined: {moment(joinDate).fromNow()}</p>
         <div className="profiledata">
           <textarea
             type="text"
             value={curbio}
-            onChange={(e) => setbio(e.currentTarget.value)}
+            onChange={(e) => {
+              setbio(e.currentTarget.value);
+              setchange(true);
+            }}
           />
         </div>
       </article>

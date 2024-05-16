@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import Navbar from "./Navbar";
 import Title from "../shared/Title";
 import "../../Css/navbar.css";
+import "../../Css/login.css";
 import "../../Css/allchats.css";
 import "../../Css/chat.css";
 import "../../Css/creategroup.css";

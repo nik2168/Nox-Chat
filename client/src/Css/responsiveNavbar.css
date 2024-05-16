@@ -246,7 +246,7 @@ border: none;
   align-items: center;
 }
 
-.profile h3 {
+.nameUsername {
     position: absolute;
     bottom: 20%;
     font-size: 1.3rem;

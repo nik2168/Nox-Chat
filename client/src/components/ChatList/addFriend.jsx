@@ -3,16 +3,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { useAsyncMutation } from "../../hooks/hook";
 import {
   useLazySearchUserQuery,
-  useSendRequestMutation
+  useSendRequestMutation,
 } from "../../redux/api/api";
 import { Button } from "@mui/material";
-
 
 const AddFriends = () => {
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState([]);
-
-
 
   // send Friend Request
   const [sendRequest, isLoadingSendRequest] = useAsyncMutation(
@@ -20,9 +17,8 @@ const AddFriends = () => {
   );
 
   const handleSendRequest = async (_id) => {
-    sendRequest("Sending friend request !", _id);
+    await sendRequest("Sending friend request !", _id);
   };
-
 
   // fetch users except friends
   const [searchUser] = useLazySearchUserQuery("");
@@ -39,11 +35,7 @@ const AddFriends = () => {
     };
   }, [search, isLoadingSendRequest]);
 
-
-
   const addUserWindow = useRef(); // open close window
-
-
 
   // open and close the addUsers window
   const handleAddUsers = () => {
@@ -100,11 +92,12 @@ const AddFriends = () => {
                       "https://res.cloudinary.com/dki615p7n/image/upload/v1715486888/default_avatar_tvgr8w.jpg"
                     }
                     style={{
-                      width: "2rem",
-                      height: "2rem",
+                      width: "2.5rem",
+                      height: "2.5rem",
                       borderRadius: "50%",
+                      objectFit: "cover",
                     }}
-                    alt=""
+                    alt="img"
                   />
                 </div>
 

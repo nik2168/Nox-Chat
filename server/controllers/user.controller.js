@@ -19,7 +19,6 @@ const createUser = async (req, res) => {
   const { name, username, password, bio } = req.body;
   try {
     const file = req.file;
-
     if (!file)
       res.status(400).json({ sucess: false, message: "Please Upload avatar" });
 
@@ -118,8 +117,7 @@ const userProfile = async (req, res) => {
 
 // profile Update
 const profileDataUpdate = async (req, res) => {
-
-  const {name, username, bio} = req.body
+  const { name, username, bio } = req.body;
 
   try {
     const getUser = await User.findById(req.userId).select("-password"); // default
@@ -127,18 +125,24 @@ const profileDataUpdate = async (req, res) => {
     if (!getUser)
       return res.status(400).json({ success: true, message: "User not exist" });
 
-    const checkUser = await User.findOne({username: username})
+    const checkUser = await User.findOne({ username: username });
 
-    if(checkUser) res.status(400).json({ success: true, message: "username already exist !" })
+    if (
+      checkUser &&
+      checkUser.username.toString() !== getUser.username.toString()
+    )
+      res
+        .status(400)
+        .json({ success: true, message: "username already exist !" });
 
-    const update =  {
-       name: name,
-       username: username,
-       bio: bio,
-      }
- 
-      await User.findOneAndUpdate({_id: req.userId}, update)
-    
+    const update = {
+      name: name,
+      username: username,
+      bio: bio,
+    };
+
+    await User.findOneAndUpdate({ _id: req.userId }, update);
+
     res.status(200).json({
       success: true,
       message: "Profile updated successfully !",
@@ -149,6 +153,44 @@ const profileDataUpdate = async (req, res) => {
       message: "Error while updating user profile",
       err,
     });
+  }
+};
+
+const updateProfilePicture = async (req, res) => {
+
+  try {
+  
+    const file = req.file
+    console.log(file)
+
+    if (!file)
+      return res
+        .status(400)
+        .json({ success: false, message: "Please send a photo to update !" });
+
+    const result = await uploadFilesToCloudinary([file]);
+
+    const avatar = {
+      public_id: result[0].public_id,
+      url: result[0].url,
+    };
+
+    const update = {
+      avatar: avatar,
+    };
+
+    await User.findOneAndUpdate({ _id: req.userId }, update);
+
+return res.status(200).json({success: true, message: "Profile picture updated successfully !"})
+
+  } catch (err) {
+    return res
+      .status(400)
+      .json({
+        success: false,
+        message: "Error while updating profile picture !",
+        err,
+      });
   }
 };
 
@@ -254,9 +296,9 @@ const acceptFriendRequest = async (req, res) => {
   const { requestId, accept } = req.body;
 
   try {
-    // fetch req form req id
+    // fetch req from req id
     const request = await Request.findById(requestId)
-      .populate("sender", "name")
+      .populate("sender", "name avatar")
       .populate("receiver", "name");
 
     if (!request) {
@@ -272,7 +314,7 @@ const acceptFriendRequest = async (req, res) => {
     }
 
     if (!accept) {
-      // if user accepted the request
+      // if user rejected the request
       await request.deleteOne();
 
       return res
@@ -281,13 +323,13 @@ const acceptFriendRequest = async (req, res) => {
     }
 
     const members = [request.sender._id, request.receiver._id]; // members will be user itself and the req sender
-
+ 
     await Promise.all([
       Chat.create({
         // will create a chat of both members together
         name: request.sender.name,
         members,
-        avatar,
+        avatar: request.sender.avatar,
       }),
       request.deleteOne(), // will delete the request at the end
     ]);
@@ -368,6 +410,7 @@ const getUserFriends = async (req, res) => {
       .map((chat) => chat.members)
       .flat()
       .filter((i) => i._id.toString() !== req.userId.toString());
+      
     if (chatId) {
       const chatFriends = await Chat.findById(chatId);
       const getfriends = allmembers.filter(
@@ -400,6 +443,7 @@ module.exports = {
   userLogin,
   userProfile,
   profileDataUpdate,
+  updateProfilePicture,
   logout,
   searchUser,
   sendFriendRequest,

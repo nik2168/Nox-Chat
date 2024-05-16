@@ -2,35 +2,27 @@ import { ArrowBack, CameraAlt, Cancel, Settings } from "@mui/icons-material";
 import React, { useRef, useState } from "react";
 
 const GroupNext = ({
+  groupnext,
+  friends,
   selectedmembers,
   setMember,
-  groupnext,
-  userdata,
-  creategroup,
-  friendlistref,
-  newgroup,
-  setNewGroup,
+  name,
+  setname,
+  curimage,
+  setImage,
   file,
   setFile,
-  fileFlag,
-  fileErr,
-  curname,
-  setname,
-  nameFlag,
-  nameErr,
+  friendlistref,
+  creategroup,
 }) => {
-
-  
-  const currentImage = useRef();
   const [check, setcheck] = useState(""); // for errors in inputs
-
-
 
   const handleImageChange = (e) => {
     if (e.target.files[0].size > 3000000) {
       setcheck("Img size must be < 1mb");
     }
-    setFile(URL.createObjectURL(e.target.files[0]));
+    setImage(URL.createObjectURL(e.target.files[0]));
+    setFile(e.target.files[0]);
   };
 
   return (
@@ -55,42 +47,15 @@ const GroupNext = ({
           type="button"
           className="groupnextbtn"
           onClick={() => {
-            if (!fileFlag) {
-              setcheck(fileErr);
-              return;
-            }
-            if (!nameFlag) {
-              setcheck(nameErr);
-              return;
-            }
-            setNewGroup((previousstate) => {
-              return {
-                ...previousstate,
-                members: { selectedmembers },
-                name: { curname },
-                avatar: { file },
-              };
-            });
-            userdata.push(newgroup);
             creategroup.current.classList.remove("groupactive");
             creategroup.current.classList.remove("move");
             setMember([]);
             setname("");
             setFile("");
+            setImage("");
             for (const child of friendlistref.current.children) {
               child.lastChild.lastChild.checked = false;
             }
-            setNewGroup({
-              userid: "4",
-              name: "",
-              avatar: "",
-              groupChat: true,
-              members: [],
-              lastMessage: "Hi Guys!",
-              lastMessageTime: "11:30",
-              notifications: "1",
-              chats: ["hi guys", "our new group is here!🫵"],
-            });
             groupnext.current.classList.remove("active");
           }}
         >
@@ -115,7 +80,7 @@ const GroupNext = ({
           }}
         >
           <div className="image-border">
-            <img src={file} className="image-border" />
+            <img src={curimage} className="image-border" />
           </div>
 
           <div
@@ -140,8 +105,7 @@ const GroupNext = ({
             <input
               type="file"
               id="image"
-              onChange={handleImageChange}
-              ref={currentImage}
+              onChange={(e) => handleImageChange(e)}
               style={{
                 margin: "0px",
                 padding: "0px",
@@ -181,12 +145,9 @@ const GroupNext = ({
             <input
               type="text"
               placeholder="Group Name"
-              value={curname}
+              value={name}
               onChange={(e) => {
-                setname(e.target.value);
-                setNewGroup((previousstate) => {
-                  return { ...previousstate, name: e.target.value };
-                });
+                setname(e.currentTarget.value);
               }}
               style={{
                 backgroundColor: "transparent",
@@ -224,11 +185,13 @@ const GroupNext = ({
 
       <ul className="nextselectedmembers">
         {selectedmembers.map((i, index) => {
-          const person = userdata.find((j) => Number(j.userid) === i);
+          const person = friends.find(
+            (friend) => friend._id.toString() === i.toString()
+          );
           return (
             <li className="addedmembers" key={index}>
               <img
-                src={person.avatar}
+                src={person?.avatar?.url}
                 style={{
                   width: "4rem",
                   height: "4rem",
@@ -238,10 +201,10 @@ const GroupNext = ({
               />
               <button
                 className="cancelbutton"
-                value={person.userid}
+                value={person?._id}
                 onClick={(e) => {
                   const newlist = selectedmembers.filter((i) => {
-                    return i !== Number(e.currentTarget.value);
+                    return i.toString() !== e.currentTarget.value.toString();
                   });
                   for (const child of friendlistref.current.children) {
                     if (child.value == e.currentTarget.value)
