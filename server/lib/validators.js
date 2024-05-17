@@ -23,11 +23,7 @@ const registerValidator = () => [
 
 const createGroupValidator = () => [
   body("name", "please provide a name for the group").notEmpty(),
-  body("members", "please provide members")
-    .notEmpty()
-    .withMessage("Please provide members")
-    .isArray({ min: 1, max: 10 })
-    .withMessage("members must be 1 to 10"),
+  body("members", "please provide members").notEmpty()
 ];
 
 const addMembersValidator = () => [

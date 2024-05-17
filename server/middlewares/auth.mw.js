@@ -1,4 +1,7 @@
 const jwt = require("jsonwebtoken");
+const User = require("../models/user.model");
+const { ErrorHandler } = require("../utils/utility");
+
 
 const isAuthenticate = (req, res, next) => {
   try {
@@ -29,6 +32,7 @@ const adminAuthenticate = (req, res, next) => {
 
   try {
     const token = req.cookies[process.env.ADMIN_TOKEN_NAME];
+    console.log(token, "yes")
 
     // If there is no token
     if (!token)
@@ -51,4 +55,29 @@ const adminAuthenticate = (req, res, next) => {
   }
 };
 
-module.exports = { isAuthenticate, adminAuthenticate };
+const socketAuthenticator = async (err, socket, next) => {
+  try {
+    if (err) return next(err);
+
+    const authToken = socket.request.cookies[process.env.TOKEN_NAME];
+
+    if (!authToken)
+      return next(new ErrorHandler("Please login to access this route", 401));
+
+    const decodedData = jwt.verify(authToken, process.env.secret);
+
+    const user = await User.findById(decodedData._id);
+
+    if (!user)
+      return next(new ErrorHandler("Please login to access this route", 401));
+
+    socket.user = user;
+
+    return next();
+  } catch (error) {
+    console.log(error);
+    return next(new ErrorHandler("Please login to access this route", 401));
+  }
+};
+
+module.exports = { isAuthenticate, adminAuthenticate, socketAuthenticator  };

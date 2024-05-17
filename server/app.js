@@ -5,8 +5,9 @@ const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
 const { createServer } = require("http");
 const { v4 } = require("uuid");
-const cors = require("cors")
-const cloudinary = require('cloudinary')
+const cors = require("cors");
+const cloudinary = require("cloudinary");
+const corsOptions = require("./constants/config.js");
 
 // routes import
 const userRoutes = require("./routes/user.routes.js");
@@ -15,18 +16,16 @@ const adminRoutes = require("./routes/admin.routes.js");
 
 const app = express();
 app.use(cookieParser());
-app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:4173", process.env.CLIENT_URL],
-  credentials: true,
-
-}))
+app.use(cors(corsOptions));
 
 // socket.io
 const { Server } = require("socket.io");
 const { NEW_MESSAGE, NEW_MESSAGE_ALERT } = require("./constants/events.js");
 const Message = require("./models/message.model.js");
+const { socketAuthenticator } = require("./middlewares/auth.mw.js");
+const { errorMiddleWare } = require("./middlewares/error.mw.js");
 const server = createServer(app);
-const io = new Server(server, {});
+const io = new Server(server, { cors: corsOptions });
 const userSocketIds = new Map(); // will map will id with socketId
 // socket.io
 
@@ -41,43 +40,63 @@ mongoose
   .then(() => {
     console.log("Connected to database successfully!");
 
+
     server.listen(process.env.port, () => {
       console.log(
         `Sever is running at port: ${process.env.port} in ${process.env.NODE_ENV} mode`
       );
+    });
+
+    app.get("/", (req, res) => {
+      res.send("Hello world !");
     });
   })
   .catch((err) => {
     console.log("Error while connecting to db", err);
   });
 
-  // cloudinary setup
-  cloudinary.v2.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-  })
+// cloudinary setup
+cloudinary.v2.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/chat", chatRoutes);
 app.use("/api/v1/admin", adminRoutes);
 
 // instead of socket.handshake we can use socket middleware api to authenticate the connection
-io.use((socket, next) => {});
+io.use((socket, next) => {
+  cookieParser()(
+    socket.request,
+    socket.request.res,
+    async (err) => await socketAuthenticator(err, socket, next)
+  );
+});
+
+    app.use((err, req, res, next) => {
+  err.message ||= "Internal Server Error";
+  err.statusCode ||= 500;
+
+  const response = {
+    success: false,
+    message: err.message,
+  };
+
+  return res.status(err.statusCode).json(response);
+});
 
 // socket.io connection
 io.on("connection", (socket) => {
-  const user = {
+  const user = socket.user
     // will get all the users currently connected to socket
     // temp user
-    _id: "sam123",
-    name: "Sam",
-  };
-
+   
   userSocketIds.set(user._id.toString(), socket.id); // all the socket connected users are in this map
 
   console.log("a user connected", socket.id);
-  console.log(userSocketIds);
+  // console.log(userSocketIds);
 
   socket.on(NEW_MESSAGE, async ({ message, chatId, members }) => {
     // we got this data from frontend for each chat
@@ -104,7 +123,7 @@ io.on("connection", (socket) => {
     try {
       await Message.create(messageForDb);
     } catch (err) {
-      console.log("Error while saving message to db :", err);
+      console.log("Error while saving message to db:", err);
     }
 
     const membersSockets = members.map((user) =>
@@ -123,3 +142,4 @@ io.on("connection", (socket) => {
     console.log("user dissconnected");
   });
 });
+

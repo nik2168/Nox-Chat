@@ -1,9 +1,7 @@
 .creategroup {
   position: absolute;
   top: 5rem;
-  border-top-left-radius: 2rem;
-  border-bottom-left-radius: 2rem;
-  border-bottom-right-radius: 2rem;
+  border-radius: 1rem;
   right: 3rem;
   height: 0vh;
   width: 0vw;
@@ -21,9 +19,7 @@
 .creategroup.groupactive {
   position: absolute;
   top: 5rem;
-  border-top-left-radius: 1rem;
-  border-bottom-left-radius: 1rem;
-  border-bottom-right-radius: 1rem;
+  border-radius: 1rem;
   right: 3rem;
   height: 70vh;
   width: 24rem;
@@ -161,9 +157,7 @@
 .groupnext {
   position: absolute;
   top: 5rem;
-  border-top-left-radius: 2rem;
-  border-bottom-left-radius: 2rem;
-  border-bottom-right-radius: 2rem;
+  border-radius: 1rem;
   right: 3rem;
   height: 70vh;
   width: 0vw;
@@ -181,9 +175,7 @@
 .groupnext.active {
   position: absolute;
   top: 5rem;
-  border-top-left-radius: 1rem;
-  border-bottom-left-radius: 1rem;
-  border-bottom-right-radius: 1rem;
+  border-radius: 1rem;
   right: 3rem;
   height: 70vh;
   width: 24rem;

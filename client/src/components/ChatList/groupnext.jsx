@@ -1,5 +1,7 @@
 import { ArrowBack, CameraAlt, Cancel, Settings } from "@mui/icons-material";
 import React, { useRef, useState } from "react";
+import { useAsyncMutation } from "../../hooks/hook";
+import { useCreateGroupMutation } from "../../redux/api/api";
 
 const GroupNext = ({
   groupnext,
@@ -15,7 +17,35 @@ const GroupNext = ({
   friendlistref,
   creategroup,
 }) => {
+
   const [check, setcheck] = useState(""); // for errors in inputs
+
+// create group function ...
+const [createGroupMutation, isLoadingCreateGroup] = useAsyncMutation(useCreateGroupMutation)
+
+const handleCreateGroup = async () => {
+
+const transformMembers = selectedmembers.map((i) => console.log(i))
+
+  const formdata = new FormData();
+
+  formdata.append("name", name)
+  formdata.append("avatar", file)
+  formdata.append("members", selectedmembers)
+
+ await createGroupMutation(`creating ${name} ...`, formdata)
+  
+  creategroup.current.classList.remove("groupactive");
+  creategroup.current.classList.remove("move");
+  setMember([]);
+  setname("");
+  setFile("");
+  setImage("");
+  for (const child of friendlistref.current.children) {
+    child.lastChild.lastChild.checked = false;
+  }
+  groupnext.current.classList.remove("active");
+}
 
   const handleImageChange = (e) => {
     if (e.target.files[0].size > 3000000) {
@@ -46,18 +76,7 @@ const GroupNext = ({
         <button
           type="button"
           className="groupnextbtn"
-          onClick={() => {
-            creategroup.current.classList.remove("groupactive");
-            creategroup.current.classList.remove("move");
-            setMember([]);
-            setname("");
-            setFile("");
-            setImage("");
-            for (const child of friendlistref.current.children) {
-              child.lastChild.lastChild.checked = false;
-            }
-            groupnext.current.classList.remove("active");
-          }}
+          onClick={() => handleCreateGroup()}
         >
           Create
         </button>

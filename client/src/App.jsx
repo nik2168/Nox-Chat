@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { userExists, userNotExists } from "./redux/reducer/authslice";
 import { server } from "./constants/config.js";
 import { Toaster } from "react-hot-toast";
-
+import { SocketProvider } from "./socket.jsx";
 
 const Home = lazy(() => import("./pages/Home"));
 const Login = lazy(() => import("./pages/Login"));
@@ -20,28 +20,36 @@ const UsersManagement = lazy(() => import("./pages/Admin/UserManagement"));
 const ChatsManagement = lazy(() => import("./pages/Admin/ChatManagement"));
 const Messages = lazy(() => import("./pages/Admin/MessageManagement"));
 
-
 const App = () => {
+  const { user, loader } = useSelector((state) => state.auth);
 
-  const {user, loader} = useSelector(state => state.auth)
-
-const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   useEffect(() => {
     axios
-      .get(`${server}/api/v1/user/profile`, {withCredentials: true})
-      .then((res) => {
-        const userData = res.data.user
-        dispatch(userExists(userData))
+      .get(`${server}/api/v1/user/profile`, { withCredentials: true })
+      .then(({ data }) => {
+        dispatch(userExists(data?.user));
       })
-      .catch((err) => dispatch(userNotExists()));
+      .catch((err) => {
+        console.log(err);
+        dispatch(userNotExists());
+      });
   }, [dispatch]);
 
-  return loader? <Loaders></Loaders> :(
+  return loader ? (
+    <Loaders />
+  ) : (
     <BrowserRouter>
       <Suspense fallback={<Loaders />}>
         <Routes>
-          <Route element={<ProtectRoute user={user} />}>
+          <Route
+            element={  // socket client connection 
+              <SocketProvider>
+                <ProtectRoute user={user} />
+              </SocketProvider>
+            }
+          >
             <Route path="/" element={<Home />} />
             <Route path="/chat/:chatid" element={<Chat />} />
             <Route path="/groups" element={<Groups />} />
@@ -64,7 +72,7 @@ const dispatch = useDispatch()
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
-      <Toaster position="top-center"/>
+      <Toaster position="top-center" />
     </BrowserRouter>
   );
 };

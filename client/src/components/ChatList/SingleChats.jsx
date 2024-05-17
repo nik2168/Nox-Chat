@@ -33,6 +33,7 @@ const SingleChats = ({data, isLoading}) => {
                 }
                 alt=""
                 className="person-image"
+                style={{height: "70px", width: "70px"}}
               />
               {false && <div className="online"></div>}
             </div>

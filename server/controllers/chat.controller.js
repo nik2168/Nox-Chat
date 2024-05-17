@@ -19,36 +19,48 @@ const newGroupChat = async (req, res) => {
   const { name, members } = req.body;
 
   try {
+
     if (!members || members.length <= 0) {
       return res
         .status(400)
         .json({ success: false, message: "group must have 1 member" });
     }
+
+  //  const allMembers =  members.forEach((i) => i.toString()).push(req.userId)
     const allMembers = [...members, req.userId];
 
-    const file = req.file;
+    console.log(allMembers)
 
-    let avatar = ""
-    if (file) {
-      const result = await uploadFilesToCloudinary([file]);
+    // const file = req.file;
 
-      avatar = {
-        public_id: result[0].public_id,
-        url: result[0].url,
-      };
-    }
+    // let avatar;
 
-    const temp = await Chat.create({
-      name: name,
-      groupChat: true,
-      avatar,
-      creator: req.userId,
-      members: allMembers,
-    });
+    // if (file) {
+    //   const result = await uploadFilesToCloudinary([file]);
 
-    emitEvent(req, ALERT, allMembers, `Welcome to ${name} group !`);
+    //   avatar = {
+    //     public_id: result[0].public_id,
+    //     url: result[0].url,
+    //   };
+    // }
+    // else{
+    //   avatar = {
+    //     public_id: "not_here",
+    //     url: "https://res.cloudinary.com/dki615p7n/image/upload/v1715486888/default_avatar_tvgr8w.jpg",
+    //   }
+    // }
 
-    emitEvent(req, REFETCH_CHATS, members);
+    // const temp = await Chat.create({
+    //   name: name,
+    //   groupChat: true,
+    //   avatar,
+    //   creator: req.userId,
+    //   members: allMembers,
+    // });
+
+    // emitEvent(req, ALERT, allMembers, `Welcome to ${name} group !`);
+
+    // emitEvent(req, REFETCH_CHATS, members);
 
     return res.status(201).json({ success: true, message: "group  created !" });
   } catch (err) {
@@ -119,6 +131,7 @@ const getMyGroups = async (req, res) => {
 
 // add members to the group
 const addMembers = async (req, res) => {
+
   const { chatId, new_members } = req.body;
 
   try {

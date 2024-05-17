@@ -44,7 +44,7 @@ const createUser = async (req, res) => {
     return res
       .status(201)
       .cookie(process.env.TOKEN_NAME, token, cookieObj)
-      .json({ success: true, message: "User Created!", newUser });
+      .json({ success: true, message: "User Created!", user: newUser });
   } catch (err) {
     if (err.code === 11000) {
       const error = Object.keys(err.keyPattern).join(",");
@@ -86,7 +86,8 @@ const userLogin = async (req, res) => {
     return res
       .status(200)
       .cookie(process.env.TOKEN_NAME, token, cookieObj)
-      .json({ success: true, message: "Login Success!" });
+      .json({ success: true, message: "Login Success!", user: checkUser });
+      
   } catch (err) {
     return res
       .status(500)
@@ -159,7 +160,7 @@ const profileDataUpdate = async (req, res) => {
 const updateProfilePicture = async (req, res) => {
 
   try {
-  
+    
     const file = req.file
     console.log(file)
 
@@ -304,13 +305,13 @@ const acceptFriendRequest = async (req, res) => {
     if (!request) {
       return res
         .status(400)
-        .json({ success: true, message: "request not found !" });
+        .json({ success: false, message: "request not found !" });
     }
 
     if (request.receiver._id.toString() !== req.userId.toString()) {
       return res
         .status(401)
-        .json({ success: true, message: "You are not authorised !" });
+        .json({ success: false, message: "You are not authorised !" });
     }
 
     if (!accept) {
@@ -410,7 +411,7 @@ const getUserFriends = async (req, res) => {
       .map((chat) => chat.members)
       .flat()
       .filter((i) => i._id.toString() !== req.userId.toString());
-      
+
     if (chatId) {
       const chatFriends = await Chat.findById(chatId);
       const getfriends = allmembers.filter(

@@ -78,8 +78,18 @@ const api = createApi({
         url: "/user/userfriends",
         credentials: "include",
       }),
-      providesTags: ["Friends"]
-    })
+      providesTags: ["Friends"],
+    }),
+
+    createGroup: builder.mutation({
+      query: (formdata) => ({
+        url: "/chat/createGroup",
+        method: "POST",
+        credentials: "include",
+        body: formdata,
+      }),
+      invalidatesTags: ["Chat"],
+    }),
 
   }),
 });
@@ -95,4 +105,5 @@ export const {
   useUpdateProfilePictureMutation,
   useRequestResponseMutation,
   useFetchUserFriendsQuery,
+  useCreateGroupMutation,
 } = api;

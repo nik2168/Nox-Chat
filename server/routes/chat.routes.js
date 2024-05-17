@@ -21,7 +21,7 @@ const {
 
 // middle wares
 const { isAuthenticate } = require("../middlewares/auth.mw.js");
-const { attachmentsMulter } = require("../middlewares/multer.js");
+const { attachmentsMulter, singleAvatar } = require("../middlewares/multer.js");
 const {
   createGroupValidator,
   validateHandler,
@@ -40,7 +40,7 @@ const {
 
 router.use(isAuthenticate); // authenticate a user with cookie
 
-router.post("/creategroup", createGroupValidator(), validateHandler, newGroupChat);
+router.post("/creategroup", singleAvatar, createGroupValidator(), validateHandler, newGroupChat);
 
 router.put("/addmembers", addMembersValidator(), validateHandler, addMembers);
 

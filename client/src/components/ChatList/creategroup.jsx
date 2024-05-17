@@ -17,7 +17,6 @@ const CreateGroup = () => {
   const [name, setname] = useState('');
 
   const [selectedmembers, setMember] = useState([]);
-  const [newgroup, setNewGroup] = useState();
 
 
   // fetching all the friends of curr user
@@ -26,7 +25,7 @@ const CreateGroup = () => {
   useErrors([{ isError, error }]);
   const friends = data?.allFriends;
 
-    const [allmembers, setallmembers] = useState('');
+    const [allmembers, setallmembers] = useState([]);
 
     useEffect(() => {
      setallmembers(friends)
@@ -49,7 +48,9 @@ const CreateGroup = () => {
           }
           setname("");
           setFile("");
-          setImage("");
+          setImage(
+            ""
+          );
           setMember([]);
           groupnext.current.classList.remove("active");
         }}
@@ -119,6 +120,7 @@ const CreateGroup = () => {
         <div className="search-div">
           <input
             type="text"
+            placeholder="Search ..."
             style={{
               backgroundColor: "#ffffff1d",
             }}

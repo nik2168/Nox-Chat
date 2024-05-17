@@ -64,7 +64,7 @@ const AllChats = ({ curnav }) => {
             sx={{
               color: "#637381",
               position: "absolute",
-              left: "9%",
+              left: "3.5rem",
             }}
           />
           <FilterList

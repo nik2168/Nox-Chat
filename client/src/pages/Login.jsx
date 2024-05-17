@@ -23,9 +23,8 @@ const Login = () => {
   const { user, setuser, userFlag, userErr } = useUserName("");
   const { bio, setbio, bioFlag, bioErr } = useBio("");
   const { pass, setpass, passFlag, passErr } = usePassword("");
-  const [file, setFile] = useState('')
-  const [image, setImage] = useState('')
-
+  const [file, setFile] = useState("");
+  const [image, setImage] = useState("");
 
   // SIGN UP
   const signUpSubmitHandler = async (e) => {
@@ -35,7 +34,7 @@ const Login = () => {
     else if (!userFlag) setcheck(userErr);
     else if (!bioFlag) setcheck(bioErr);
     else if (!passFlag) setcheck(passErr);
-    else if (!file) setcheck('avatar ???');
+    else if (!file) setcheck("avatar ???");
     else setcheck("");
 
     const formdata = new FormData();
@@ -45,7 +44,7 @@ const Login = () => {
     formdata.append("password", pass);
     formdata.append("bio", bio);
     formdata.append("avatar", file);
-    
+
     const config = {
       withCredentials: true,
       headers: {
@@ -59,13 +58,14 @@ const Login = () => {
         formdata,
         config
       );
-      dispatch(userExists(true));
-      toast.success(data.message);
+      dispatch(userExists(data?.user));
+      toast.success(data?.message);
     } catch (err) {
       toast.error(err?.response?.data?.message || "Something went wrong");
+    } finally {
+      setIsLoading(false);
     }
   };
-
 
   // LOGIN
   const signInSubmitHandler = async (e) => {
@@ -84,27 +84,23 @@ const Login = () => {
         { username: user, password: pass },
         config
       );
-      dispatch(userExists(true));
+      dispatch(userExists(data?.user));
       toast.success(data.message);
     } catch (err) {
-      console.log(err)
+      console.log(err);
       toast.error(err?.response?.data?.message || "something went wrong !");
     }
   };
 
-
-
- // IMG 
+  // IMG
   const handleImageChange = (e) => {
     if (e.target.files[0].size > 3000000) {
       setcheck("Img size must be upto 3mb");
       return;
     }
     setImage(URL.createObjectURL(e.target.files[0]));
-    setFile(e.target.files[0])
+    setFile(e.target.files[0]);
   };
-
-
 
   return (
     <div className="container" id="container" ref={contain}>

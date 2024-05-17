@@ -1,15 +1,10 @@
 import {
-  AddCircle,
-  Notifications,
-  DoneRounded,
-  CancelSharp,
-  CancelScheduleSend,
-  ChangeCircleRounded,
-  Close,
+  Notifications
 } from "@mui/icons-material";
 import React, { useRef } from "react";
+import toast from "react-hot-toast";
+import { useErrors } from "../../hooks/hook";
 import { useFetchRequestsQuery, useRequestResponseMutation } from "../../redux/api/api";
-import { useAsyncMutation, useErrors } from "../../hooks/hook";
 
 const CurNotifications = () => {
 
@@ -22,15 +17,29 @@ const CurNotifications = () => {
   useErrors([{ isError, error }]);
 
   // accept or decline requests handler
-       const [requestRes, isLoadingRequestRes ] = useAsyncMutation(useRequestResponseMutation)
+       const [requestRes] = useRequestResponseMutation()
 
-  const handleSendRequest = (e, accept) => {
-      console.log(e.currentTarget.value, accept)
+  const handleSendRequest = async (e, accept) => {
+
+    try{
         const data = {
           requestId: e.currentTarget.value,
           accept,
         };
-        requestRes("responding to the request ...", data)
+           const res = await requestRes(data)
+
+           if(res?.success){
+            console.log("use socket here for users")
+                       toast.success(res?.data?.message);
+           }
+           else{
+            toast.error(res?.error?.message || "Something went wrong !")
+           }
+
+      }catch(err){
+        console.log(err)
+        toast.error("Something went wrong!")
+      }
   }
 
   // window close/open

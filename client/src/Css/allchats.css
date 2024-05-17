@@ -267,6 +267,7 @@ color: red;
   object-fit: cover;
   position: absolute;
   left: 8px;
+  border: 0.8px solid white;
 }
 
 .group-image {

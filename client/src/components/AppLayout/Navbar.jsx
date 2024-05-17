@@ -16,8 +16,8 @@ const Navbar = ({ setnav, curnav }) => {
   const { avatar, bio, createdAt, name, username } = user;
   const joinDate = new Date(createdAt);
 
-  const [curImage, setImage] = useState(avatar.url)
-  const [file, setFile] = useState()
+  const [curImage, setImage] = useState(avatar?.url)
+  const [file, setFile] = useState('')
   const [curbio, setbio] = useState(bio);
   const [curname, setname] = useState(name);
   const [curusername, setusername] = useState(username);

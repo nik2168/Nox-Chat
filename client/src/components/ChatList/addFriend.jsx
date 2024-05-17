@@ -55,6 +55,7 @@ const AddFriends = () => {
         <div className="search-div">
           <input
             type="text"
+            placeholder="Search ..."
             style={{
               backgroundColor: "#ffffff1d",
               fontSize: "1rem",
