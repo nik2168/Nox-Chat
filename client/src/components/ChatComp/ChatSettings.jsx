@@ -1,10 +1,10 @@
 import React from 'react'
 import {  } from '@mui/icons-material'
 
-const ChatSettings = ({setlist}) => {
+const ChatSettings = () => {
   return (
     <div className="chat-settings" >
-      <button onClick={() => {setlist([])}}>Clear Chat</button>
+      <button onClick={() => {}}>Clear Chat</button>
       <hr />
       <button>Background</button>
       <hr />

@@ -6,7 +6,7 @@ import { fileFormat } from "../../lib/features";
 
 
 
-const Messages = ({ chat, list,  user }) => {
+const Messages = ({ chat, messages,  user }) => {
 // let currentDate = new Date();
 
   return (
@@ -18,18 +18,18 @@ const Messages = ({ chat, list,  user }) => {
       }}
     >
 
-      {list.map((i, index) => {
+      {messages?.map((i, index) => {
       
-        const {attachments, content, createdAt, sender} =  i;
-          const timeAgo = moment(createdAt).fromNow();
-            const samesender = user?._id == sender?._id;
+        const {_id, content, attachments, sender} =  i;
+          const timeAgo = moment(sender?.createdAt).format("HH:MM")
+            const samesender = user?._id.toString() === sender?._id.toString();
       { return !samesender ? (
-        <div key={index} className="textsinboxOuterDiv">
+        <div key={_id} className="textsinboxOuterDiv">
           <div className="textsinboxdiv">
             <p className="textsender">{sender.name}</p>
 
-            {attachments.length > 0 &&
-              attachments.map((i, index) => {
+            {attachments?.length > 0 &&
+              attachments?.map((i, index) => {
                 const url = i.url;
                 const file = fileFormat(url);
 
@@ -52,11 +52,11 @@ const Messages = ({ chat, list,  user }) => {
           </div>
         </div>
       ) : (
-        <div key={index} className="textssentOuterDiv">
+        <div key={_id} className="textssentOuterDiv">
           <div className="textssentdiv">
 
-            {attachments.length > 0 &&
-              attachments.map((i, idx) => {
+            {attachments?.length > 0 &&
+              attachments?.map((i, idx) => {
                 const url = i.url;
                 const file = fileFormat(url);
 

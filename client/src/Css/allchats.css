@@ -3,6 +3,7 @@
   height: 100vh;
   background-color: #161c24;
   position: relative;
+  z-index: 4;
 }
 
 .allchats-header {

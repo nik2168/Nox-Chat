@@ -36,6 +36,7 @@
   justify-content: space-between;
   align-items: center;
   position: relative;
+  
 }
 
 .chat-person-div {
@@ -253,12 +254,14 @@
 }
 
 .textssenttimeStamps{
-font-size: 0.7rem;
-  font-weight: 500;
+font-size: 0.6rem;
+  font-weight: 800;
+  width: 8rem;
   color: #DFE3E8;
     color: #c4cdd5;
   position: absolute;
-  bottom: -1rem;
+  bottom: -0.8rem;
+  right: -5.5rem;
     padding-left: 0.5rem;
 }
 
@@ -348,7 +351,7 @@ font-size: 0.7rem;
   border-bottom-right-radius: 40%;
   background-color: #454f5b;
   filter: blur(65px);
-  z-index: 5;
+  z-index: 3;
   opacity: 1;
 }
 

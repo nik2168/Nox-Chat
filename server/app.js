@@ -40,7 +40,6 @@ mongoose
   .then(() => {
     console.log("Connected to database successfully!");
 
-
     server.listen(process.env.port, () => {
       console.log(
         `Sever is running at port: ${process.env.port} in ${process.env.NODE_ENV} mode`
@@ -75,7 +74,7 @@ io.use((socket, next) => {
   );
 });
 
-    app.use((err, req, res, next) => {
+app.use((err, req, res, next) => {
   err.message ||= "Internal Server Error";
   err.statusCode ||= 500;
 
@@ -89,26 +88,27 @@ io.use((socket, next) => {
 
 // socket.io connection
 io.on("connection", (socket) => {
-  const user = socket.user
-    // will get all the users currently connected to socket
-    // temp user
-   
+  const user = socket.user;
+  // will get all the users currently connected to socket
+  // temp user
+
   userSocketIds.set(user._id.toString(), socket.id); // all the socket connected users are in this map
 
   console.log("a user connected", socket.id);
   // console.log(userSocketIds);
 
-  socket.on(NEW_MESSAGE, async ({ message, chatId, members }) => {
+  socket.on(NEW_MESSAGE, async ({ message, chatid, members }) => {
     // we got this data from frontend for each chat
 
     const messageForRealTime = {
       // this will be the message for real time chatting ...
       content: message,
+      attachments : [],
       _id: v4(), // generate a random _id temprary
       sender: {
         _id: user._id,
         name: user.name,
-        chat: chatId,
+        chat: chatid,
         createdAt: new Date().toISOString(),
       },
     };
@@ -116,8 +116,9 @@ io.on("connection", (socket) => {
     const messageForDb = {
       // this format of message will save in our Message model
       content: message,
+      attachments: [],
       sender: user._id,
-      chat: chatId,
+      chat: chatid,
     };
 
     try {
@@ -131,10 +132,10 @@ io.on("connection", (socket) => {
     ); // will get all the socketIds of a sepecific chat's members to whom we need to send the message ...
 
     io.to(membersSockets).emit(NEW_MESSAGE, {
-      chatId,
+      chatid,
       message: messageForRealTime,
     });
-    io.to(membersSockets).emit(NEW_MESSAGE_ALERT, { chatId });
+    io.to(membersSockets).emit(NEW_MESSAGE_ALERT, { chatid });
   });
 
   socket.on("disconnect", () => {
@@ -142,4 +143,3 @@ io.on("connection", (socket) => {
     console.log("user dissconnected");
   });
 });
-

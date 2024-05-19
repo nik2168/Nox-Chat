@@ -8,69 +8,74 @@ import {
   Send,
   VideoCameraBackRounded as VideoIcon,
 } from "@mui/icons-material";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import AppLayout from "../components/AppLayout/AppLayout";
-import ChatSettings from '../components/ChatComp/ChatSettings';
-import Messages from '../components/ChatComp/Messages';
+import ChatSettings from "../components/ChatComp/ChatSettings";
+import Messages from "../components/ChatComp/Messages";
 import GroupSettings from "../components/ChatComp/groupsettings";
 import { getSocket } from "../socket";
 import { useDispatch, useSelector } from "react-redux";
-import {NEW_MESSAGE} from "../constants/events.js"
-import { useGetChatDetailsQuery } from "../redux/api/api.js";
-import { useErrors } from "../hooks/hook.jsx";
+import { NEW_MESSAGE } from "../constants/events.js";
+import { useGetChatDetailsQuery, useGetMessagesQuery } from "../redux/api/api.js";
+import { useErrors, useSocketEvents } from "../hooks/hook.jsx";
 import { Skeleton } from "@mui/material";
 
-
-
 const Chat = () => {
-
   const { chatid } = useParams();
-  console.log(chatid)
 
-  const {user} = useSelector((state) => state.auth)
+  const { user } = useSelector((state) => state.auth); // Cur User
 
-  // fetching current chat details according to chatid
-    const populate = true;
-    const { isLoading, data, error, isError, refetch } = useGetChatDetailsQuery(
-      chatid,
-      populate
-    );
-
-    useErrors(error, isError);
-
-    
-
-  const curChat = data?.curchat;
-
-const members = curChat?.members
-
-  const [list, setlist] = useState([]);
-
-  // useEffect(()=> {
-  // setlist(chats);
-  // }, [chatid])
-
-  const socket = getSocket();
-
-  const [message, setcurmessage] = useState("");
+  const [message, setcurmessage] = useState(""); // CurMessage
+  const [messages, setMessages] = useState([]); // Messages List
+  const [page, setPage] = useState(1);
 
   const chat = useRef(); // ref to chat
 
   const groupsetting = useRef();
 
+  // fetching current chat details according to chatid
+  const populate = true;
+  const { isLoading, data, error, isError, refetch } = useGetChatDetailsQuery(
+    chatid,
+    populate
+  );
+  useErrors(error, isError);
+
+  const curChat = data?.curchat;
+  const members = curChat?.members;
+
+  
+  // fetching old Messages from database
+    const oldMessagesChunk = useGetMessagesQuery(chatid, page);
+    
+
+
+  const socket = getSocket();
+
   const messageSubmitHandler = (e) => {
-    e.preventDefault()
-    if(!message.trim()) return;
+    e.preventDefault();
+    if (!message.trim()) return;
 
     // emitting message to the server ...
-socket.emit(NEW_MESSAGE, {chatid, members, message})
+    socket.emit(NEW_MESSAGE, { chatid, members, message });
 
-    setcurmessage("")
-  }
+    setcurmessage("");
+  };
 
-  return (
-    isLoading ? <Skeleton/> :
+  // will use newMessages function inside useCallback so that it won't created everytime we got new message
+  const newMessages = useCallback((data) => {
+    setMessages((pre) => [...pre, data.message]);
+  }, []);
+
+  const events = { [NEW_MESSAGE]: newMessages }; // [NEW_MESSAGE] -> its value will be read as a string in key
+
+  useSocketEvents(socket, events); // using a custom hook to listen for events array
+
+
+  return isLoading ? (
+    <Skeleton />
+  ) : (
     <section className="chat" ref={chat}>
       <GroupSettings groupsetting={groupsetting} curChat={curChat} />
 
@@ -79,7 +84,12 @@ socket.emit(NEW_MESSAGE, {chatid, members, message})
           className="person-dp"
           onClick={() => groupsetting.current.classList.add("active")}
         >
-          <img src={curChat?.avatar?.url} alt="img" className="person-image" style={{height: "70px", width:"70px"}}/>
+          <img
+            src={curChat?.avatar?.url}
+            alt="img"
+            className="person-image"
+            style={{ height: "70px", width: "70px" }}
+          />
           {/* {isOnline && <div className="online"></div>} */}
         </div>
         <div className="chat-person-details">
@@ -100,9 +110,9 @@ socket.emit(NEW_MESSAGE, {chatid, members, message})
         </span>
       </div>
 
-      <ChatSettings setlist={setlist} />
+      <ChatSettings />
 
-      <Messages user={curChat} list={list} chat={chat} />
+      <Messages user={user} messages={messages} chat={chat} />
 
       <form
         className="chat-message-div"
@@ -145,11 +155,7 @@ socket.emit(NEW_MESSAGE, {chatid, members, message})
         <button
           type="button"
           className="sendmessage"
-          onClick={(e) => {
-            e.preventDefault();
-            setlist([...list, message]);
-            setcurmessage("");
-          }}
+          onClick={(e) => messageSubmitHandler(e)}
         >
           <Send
             sx={{
@@ -202,6 +208,6 @@ socket.emit(NEW_MESSAGE, {chatid, members, message})
       </div>
     </section>
   );
-}
+};
 
 export default AppLayout()(Chat);
