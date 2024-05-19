@@ -91,6 +91,20 @@ const api = createApi({
       invalidatesTags: ["Chat"],
     }),
 
+    getChatDetails: builder.query({
+      query: (chatid, populate = true) => {
+        let url = `/chat/${chatid}`;
+       if(populate) url += "?populate=true";
+
+       return {
+        url,
+        method: "GET",
+        credentials: "include",
+       }
+      },
+      providesTags: ["Chat"],
+    }),
+
   }),
 });
 
@@ -106,4 +120,5 @@ export const {
   useRequestResponseMutation,
   useFetchUserFriendsQuery,
   useCreateGroupMutation,
+  useGetChatDetailsQuery,
 } = api;

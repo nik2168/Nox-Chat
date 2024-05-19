@@ -14,43 +14,77 @@ import AppLayout from "../components/AppLayout/AppLayout";
 import ChatSettings from '../components/ChatComp/ChatSettings';
 import Messages from '../components/ChatComp/Messages';
 import GroupSettings from "../components/ChatComp/groupsettings";
+import { getSocket } from "../socket";
+import { useDispatch, useSelector } from "react-redux";
+import {NEW_MESSAGE} from "../constants/events.js"
+import { useGetChatDetailsQuery } from "../redux/api/api.js";
+import { useErrors } from "../hooks/hook.jsx";
+import { Skeleton } from "@mui/material";
 
- const curuser = {
-   _id: "1",
-   name: "Nik",
- };
 
-const Chat = ({userdata}) => {
-    const { chatid } = useParams();
 
-      const [list, setlist] = useState([]);
+const Chat = () => {
 
-    const user = userdata.find((i) => i.userid === chatid);
-    const { name, isOnline, avatar, groupChat, chats } = user;
+  const { chatid } = useParams();
+  console.log(chatid)
+
+  const {user} = useSelector((state) => state.auth)
+
+  // fetching current chat details according to chatid
+    const populate = true;
+    const { isLoading, data, error, isError, refetch } = useGetChatDetailsQuery(
+      chatid,
+      populate
+    );
+
+    useErrors(error, isError);
+
     
-    useEffect(()=> {
-    setlist(chats);
-    }, [chatid])
 
-  const [curmessage, setcurmessage] = useState("");
+  const curChat = data?.curchat;
+
+const members = curChat?.members
+
+  const [list, setlist] = useState([]);
+
+  // useEffect(()=> {
+  // setlist(chats);
+  // }, [chatid])
+
+  const socket = getSocket();
+
+  const [message, setcurmessage] = useState("");
 
   const chat = useRef(); // ref to chat
 
-  const groupsetting = useRef()
+  const groupsetting = useRef();
+
+  const messageSubmitHandler = (e) => {
+    e.preventDefault()
+    if(!message.trim()) return;
+
+    // emitting message to the server ...
+socket.emit(NEW_MESSAGE, {chatid, members, message})
+
+    setcurmessage("")
+  }
 
   return (
+    isLoading ? <Skeleton/> :
     <section className="chat" ref={chat}>
-
-      <GroupSettings groupsetting={groupsetting} user={user} />
+      <GroupSettings groupsetting={groupsetting} curChat={curChat} />
 
       <div className="chat-person-div">
-        <div className="person-dp" onClick={() => groupsetting.current.classList.add('active')}>
-          <img src={avatar} alt="" className="person-image" />
-          {isOnline && <div className="online"></div>}
+        <div
+          className="person-dp"
+          onClick={() => groupsetting.current.classList.add("active")}
+        >
+          <img src={curChat?.avatar?.url} alt="img" className="person-image" style={{height: "70px", width:"70px"}}/>
+          {/* {isOnline && <div className="online"></div>} */}
         </div>
         <div className="chat-person-details">
-          <h5>{name}</h5>
-          {isOnline ? <span>Online</span> : <span>Offline</span>}
+          <h5>{curChat?.name}</h5>
+          {/* {isOnline ? <span>Online</span> : <span>Offline</span>} */}
         </div>
         <span
           className="morevert"
@@ -68,15 +102,11 @@ const Chat = ({userdata}) => {
 
       <ChatSettings setlist={setlist} />
 
-      <Messages user={curuser} list={list} chat={chat} />
+      <Messages user={curChat} list={list} chat={chat} />
 
       <form
         className="chat-message-div"
-        onSubmit={(e) => {
-          e.preventDefault();
-          setlist([...list, curmessage]);
-          setcurmessage("");
-        }}
+        onSubmit={(e) => messageSubmitHandler(e)}
       >
         <span className="addspan">
           <Add
@@ -97,7 +127,7 @@ const Chat = ({userdata}) => {
           <input
             type="text"
             className="chat-message"
-            value={curmessage}
+            value={message}
             onChange={(e) => {
               setcurmessage(e.currentTarget.value);
             }}
@@ -117,7 +147,7 @@ const Chat = ({userdata}) => {
           className="sendmessage"
           onClick={(e) => {
             e.preventDefault();
-            setlist([...list, curmessage]);
+            setlist([...list, message]);
             setcurmessage("");
           }}
         >

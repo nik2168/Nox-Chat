@@ -16,7 +16,6 @@ const SingleChats = ({data, isLoading}) => {
           name,
           avatar,
           groupChat,
-          members,
         } = chat;
         if(groupChat) return;
         return (

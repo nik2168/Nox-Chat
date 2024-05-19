@@ -12,7 +12,7 @@ const GroupChats = ({ data, isLoading }) => {
         <Skeleton />
       ) : (
         <>{myChats?.map((chat, index) => {
-            const { _id, name, avatar, groupChat, members } = chat;
+            const { _id, name, avatar, groupChat } = chat;
             if (!groupChat) return;
             return (
               <div

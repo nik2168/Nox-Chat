@@ -1,33 +1,28 @@
-import React, { useEffect, useRef, useState } from "react";
 import {
-  Search,
   FilterList,
-  NoteAddOutlined,
-  Add,
-  Notifications,
+  Search
 } from "@mui/icons-material";
-import SingleChats from "../ChatList/SingleChats";
-import GroupChats from "../ChatList/GroupsChats";
-import CreateGroup from "./creategroup";
-import GroupNext from "./groupnext";
+import React from "react";
 import { useFileValidator, useName } from "../../hooks/InputValidator";
-import { userdata } from "../../assets/rawusers";
+import GroupChats from "../ChatList/GroupsChats";
+import SingleChats from "../ChatList/SingleChats";
+import CurNotifications from "./CurNotifications";
+import AddFriends from "./addFriend";
+import CreateGroup from "./creategroup";
 import { useMyChatsQuery } from "../../redux/api/api";
 import { useErrors } from "../../hooks/hook";
-import AddFriends from "./addFriend";
-import CurNotifications from "./CurNotifications";
 
-const AllChats = ({ curnav }) => {
+
+const AllChats = ({ curnav}) => {
   // for create group
-  
 
   const { file, setFile, fileFlag, fileErr } = useFileValidator("");
   const { curname, setname, nameFlag, nameErr } = useName("");
 
   // my chats fetching ...
   const { isLoading, data, isError, error, refetch } = useMyChatsQuery("");
-
   useErrors([{ isError, error }]);
+
 
   const handleDeleteChatOpen = (e, userid, groupchat) => {
     e.preventDefault();
@@ -37,7 +32,6 @@ const AllChats = ({ curnav }) => {
   return (
     <section className="allchats">
       <div className="allchats-header">
-        
         <div className="allchats-div">
           {curnav === "chats" && <h1>Chats</h1>}
           {curnav === "groups" && <h1>Groups</h1>}
@@ -47,9 +41,8 @@ const AllChats = ({ curnav }) => {
           <CurNotifications />
 
           <AddFriends />
-          
+
           <CreateGroup />
-           
         </div>
 
         <div className="search-div">

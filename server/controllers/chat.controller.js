@@ -19,17 +19,16 @@ const newGroupChat = async (req, res) => {
   const { name, members } = req.body;
 
   try {
-
     if (!members || members.length <= 0) {
       return res
         .status(400)
         .json({ success: false, message: "group must have 1 member" });
     }
 
-  //  const allMembers =  members.forEach((i) => i.toString()).push(req.userId)
+    //  const allMembers =  members.forEach((i) => i.toString()).push(req.userId)
     const allMembers = [...members, req.userId];
 
-    console.log(allMembers)
+    console.log(allMembers);
 
     // const file = req.file;
 
@@ -74,6 +73,7 @@ const newGroupChat = async (req, res) => {
 
 // get personal chats
 const getMyChats = async (req, res) => {
+
   try {
     const chats = await Chat.find({
       members: req.userId,
@@ -96,7 +96,7 @@ const getMyChats = async (req, res) => {
             }
             return pre;
           }, []),
-          // lastMessage: lastMessage
+         // lastMessage: lastMessage
         };
       }
     );
@@ -131,7 +131,6 @@ const getMyGroups = async (req, res) => {
 
 // add members to the group
 const addMembers = async (req, res) => {
-
   const { chatId, new_members } = req.body;
 
   try {
@@ -453,6 +452,8 @@ const sendAttachments = async (req, res) => {
 };
 
 const getChatDetails = async (req, res) => {
+
+
   try {
     if (req.query.populate === "true") {
       // will send members with name and avatar
@@ -463,11 +464,7 @@ const getChatDetails = async (req, res) => {
       if (!chat)
         res.status(400).json({ success: false, Message: "chat not found" });
 
-      chat.members = chat.members.map((_id, name, avatar) => {
-        return { _id, name, avatar: avatar.url };
-      });
-
-      return res.status(200).json({ success: true, message: chat });
+      return res.status(200).json({ success: true, curchat: chat });
     }
 
     // without populate in members else
@@ -478,7 +475,7 @@ const getChatDetails = async (req, res) => {
           success: false,
           Message: "chat not found",
         });
-      return res.status(200).json({ success: true, message: chat });
+      return res.status(200).json({ success: true, curchat: chat });
     }
   } catch (err) {
     if (err.name === "CastError") {

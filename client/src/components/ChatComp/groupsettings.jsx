@@ -6,8 +6,10 @@ import { userdata } from '../../assets/rawusers';
 
 
 
-const GroupSettings = ({user, groupsetting}) => {
-  const { name, isOnline, avatar, groupChat, chats, members } = user;
+const GroupSettings = ({curChat, groupsetting}) => {
+  const { _id, name, avatar, groupChat, members } = curChat;
+
+  
 
   const [check, setcheck] = useState(""); // for errors in inputs
 
@@ -189,15 +191,15 @@ const GroupSettings = ({user, groupsetting}) => {
         </li>
       </ul>
       <ul className="groupsettingsmembersdiv">
-        {members.map((i, index) => {
-          const each = userdata.find((j) => j.userid === i);
+        {members.map((member, index) => {
+         
           return (
             <li key={index} className="groupsettingsmembers">
-              <img src={each.avatar} className="groupsettingsimage" alt="" />
+              <img src={member?.avatar?.url} className="groupsettingsimage" alt="" />
               <div style={{ width: "70%" }}>
-                <h4>{each.name}</h4>
+                <h4>{member.name}</h4>
               </div>
-              <button className="gsremovebtn">remove</button>
+              <button value={member?._id} className="gsremovebtn">remove</button>
             </li>
           );
         })}
