@@ -3,6 +3,7 @@ const {
   REFETCH_CHATS,
   NEW_ATTACHMENT,
   NEW_MESSAGE_ALERT,
+  NEW_MESSAGE,
 } = require("../constants/events.js");
 const Chat = require("../models/chat.model.js");
 const Message = require("../models/message.model.js");
@@ -383,7 +384,7 @@ const sendAttachments = async (req, res) => {
     if (files.length < 1 && files.length > 5) {
       return res.status(400).json({
         success: false,
-        Message: "please upload attachment upto 5",
+        message: "please upload attachment upto 5",
       });
     }
 
@@ -394,21 +395,23 @@ const sendAttachments = async (req, res) => {
     if (!chat)
       return res
         .status(400)
-        .json({ success: false, Message: "Error while finding the chatId" });
+        .json({ success: false, matchMediaessage: "Error while finding the chatId" });
 
     if (files.length < 1)
       return res
         .status(400)
-        .json({ success: "false", Message: "please provide attachment!" });
+        .json({ success: "false", message: "please provide attachment!" });
 
-    const attachments = [];
+   // upload file here
+
+    const attachments = await uploadFilesToCloudinary(files);
 
     const messageForRealTime = {
       content: "",
       attachments,
       chat: chatId,
       sender: {
-        id: user._id,
+        _id: user._id,
         name: user.name,
       },
     };
@@ -422,16 +425,17 @@ const sendAttachments = async (req, res) => {
 
     const message = await Message.create(messageForDb);
 
-    emitEvent(req, NEW_ATTACHMENT, chat.members, {
+    emitEvent(req, NEW_MESSAGE, chat?.members, {
       message: messageForRealTime,
-      chatId,
+      chatid: chatId,
     });
     emitEvent(req, NEW_MESSAGE_ALERT, chat.members, { chatId });
 
     res.status(201).json({
       success: true,
-      Message: message,
+      message: message,
     });
+
   } catch (err) {
     if (err.name === "CastError") {
       const path = err.path;
@@ -626,6 +630,13 @@ const getMessages = async (req, res) => {
     const limit = 20;
     const skip = (page - 1) * limit;
 
+      const chat = await Chat.findById(chatId);
+
+      if (!chat) return res.status(404).json({success: true, message: "chat not found !"});
+
+      if (!chat.members.includes(req.userId.toString()))
+        return  res.status(403).json({success: true, message: "You are not allowed to access this chat !"});
+
     const [messages, totalMessagesCount] = await Promise.all([
       Message.find({ chat: chatId })
         .sort({ createdAt: -1 })
@@ -642,6 +653,7 @@ const getMessages = async (req, res) => {
     res
       .status(200)
       .json({ success: true, messages: messages.reverse(), totalPages });
+
   } catch (err) {
     if (err.name === "CastError") {
       const path = err.path;
@@ -655,7 +667,7 @@ const getMessages = async (req, res) => {
 
     return res.status(400).json({
       success: false,
-      message: "error while deleting the grouchat/chat details",
+      message: "error while fetching the messages !",
       Error: err,
     });
   }

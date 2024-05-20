@@ -32,6 +32,24 @@
   padding: 0;
 }
 
+
+.notificationBadge{
+  display: flex;
+  flex-direction: row;
+   justify-content: center;
+   align-items: center;
+   width: 1rem;
+   height: 1rem;
+   border-radius: 50%;
+   background-color: red;
+   color: green;
+}
+
+.notificationBadge p{
+  font-size: 0.8rem;
+  font-weight: 1000;
+}
+
 .allchats-notifications {
   height: 2.3rem;
   width: 2.3rem;

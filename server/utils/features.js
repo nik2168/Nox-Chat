@@ -3,6 +3,9 @@ const { v4 } = require("uuid");
 const cloudinary = require("cloudinary");
 const { getBase64 } = require("../lib/helper.js");
 
+const userSocketIds = new Map(); // will map user id with socketId
+
+
 const cookieObj = {
   maxAge: 15 * 24 * 60 * 60 * 1000,
   sameSite: "none",
@@ -22,7 +25,13 @@ const sendToken = (res, user, code, message) => {
 };
 
 const emitEvent = (req, event, users, data) => {
-  console.log("Event emitting", event);
+  const io = req.app.get("io");
+  
+  const usersSocket = users.map((user) =>
+    userSocketIds.get(user.toString())
+  );
+
+  io.to(usersSocket).emit(event, data);
   return;
 };
 
@@ -53,4 +62,4 @@ const uploadFilesToCloudinary = async (files = []) => {
   }
 };
 
-module.exports = { sendToken, emitEvent, uploadFilesToCloudinary };
+module.exports = { sendToken, emitEvent, uploadFilesToCloudinary, userSocketIds };

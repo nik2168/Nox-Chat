@@ -92,7 +92,7 @@ const api = createApi({
     }),
 
     getChatDetails: builder.query({
-      query: (chatid, populate = true) => {
+      query: ({ chatid, populate = true }) => {
         let url = `/chat/${chatid}`;
         if (populate) url += "?populate=true";
 
@@ -106,12 +106,23 @@ const api = createApi({
     }),
 
     getMessages: builder.query({
-      query: (chatid, page) => ({
+      query: ({ chatid, page }) => ({
         url: `/chat/messages/${chatid}?page=${page}`,
         credentials: "include",
       }),
       providesTags: ["Message"],
     }),
+
+    sendAttachments: builder.mutation({
+      query: (formdata) => ({
+        url: "/chat/sendattachments",
+        method: "POST",
+        credentials: "include",
+        body: formdata,
+      }),
+   }),
+
+   
   }),
 });
 
@@ -129,4 +140,5 @@ export const {
   useCreateGroupMutation,
   useGetChatDetailsQuery,
   useGetMessagesQuery,
+  useSendAttachmentsMutation,
 } = api;

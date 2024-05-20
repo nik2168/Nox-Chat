@@ -24,10 +24,13 @@ const { NEW_MESSAGE, NEW_MESSAGE_ALERT } = require("./constants/events.js");
 const Message = require("./models/message.model.js");
 const { socketAuthenticator } = require("./middlewares/auth.mw.js");
 const { errorMiddleWare } = require("./middlewares/error.mw.js");
+const { userSocketIds } = require("./utils/features.js");
 const server = createServer(app);
 const io = new Server(server, { cors: corsOptions });
-const userSocketIds = new Map(); // will map will id with socketId
+
+
 // socket.io
+app.set("io", io) // saved the io instance to whole app ...
 
 dotenv.config({
   path: "./.env",
@@ -94,8 +97,9 @@ io.on("connection", (socket) => {
 
   userSocketIds.set(user._id.toString(), socket.id); // all the socket connected users are in this map
 
+
   console.log("a user connected", socket.id);
-  // console.log(userSocketIds);
+  console.log(userSocketIds);
 
   socket.on(NEW_MESSAGE, async ({ message, chatid, members }) => {
     // we got this data from frontend for each chat
@@ -143,3 +147,5 @@ io.on("connection", (socket) => {
     console.log("user dissconnected");
   });
 });
+
+module.exports = {userSocketIds}

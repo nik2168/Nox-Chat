@@ -213,6 +213,8 @@ main {
   border: none;
   object-fit: cover;
 }
+
+
 .profileimgdiv img:hover {
 border: none;
 }

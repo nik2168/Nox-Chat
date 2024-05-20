@@ -59,7 +59,7 @@ router.get("/groups", getMyGroups);
 router.get("/leave/:id", leaveGroupValidator(), validateHandler, leaveGroup);
 
 router.post(
-  "/messages",
+  "/sendattachments",
   attachmentsMulter,
   sendAttachmentsValidator(),
   validateHandler,

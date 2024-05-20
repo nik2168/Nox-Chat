@@ -204,9 +204,21 @@ main {
   height: 100%;
   width: 100%;
   border-radius: 3rem;
+  filter: blur(100px);
+  transition: all 0.8s ease-out;
   border: none;
   object-fit: cover;
 }
+
+.navbar.active .profileimgdiv img {
+  height: 100%;
+  width: 100%;
+  border-radius: 3rem;
+  filter: blur(0px);
+  border: none;
+  object-fit: cover;
+}
+
 .profileimgdiv img:hover {
 border: none;
 }
@@ -248,7 +260,7 @@ border: none;
 
 .nameUsername {
     position: absolute;
-    bottom: 20%;
+    bottom: 16%;
     font-size: 1.3rem;
     font-weight: 1000;
     color: #f9fafb;

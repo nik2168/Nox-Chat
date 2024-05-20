@@ -1,25 +1,21 @@
-import {
-  Add,
-  DocumentScannerRounded as DocumentIcon,
-  EmojiEmotions,
-  MoreVert,
-  PhotoAlbumRounded as PhotoIcon,
-  PollRounded as PollIcon,
-  Send,
-  VideoCameraBackRounded as VideoIcon,
-} from "@mui/icons-material";
+import { useInfiniteScrollTop } from "6pp";
+import { Add, EmojiEmotions, MoreVert, Send } from "@mui/icons-material";
+import { Skeleton } from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import AppLayout from "../components/AppLayout/AppLayout";
+import ChatFilesMenu from "../components/ChatComp/ChatFilesMenu.jsx";
 import ChatSettings from "../components/ChatComp/ChatSettings";
 import Messages from "../components/ChatComp/Messages";
 import GroupSettings from "../components/ChatComp/groupsettings";
-import { getSocket } from "../socket";
-import { useDispatch, useSelector } from "react-redux";
 import { NEW_MESSAGE } from "../constants/events.js";
-import { useGetChatDetailsQuery, useGetMessagesQuery } from "../redux/api/api.js";
 import { useErrors, useSocketEvents } from "../hooks/hook.jsx";
-import { Skeleton } from "@mui/material";
+import {
+  useGetChatDetailsQuery,
+  useGetMessagesQuery,
+} from "../redux/api/api.js";
+import { getSocket } from "../socket";
 
 const Chat = () => {
   const { chatid } = useParams();
@@ -32,24 +28,44 @@ const Chat = () => {
 
   const chat = useRef(); // ref to chat
 
+  const scrollElement = useRef(); // for infinite scroll
+
   const groupsetting = useRef();
 
-  // fetching current chat details according to chatid
-  const populate = true;
-  const { isLoading, data, error, isError, refetch } = useGetChatDetailsQuery(
-    chatid,
-    populate
-  );
-  useErrors(error, isError);
+  const chatDetails = useGetChatDetailsQuery({ chatid, populate: true });
+  const oldMessagesChunk = useGetMessagesQuery({ chatid, page });
 
-  const curChat = data?.curchat;
+  const error = [
+    { error: chatDetails?.error, isError: chatDetails?.isError },
+    { error: oldMessagesChunk?.error, isError: oldMessagesChunk?.isError },
+  ];
+
+  useErrors(error);
+
+  const curChat = chatDetails?.data?.curchat;
   const members = curChat?.members;
 
-  
-  // fetching old Messages from database
-    const oldMessagesChunk = useGetMessagesQuery(chatid, page);
-    
+  // infinite scroll
+  const { data: oldMessages, setData: setOldMessages } = useInfiniteScrollTop(
+    scrollElement,
+    oldMessagesChunk?.data?.totalPages,
+    page,
+    setPage,
+    oldMessagesChunk?.data?.messages
+  );
 
+  useEffect(() => {
+
+    return () => {
+    setOldMessages([]);
+    setPage(1);
+    setMessages([])
+    setcurmessage('')
+    }
+  }, [chatid])
+
+  
+  const allMessages = [...oldMessages, ...messages];
 
   const socket = getSocket();
 
@@ -65,6 +81,7 @@ const Chat = () => {
 
   // will use newMessages function inside useCallback so that it won't created everytime we got new message
   const newMessages = useCallback((data) => {
+    if(data?.chatid.toString() !== chatid.toString()) return;
     setMessages((pre) => [...pre, data.message]);
   }, []);
 
@@ -72,9 +89,8 @@ const Chat = () => {
 
   useSocketEvents(socket, events); // using a custom hook to listen for events array
 
-
-  return isLoading ? (
-    <Skeleton />
+  return chatDetails?.isLoading ? (
+    <Skeleton className="chat" />
   ) : (
     <section className="chat" ref={chat}>
       <GroupSettings groupsetting={groupsetting} curChat={curChat} />
@@ -112,7 +128,12 @@ const Chat = () => {
 
       <ChatSettings />
 
-      <Messages user={user} messages={messages} chat={chat} />
+      <Messages
+        user={user}
+        scrollElement={scrollElement}
+        allMessages={allMessages}
+        chat={chat}
+      />
 
       <form
         className="chat-message-div"
@@ -169,43 +190,7 @@ const Chat = () => {
         </button>
       </form>
 
-      <article className="chat-files"></article>
-      <div className="chat-file photos">
-        <PhotoIcon
-          sx={{
-            color: "#f9fafb",
-            fontSize: "2.3rem",
-          }}
-        />
-        <span>Photos</span>
-      </div>
-      <div className="chat-file videos">
-        <VideoIcon
-          sx={{
-            color: "#f9fafb",
-            fontSize: "2.3rem",
-          }}
-        />
-        <span>Videos</span>
-      </div>
-      <div className="chat-file documents">
-        <DocumentIcon
-          sx={{
-            color: "#f9fafb",
-            fontSize: "2.3rem",
-          }}
-        />
-        <span>Document</span>
-      </div>
-      <div className="chat-file poll">
-        <PollIcon
-          sx={{
-            color: "#f9fafb",
-            fontSize: "2.3rem",
-          }}
-        />
-        <span>Poll</span>
-      </div>
+      <ChatFilesMenu chat={chat} chatid={chatid} />
     </section>
   );
 };

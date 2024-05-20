@@ -5,16 +5,23 @@ import React, { useRef } from "react";
 import toast from "react-hot-toast";
 import { useErrors } from "../../hooks/hook";
 import { useFetchRequestsQuery, useRequestResponseMutation } from "../../redux/api/api";
+import { useDispatch, useSelector } from "react-redux";
+import { Badge } from "@mui/material";
+import { resetNotification } from "../../redux/reducer/chat";
+
 
 const CurNotifications = () => {
 
-
+  const {notificationCount} = useSelector((state) => state.chat)
+  const dispatch = useDispatch()
   const notificationsWindow = useRef(); // open close notificationw window
 
 
    // Fetch requests for curr user
   const { data, isError, error, isLoading, reFetch } = useFetchRequestsQuery();
   useErrors([{ isError, error }]);
+
+  
 
   // accept or decline requests handler
        const [requestRes] = useRequestResponseMutation()
@@ -48,6 +55,7 @@ const CurNotifications = () => {
       notificationsWindow.current.classList.add("active");
       return;
     }
+    dispatch(resetNotification())
     notificationsWindow.current.classList.remove("active");
   };
 
@@ -57,16 +65,23 @@ const CurNotifications = () => {
         className="allchats-notifications"
         onClick={() => handleNotificationsWindow()}
       >
-        <Notifications sx={{ height: "1.5rem", width: "1.5rem" }} />
+          {notificationCount && (
+            <div className="notificationBadge">
+              <p>{notificationCount}</p>
+            </div>
+          )}
+          <Notifications sx={{ height: "1.5rem", width: "1.5rem" }} />
       </div>
 
       <article className="notifications-article" ref={notificationsWindow}>
         <div className="notificationHeading">
           <h3>Notifications</h3>
         </div>
-        {data?.notifications?.length === 0 && <div className="notificationHeading" style={{padding: "1rem"}}>
-          <p>Relax, you don't have any new notification !</p>
-        </div>}
+        {data?.notifications?.length === 0 && (
+          <div className="notificationHeading" style={{ padding: "1rem" }}>
+            <p>Relax, you don't have any new notification !</p>
+          </div>
+        )}
         <ul className="friendlist">
           {data?.notifications?.map(({ _id, sender }, index) => {
             return (
