@@ -37,6 +37,8 @@ const AllChats = ({ curnav}) => {
           {curnav === "groups" && <h1>Groups</h1>}
           {curnav === "calls" && <h1>Calls</h1>}
           {curnav === "settings" && <h1>Settings</h1>}
+     
+   <div className="headerAllChats"></div>
 
           <CurNotifications />
 

@@ -1,14 +1,12 @@
-import React, { useState } from "react";
 import moment from "moment";
-import RenderAttachment from "./RenderAttachment";
+import React from "react";
+import { useSelector } from "react-redux";
 import { fileFormat } from "../../lib/features";
-import { Stack } from "@mui/material";
+import RenderAttachment from "./RenderAttachment";
 
+const Messages = ({ chat, allMessages, user, scrollElement, chatid }) => {
+  const { isTyping } = useSelector((state) => state.chat);
 
-
-
-const Messages = ({ chat, allMessages, user, scrollElement }) => {
-  // let currentDate = new Date();
 
   return (
     <ul
@@ -27,7 +25,7 @@ const Messages = ({ chat, allMessages, user, scrollElement }) => {
           return !samesender ? (
             <li key={_id} className="textsinboxOuterDiv">
               <div className="textsinboxdiv">
-                <p className="textsender">{sender.name}</p>
+                {/* <p className="textsender">{sender.name}</p> */}
 
                 {attachments?.length > 0 &&
                   attachments?.map((i, index) => {
@@ -87,6 +85,14 @@ const Messages = ({ chat, allMessages, user, scrollElement }) => {
           );
         }
       })}
+
+      {isTyping && (
+        <div className="textsinboxOuterDiv">
+          <div className="textsinboxdiv">
+            <p className="textsinboxp">typing ...</p>
+          </div>
+        </div>
+      )}
     </ul>
   );
 };

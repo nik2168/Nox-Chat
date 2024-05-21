@@ -199,18 +199,18 @@
 
 .textsinboxp {
   color: #161c24;
-  font-weight: 600;
   font-size: 0.9rem;
   padding-left: 0.5rem;
   padding-right: 0.5rem;
 }
 
 .textsinboxtimeStamps {
-  font-size: 0.7rem;
-  font-weight: 500;
+  font-size: 0.6rem;
+  font-weight: 1000;
   color: #c4cdd5;
   position: absolute;
   bottom: -1rem;
+  left: -0.3rem;
   padding-left: 0.5rem;
 }
 
@@ -236,8 +236,7 @@
 }
 
 .textssentp {
-  color: #f9fafb;
-  font-weight: 600;
+  color: white;
   font-size: 0.9rem;
   padding-left: 0.5rem;
   padding-right: 0.5rem;

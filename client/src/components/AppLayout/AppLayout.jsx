@@ -16,16 +16,24 @@ import { useSocketEvents } from "../../hooks/hook.jsx";
 import { getSocket } from "../../socket.jsx";
 import AllChats from "../ChatList/allChats";
 import { useDispatch, useSelector } from "react-redux";
-import { incrementNotification } from "../../redux/reducer/chat.js";
+import { incrementNotification, setNewMessagesAlert } from "../../redux/reducer/chat.js";
+import { useParams } from "react-router-dom";
 
 const AppLayout = () => (WrapComp) => {
   return (props) => {
+    
+    const {chatid} = useParams();
+
     const [curnav, setnav] = useState("chats");
     const dispatch = useDispatch();
 
     const socket = getSocket();
 
-    const newMessagesAlert = useCallback(() => {}, []);
+    const newMessagesAlert = useCallback((data) => {
+      if(chatid === data?.chatid) return;
+      dispatch(setNewMessagesAlert(data))
+    }, [chatid]);
+
     const newRequestAlert = useCallback(() => {
       dispatch(incrementNotification());
     }, [dispatch]);
@@ -43,7 +51,7 @@ const AppLayout = () => (WrapComp) => {
         <main>
           <Navbar setnav={setnav} curnav={curnav} />
           <AllChats curnav={curnav} />
-          <WrapComp />
+          <WrapComp chatid={chatid} />
         </main>
       </>
     );

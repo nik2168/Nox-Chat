@@ -32,26 +32,33 @@
   padding: 0;
 }
 
-
-.notificationBadge{
-  display: flex;
-  flex-direction: row;
-   justify-content: center;
-   align-items: center;
-   width: 1rem;
-   height: 1rem;
-   border-radius: 50%;
-   background-color: red;
-   color: green;
+.headerAllChats{
+  height: 100%;
+  width: 40%;
 }
 
-.notificationBadge p{
+.notificationBadge {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background-color: red;
+  color: white;
+}
+
+.notificationBadge p {
   font-size: 0.8rem;
   font-weight: 1000;
 }
 
 .allchats-notifications {
-  height: 2.3rem;
+   height: 2.3rem;
   width: 2.3rem;
   border-radius: 50%;
   display: flex;
@@ -59,8 +66,7 @@
   justify-content: center;
   align-items: center;
   transition: 0.4s ease-out;
-  position: absolute;
-  right: 8rem;
+  position: relative;
   z-index: 5;
 }
 
@@ -68,7 +74,7 @@
   background-color: #212b36;
 }
 
-.notificationHeading{
+.notificationHeading {
   width: 100%;
   height: 3rem;
   display: flex;
@@ -77,23 +83,25 @@
   align-items: center;
 }
 
-.notifications-article{
-   background-color: white;
+.notifications-article {
+  background-color: white;
   height: 0;
   width: 0;
-    max-width: 0rem;
+  max-width: 0rem;
   border-radius: 1.3rem;
-  position: absolute;
+  position: relative;
   opacity: 0;
-  top: 5rem;
-  right: 9rem;
   z-index: 0;
-    transition: 0.4s ease-out;
-    background-color: #ffffff1d;
-  backdrop-filter: blur(20px);
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  opacity: 0;
+  transition: 0.4s ease-out;
+  background-color: #ffffff1d;
+  backdrop-filter: blur(200px);
 }
 
-.notifications-article.active{
+.notifications-article.active {
   background-color: white;
   height: 60vh;
   width: 70vw;
@@ -101,27 +109,27 @@
   opacity: 1;
   border-radius: 1.3rem;
   position: absolute;
-  top: 5rem;
-  right: 9rem;
+  top: 1.3rem;
+  right: 1.3rem;
+  opacity: 1;
   z-index: 9;
-    background-color: #ffffff1d;
-  backdrop-filter: blur(20px);
+  background-color: #ffffff1d;
+  backdrop-filter: blur(60px);
 }
 
-.friendlistdivs p{
- color: #dfe3e8;
- font-weight: 600;
- font-size: 0.8rem;
- transition: all 0.4s ease-out;
+.friendlistdivs p {
+  color: #dfe3e8;
+  font-weight: 600;
+  font-size: 0.8rem;
+  transition: all 0.4s ease-out;
 }
 
-
-.accept:hover{
-color: #2d99ff;
+.accept:hover {
+  color: #2d99ff;
 }
 
-.cancel:hover{
-color: red;
+.cancel:hover {
+  color: red;
 }
 
 .allchats-addusers {
@@ -133,8 +141,7 @@ color: red;
   justify-content: center;
   align-items: center;
   transition: 0.4s ease-out;
-  position: absolute;
-  right: 5rem;
+  position: relative;
   z-index: 5;
 }
 
@@ -142,23 +149,23 @@ color: red;
   background-color: #212b36;
 }
 
-.addusers-article{
+.addusers-article {
   background-color: white;
   height: 0;
   width: 0;
-    max-width: 0rem;
+  max-width: 0rem;
   border-radius: 1.3rem;
   position: absolute;
+ top: 1.3rem;
+  right: 1.3rem;
   opacity: 0;
-  top: 5rem;
-  right: 6rem;
   z-index: 0;
-    transition: 0.4s ease-out;
-    background-color: #ffffff1d;
-  backdrop-filter: blur(20px);
+  transition: 0.4s ease-out;
+  background-color: #ffffff1d;
+  backdrop-filter: blur(100px);
 }
 
-.addusers-article.active{
+.addusers-article.active {
   background-color: white;
   height: 60vh;
   width: 70vw;
@@ -166,15 +173,14 @@ color: red;
   opacity: 1;
   border-radius: 1.3rem;
   position: absolute;
-  top: 5rem;
-  right: 6rem;
+  top: 1.3rem;
+  right: 1.3rem;
   z-index: 9;
-    background-color: #ffffff1d;
-  backdrop-filter: blur(20px);
+  background-color: #ffffff1d;
+  backdrop-filter: blur(30px);
 }
 
-
-.allchats-addusers img{
+.allchats-addusers img {
   width: 4rem;
   height: 4rem;
   object-fit: cover;
@@ -189,11 +195,9 @@ color: red;
   justify-content: center;
   align-items: center;
   transition: 0.4s ease-out;
-  position: absolute;
-  right: 2rem;
+  position: relative;
   z-index: 5;
 }
-
 
 .allchats-addgroup:hover {
   background-color: #212b36;

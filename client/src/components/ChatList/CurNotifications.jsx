@@ -8,6 +8,7 @@ import { useFetchRequestsQuery, useRequestResponseMutation } from "../../redux/a
 import { useDispatch, useSelector } from "react-redux";
 import { Badge } from "@mui/material";
 import { resetNotification } from "../../redux/reducer/chat";
+import { current } from "@reduxjs/toolkit";
 
 
 const CurNotifications = () => {
@@ -61,115 +62,121 @@ const CurNotifications = () => {
 
   return (
     <>
-      <div
-        className="allchats-notifications"
-        onClick={() => handleNotificationsWindow()}
-      >
-          {notificationCount && (
-            <div className="notificationBadge">
-              <p>{notificationCount}</p>
-            </div>
-          )}
-          <Notifications sx={{ height: "1.5rem", width: "1.5rem" }} />
-      </div>
+      <div className="allchats-notifications">
+        <Notifications
+          sx={{ height: "1.5rem", width: "1.5rem" }}
+          onClick={() => handleNotificationsWindow()}
+        />
 
-      <article className="notifications-article" ref={notificationsWindow}>
-        <div className="notificationHeading">
-          <h3>Notifications</h3>
-        </div>
-        {data?.notifications?.length === 0 && (
-          <div className="notificationHeading" style={{ padding: "1rem" }}>
-            <p>Relax, you don't have any new notification !</p>
+        {notificationCount !== 0 && (
+          <div className="notificationBadge">
+            <p>{notificationCount}</p>
           </div>
         )}
-        <ul className="friendlist">
-          {data?.notifications?.map(({ _id, sender }, index) => {
-            return (
-              <li className="friendlistdivs" key={index} value={_id} style={{}}>
-                <div
-                  style={{
-                    height: "2rem",
-                    width: "4rem",
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
+
+        <article className="notifications-article" ref={notificationsWindow}>
+          <div className="notificationHeading">
+            <h3>Notifications</h3>
+          </div>
+          {data?.notifications?.length === 0 && (
+            <div className="notificationHeading" style={{ padding: "1rem" }}>
+              <p>Relax, you don't have any new notification !</p>
+            </div>
+          )}
+          <ul className="friendlist">
+            {data?.notifications?.map(({ _id, sender }, index) => {
+              return (
+                <li
+                  className="friendlistdivs"
+                  key={index}
+                  value={_id}
+                  style={{}}
                 >
-                  <img
-                    src={
-                      sender?.avatar ||
-                      "https://res.cloudinary.com/dki615p7n/image/upload/v1715486888/default_avatar_tvgr8w.jpg"
-                    }
+                  <div
                     style={{
-                      width: "2rem",
                       height: "2rem",
-                      borderRadius: "50%",
+                      width: "4rem",
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
                     }}
-                    alt="user image"
-                  />
-                </div>
+                  >
+                    <img
+                      src={
+                        sender?.avatar ||
+                        "https://res.cloudinary.com/dki615p7n/image/upload/v1715486888/default_avatar_tvgr8w.jpg"
+                      }
+                      style={{
+                        width: "2rem",
+                        height: "2rem",
+                        borderRadius: "50%",
+                      }}
+                      alt="user image"
+                    />
+                  </div>
 
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "flex-start",
-                    alignItems: "center",
-                    paddingLeft: "4px",
-                    margin: "0",
-                    width: "60%",
-                    height: "100%",
-                  }}
-                >
-                  <h5>{sender.name} </h5>
-                </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "flex-start",
+                      alignItems: "center",
+                      paddingLeft: "4px",
+                      margin: "0",
+                      width: "60%",
+                      height: "100%",
+                    }}
+                  >
+                    <h5>{sender.name} </h5>
+                  </div>
 
-                <button
-                  style={{
-                    width: "20%",
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    backgroundColor: "transparent",
-                    border: "none",
-                    borderRadius: "5px",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                  value={_id}
-                  onClick={(e) => handleSendRequest(e, false)}
-                >
-                  {<p className="cancel">cancel</p>}
-                </button>
-                <button
-                  style={{
-                    width: "3.5rem",
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    backgroundColor: "transparent",
-                    border: "none",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    borderRadius: "3px",
-                    marginRight: "0.5rem",
-                    marginLeft: "1rem",
-                  }}
-                  value={_id}
-                  onClick={(e) => handleSendRequest(e, true)}
-                >
-                  {
-                    <p className="accept" style={{ color: "#2d99ff" }}>
-                      accept
-                    </p>
-                  }
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </article>
+                  <button
+                    style={{
+                      width: "20%",
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      backgroundColor: "transparent",
+                      border: "none",
+                      borderRadius: "5px",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                    value={_id}
+                    onClick={(e) => handleSendRequest(e, false)}
+                  >
+                    {<p className="cancel">cancel</p>}
+                  </button>
+                  <button
+                    style={{
+                      width: "3.5rem",
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      backgroundColor: "transparent",
+                      border: "none",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      borderRadius: "3px",
+                      marginRight: "0.5rem",
+                      marginLeft: "1rem",
+                    }}
+                    value={_id}
+                    onClick={(e) => handleSendRequest(e, true)}
+                  >
+                    {
+                      <p className="accept" style={{ color: "#2d99ff" }}>
+                        accept
+                      </p>
+                    }
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </article>
+      </div>
     </>
   );
 };

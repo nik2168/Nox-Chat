@@ -1,9 +1,21 @@
 import { Skeleton } from '@mui/material';
-import React from 'react'
+import moment from 'moment';
+import React, { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { getOrSaveFromStorage } from '../../lib/features';
+import { NEW_MESSAGE_ALERT } from '../../constants/events';
 
 
 const SingleChats = ({data, isLoading}) => {
+
+const { newMessageAlert } = useSelector((state) => state.chat)
+const { isTyping } = useSelector((state) => state.chat)
+
+useEffect(() => {
+
+  getOrSaveFromStorage({key: NEW_MESSAGE_ALERT, value: newMessageAlert, })
+}, [newMessageAlert])
 
   const myChats = data?.mychats
 
@@ -17,6 +29,13 @@ const SingleChats = ({data, isLoading}) => {
           avatar,
           groupChat,
         } = chat;
+ 
+      const msgAlert = newMessageAlert?.find((i) => i.chatid.toString() === _id.toString())
+      const notificationCount = msgAlert?.count || 0;
+      const messageAlert = msgAlert?.message ||  "No new message";
+      let msg = messageAlert?.content?.slice(0, 18) || [];
+      if(msg.length === 18) msg += "..."
+
         if(groupChat) return;
         return (
           <div
@@ -32,16 +51,20 @@ const SingleChats = ({data, isLoading}) => {
                 }
                 alt=""
                 className="person-image"
-                style={{height: "70px", width: "70px"}}
+                style={{ height: "70px", width: "70px" }}
               />
               {false && <div className="online"></div>}
             </div>
             <Link to={`/chat/${_id}`} className="person-details">
               <h5>{name}</h5>
-              <span>{"lastMessage"}</span>
+              <span>{isTyping && "typing ..." || msg}</span>
             </Link>
-            <span className="person-time">{"09:23 am"}</span>
-            <span className="person-notification-count">{"2"}</span>
+            <span className="person-time">{moment(messageAlert?.sender?.createdAt).format("HH:MM")}</span>
+            {notificationCount !== 0 && (
+              <span className="person-notification-count">
+                {notificationCount}
+              </span>
+            )}
           </div>
         );
       })}

@@ -1,8 +1,8 @@
 .creategroup {
   position: absolute;
-  top: 5rem;
+  top: 1.3rem;
   border-radius: 1rem;
-  right: 3rem;
+  right: 1.3rem;
   height: 0vh;
   width: 0vw;
   z-index: 0;
@@ -18,9 +18,9 @@
 
 .creategroup.groupactive {
   position: absolute;
-  top: 5rem;
+  top: 1.3rem;
   border-radius: 1rem;
-  right: 3rem;
+  right: 1.3rem;
   height: 70vh;
   width: 24rem;
   z-index: 3;
@@ -29,7 +29,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(50px);
   overflow: hidden;
   padding: 0.5rem;
   transition: all 0.3s ease-in-out;
@@ -156,9 +156,9 @@
 
 .groupnext {
   position: absolute;
-  top: 5rem;
+  top: 1.3rem;
   border-radius: 1rem;
-  right: 3rem;
+  right: 1.3rem;
   height: 70vh;
   width: 0vw;
   z-index: 0;
@@ -174,9 +174,9 @@
 
 .groupnext.active {
   position: absolute;
-  top: 5rem;
+  top: 1.3rem;
   border-radius: 1rem;
-  right: 3rem;
+  right: 1.3rem;
   height: 70vh;
   width: 24rem;
   padding: 0.5rem;

@@ -2,25 +2,28 @@ import { useInfiniteScrollTop } from "6pp";
 import { Add, EmojiEmotions, MoreVert, Send } from "@mui/icons-material";
 import { Skeleton } from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import AppLayout from "../components/AppLayout/AppLayout";
 import ChatFilesMenu from "../components/ChatComp/ChatFilesMenu.jsx";
 import ChatSettings from "../components/ChatComp/ChatSettings";
 import Messages from "../components/ChatComp/Messages";
 import GroupSettings from "../components/ChatComp/groupsettings";
-import { NEW_MESSAGE } from "../constants/events.js";
+import { NEW_MESSAGE, START_TYPING, STOP_TYPING } from "../constants/events.js";
 import { useErrors, useSocketEvents } from "../hooks/hook.jsx";
 import {
   useGetChatDetailsQuery,
   useGetMessagesQuery,
 } from "../redux/api/api.js";
 import { getSocket } from "../socket";
+import { removeNewMessagesAlert, setTyping } from "../redux/reducer/chat.js";
 
-const Chat = () => {
-  const { chatid } = useParams();
+const Chat = ({ chatid }) => {
 
+
+  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth); // Cur User
+  const { isTyping } = useSelector((state) => state.chat); // Cur User
 
   const [message, setcurmessage] = useState(""); // CurMessage
   const [messages, setMessages] = useState([]); // Messages List
@@ -31,6 +34,8 @@ const Chat = () => {
   const scrollElement = useRef(); // for infinite scroll
 
   const groupsetting = useRef();
+
+  const clearTime = useRef();
 
   const chatDetails = useGetChatDetailsQuery({ chatid, populate: true });
   const oldMessagesChunk = useGetMessagesQuery({ chatid, page });
@@ -56,15 +61,16 @@ const Chat = () => {
 
   useEffect(() => {
 
-    return () => {
-    setOldMessages([]);
-    setPage(1);
-    setMessages([])
-    setcurmessage('')
-    }
-  }, [chatid])
+    dispatch(removeNewMessagesAlert(chatid));
 
-  
+    return () => {
+      setOldMessages([]);
+      setPage(1);
+      setMessages([]);
+      setcurmessage("");
+    };
+  }, [chatid]);
+
   const allMessages = [...oldMessages, ...messages];
 
   const socket = getSocket();
@@ -79,13 +85,53 @@ const Chat = () => {
     setcurmessage("");
   };
 
-  // will use newMessages function inside useCallback so that it won't created everytime we got new message
-  const newMessages = useCallback((data) => {
-    if(data?.chatid.toString() !== chatid.toString()) return;
-    setMessages((pre) => [...pre, data.message]);
-  }, []);
+  const onChangeHandler = (e) => {
+    setcurmessage(e.target.value)
+    const filteredMembers = members.filter((i) => i._id.toString() !== user._id.toString())
+ if(!isTyping){
+  socket.emit(START_TYPING, { filteredMembers, chatid, username: user.name });
+ }
 
-  const events = { [NEW_MESSAGE]: newMessages }; // [NEW_MESSAGE] -> its value will be read as a string in key
+ if(clearTime.current) clearTimeout(clearTime.current)
+
+ clearTime.current = setTimeout(() => {
+  socket.emit(STOP_TYPING, { filteredMembers, chatid });
+ }, [2000])
+
+
+  }
+
+  // will use newMessages function inside useCallback so that it won't created everytime we got new message
+  const newMessageListner = useCallback(
+    (data) => {
+      if (data?.chatid.toString() !== chatid.toString()) return;
+      setMessages((pre) => [...pre, data.message]);
+    },
+    [chatid]
+  );
+
+  const startTypingListner = useCallback(
+    (data) => {
+      if (data?.chatid.toString() !== chatid.toString()) return;
+       dispatch(setTyping(true));
+    },
+    [chatid]
+  );
+
+  const stopTypingListner = useCallback(
+    (data) => {
+      if (data?.chatid.toString() !== chatid.toString()) return;
+       dispatch(setTyping(false));
+    },
+    [chatid]
+  );
+
+
+  const events = {
+    [NEW_MESSAGE]: newMessageListner,
+    [START_TYPING]: startTypingListner,
+    [STOP_TYPING]: stopTypingListner,
+  }; // [NEW_MESSAGE] -> its value will be read as a string in key
 
   useSocketEvents(socket, events); // using a custom hook to listen for events array
 
@@ -133,6 +179,7 @@ const Chat = () => {
         scrollElement={scrollElement}
         allMessages={allMessages}
         chat={chat}
+        chatid={chatid}
       />
 
       <form
@@ -159,9 +206,7 @@ const Chat = () => {
             type="text"
             className="chat-message"
             value={message}
-            onChange={(e) => {
-              setcurmessage(e.currentTarget.value);
-            }}
+            onChange={(e) => onChangeHandler(e)}
             autoFocus
           />
 

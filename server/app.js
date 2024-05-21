@@ -20,7 +20,12 @@ app.use(cors(corsOptions));
 
 // socket.io
 const { Server } = require("socket.io");
-const { NEW_MESSAGE, NEW_MESSAGE_ALERT } = require("./constants/events.js");
+const {
+  NEW_MESSAGE,
+  NEW_MESSAGE_ALERT,
+  START_TYPING,
+  STOP_TYPING,
+} = require("./constants/events.js");
 const Message = require("./models/message.model.js");
 const { socketAuthenticator } = require("./middlewares/auth.mw.js");
 const { errorMiddleWare } = require("./middlewares/error.mw.js");
@@ -28,9 +33,8 @@ const { userSocketIds } = require("./utils/features.js");
 const server = createServer(app);
 const io = new Server(server, { cors: corsOptions });
 
-
 // socket.io
-app.set("io", io) // saved the io instance to whole app ...
+app.set("io", io); // saved the io instance to whole app ...
 
 dotenv.config({
   path: "./.env",
@@ -78,6 +82,7 @@ io.use((socket, next) => {
 });
 
 app.use((err, req, res, next) => {
+  // socket error middleware
   err.message ||= "Internal Server Error";
   err.statusCode ||= 500;
 
@@ -97,9 +102,7 @@ io.on("connection", (socket) => {
 
   userSocketIds.set(user._id.toString(), socket.id); // all the socket connected users are in this map
 
-
   console.log("a user connected", socket.id);
-  console.log(userSocketIds);
 
   socket.on(NEW_MESSAGE, async ({ message, chatid, members }) => {
     // we got this data from frontend for each chat
@@ -107,7 +110,7 @@ io.on("connection", (socket) => {
     const messageForRealTime = {
       // this will be the message for real time chatting ...
       content: message,
-      attachments : [],
+      attachments: [],
       _id: v4(), // generate a random _id temprary
       sender: {
         _id: user._id,
@@ -139,7 +142,24 @@ io.on("connection", (socket) => {
       chatid,
       message: messageForRealTime,
     });
-    io.to(membersSockets).emit(NEW_MESSAGE_ALERT, { chatid });
+    io.to(membersSockets).emit(NEW_MESSAGE_ALERT, {
+      chatid,
+      message: messageForRealTime,
+    });
+  });
+
+  socket.on(START_TYPING, ({ filteredMembers, chatid, username }) => {
+    const membersSockets = filteredMembers.map((member) =>
+      userSocketIds.get(member._id.toString())
+    );
+    io.to(membersSockets).emit(START_TYPING, { chatid, username });
+  });
+
+  socket.on(STOP_TYPING, ({ filteredMembers, chatid }) => {
+    const membersSockets = filteredMembers.map((member) =>
+      userSocketIds.get(member._id.toString())
+    );
+    io.to(membersSockets).emit(STOP_TYPING, { chatid });
   });
 
   socket.on("disconnect", () => {
@@ -147,5 +167,3 @@ io.on("connection", (socket) => {
     console.log("user dissconnected");
   });
 });
-
-module.exports = {userSocketIds}
