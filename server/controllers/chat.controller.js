@@ -26,41 +26,36 @@ const newGroupChat = async (req, res) => {
         .json({ success: false, message: "group must have 1 member" });
     }
 
-    //  const allMembers =  members.forEach((i) => i.toString()).push(req.userId)
     const allMembers = [...members, req.userId];
 
     console.log(allMembers);
+    return res.status(200).json({message: "Ok bro chill !"});
 
-    // const file = req.file;
+    const file = req.file;
 
-    // let avatar;
+    let avatar;
 
-    // if (file) {
-    //   const result = await uploadFilesToCloudinary([file]);
+    if (file) {
+      const result = await uploadFilesToCloudinary([file]);
 
-    //   avatar = {
-    //     public_id: result[0].public_id,
-    //     url: result[0].url,
-    //   };
-    // }
-    // else{
-    //   avatar = {
-    //     public_id: "not_here",
-    //     url: "https://res.cloudinary.com/dki615p7n/image/upload/v1715486888/default_avatar_tvgr8w.jpg",
-    //   }
-    // }
+      avatar = {
+        public_id: result[0].public_id,
+        url: result[0].url,
+      };
+    }
+ 
 
-    // const temp = await Chat.create({
-    //   name: name,
-    //   groupChat: true,
-    //   avatar,
-    //   creator: req.userId,
-    //   members: allMembers,
-    // });
+    const temp = await Chat.create({
+      name: name,
+      groupChat: true,
+      avatar,
+      creator: req.userId,
+      members: allMembers,
+    });
 
-    // emitEvent(req, ALERT, allMembers, `Welcome to ${name} group !`);
+    emitEvent(req, ALERT, allMembers, `Welcome to ${name} group !`);
 
-    // emitEvent(req, REFETCH_CHATS, members);
+    emitEvent(req, REFETCH_CHATS, members);
 
     return res.status(201).json({ success: true, message: "group  created !" });
   } catch (err) {
@@ -120,7 +115,7 @@ const getMyGroups = async (req, res) => {
       groupChat: true,
     });
 
-    return res.status(200).json({ success: true, Groups: groupChats });
+    return res.status(200).json({ success: true, groupChats: groupChats });
   } catch (err) {
     return res.status(400).json({
       success: false,
