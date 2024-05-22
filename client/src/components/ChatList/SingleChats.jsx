@@ -9,8 +9,11 @@ import { NEW_MESSAGE_ALERT } from '../../constants/events';
 
 const SingleChats = ({data, isLoading}) => {
 
+      const { allChatsIsTyping } = useSelector((state) => state.chat); // Cur User
+
+
 const { newMessageAlert } = useSelector((state) => state.chat)
-const { isTyping } = useSelector((state) => state.chat)
+const { typing } = useSelector((state) => state.chat)
 
 useEffect(() => {
 
@@ -36,6 +39,10 @@ useEffect(() => {
       let msg = messageAlert?.content?.slice(0, 18) || [];
       if(msg.length === 18) msg += "..."
 
+      let startTyping = false;
+      if (_id.toString() === allChatsIsTyping.typingChatid.toString())
+        startTyping = allChatsIsTyping.isTyping;
+
         if(groupChat) return;
         return (
           <div
@@ -57,9 +64,12 @@ useEffect(() => {
             </div>
             <Link to={`/chat/${_id}`} className="person-details">
               <h5>{name}</h5>
-              <span>{isTyping && "typing ..." || msg}</span>
+              {startTyping ? <span style={{color: "green"}}>typing ...</span> : <span>{msg}</span>}
+           
             </Link>
-            <span className="person-time">{moment(messageAlert?.sender?.createdAt).format("HH:MM")}</span>
+            <span className="person-time">
+              {moment(messageAlert?.sender?.createdAt).format("HH:MM")}
+            </span>
             {notificationCount !== 0 && (
               <span className="person-notification-count">
                 {notificationCount}
@@ -75,3 +85,4 @@ useEffect(() => {
 }
 
 export default SingleChats
+

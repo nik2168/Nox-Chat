@@ -148,10 +148,11 @@ const CreateGroup = () => {
                     key={index}
                     value={friend?._id}
                     onClick={(e) => {
+                      console.log(e.currentTarget.value)
                       if (
                         e.currentTarget.lastChild.lastChild.checked == false
                       ) {
-                        setMember([...selectedmembers, e.currentTarget.value]);
+                        setMember((pre) => [...pre, e.currentTarget.value]);
 
                         e.currentTarget.lastChild.lastChild.checked = true;
                         return;

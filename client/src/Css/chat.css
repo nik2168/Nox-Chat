@@ -62,7 +62,7 @@
   border: 3px solid #dfe3e8;
 }
 
-.chat-person-div span {
+.chatsettingsSpan {
   font-size: 0.7rem;
   color: lightgreen;
   width: 2rem;
@@ -73,6 +73,13 @@
   align-items: center;
   border-radius: 5px;
   transition: all 0.4s ease-in-out;
+}
+
+.chatonlinespan{
+  width: 13rem;
+  height: 2rem;
+  font-size: 0.8rem;
+  color:  yellowgreen;
 }
 
 .chat-person-div span:hover {

@@ -1,12 +1,17 @@
 import moment from "moment";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { fileFormat } from "../../lib/features";
 import RenderAttachment from "./RenderAttachment";
 
-const Messages = ({ chat, allMessages, user, scrollElement, chatid }) => {
+const Messages = ({ chat, allMessages, user, scrollElement, chatid, messages }) => {
   const { isTyping } = useSelector((state) => state.chat);
 
+  const autoScrollDiv = useRef()
+
+  useEffect(() => {
+    if(autoScrollDiv.current) autoScrollDiv.current.scrollIntoView({behaviour: "smooth"})
+  }, [messages])
 
   return (
     <ul
@@ -86,13 +91,15 @@ const Messages = ({ chat, allMessages, user, scrollElement, chatid }) => {
         }
       })}
 
-      {isTyping && (
+      {/* {isTyping && (
         <div className="textsinboxOuterDiv">
           <div className="textsinboxdiv">
             <p className="textsinboxp">typing ...</p>
           </div>
         </div>
-      )}
+      )} */}
+
+      <div ref={autoScrollDiv}></div>
     </ul>
   );
 };

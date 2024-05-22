@@ -12,7 +12,7 @@ import { SocketProvider } from "./socket.jsx";
 const Home = lazy(() => import("./pages/Home"));
 const Login = lazy(() => import("./pages/Login"));
 const Chat = lazy(() => import("./pages/Chat"));
-const Groups = lazy(() => import("./pages/Groups"));
+// const Groups = lazy(() => import("./pages/Groups"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const AdminLogin = lazy(() => import("./pages/Admin/AdminLogin"));
 const Dashboard = lazy(() => import("./pages/Admin/Dashboard"));
@@ -52,7 +52,7 @@ const App = () => {
           >
             <Route path="/" element={<Home />} />
             <Route path="/chat/:chatid" element={<Chat />} />
-            <Route path="/groups" element={<Groups />} />
+            {/* <Route path="/groups" element={<Groups />} /> */}
           </Route>
           <Route
             path="/login"

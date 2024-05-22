@@ -24,14 +24,11 @@ const GroupNext = ({
 const [createGroupMutation, isLoadingCreateGroup] = useAsyncMutation(useCreateGroupMutation)
 
 const handleCreateGroup = async () => {
-
-const transformMembers = selectedmembers.map((i) => console.log(i))
-
   const formdata = new FormData();
 
   formdata.append("name", name)
+  formdata.append("members", selectedmembers);
   formdata.append("avatar", file)
-  formdata.append("members", selectedmembers)
 
  await createGroupMutation(`creating ${name} ...`, formdata)
   

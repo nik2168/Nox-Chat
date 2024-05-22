@@ -9,7 +9,7 @@ import ChatFilesMenu from "../components/ChatComp/ChatFilesMenu.jsx";
 import ChatSettings from "../components/ChatComp/ChatSettings";
 import Messages from "../components/ChatComp/Messages";
 import GroupSettings from "../components/ChatComp/groupsettings";
-import { NEW_MESSAGE, START_TYPING, STOP_TYPING } from "../constants/events.js";
+import { ALERT, NEW_MESSAGE, START_TYPING, STOP_TYPING } from "../constants/events.js";
 import { useErrors, useSocketEvents } from "../hooks/hook.jsx";
 import {
   useGetChatDetailsQuery,
@@ -19,15 +19,15 @@ import { getSocket } from "../socket";
 import { removeNewMessagesAlert, setTyping } from "../redux/reducer/chat.js";
 
 const Chat = ({ chatid }) => {
-
-
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth); // Cur User
-  const { isTyping } = useSelector((state) => state.chat); // Cur User
+  const { isTyping } = useSelector((state) => state.chat);
+  const { allChatsIsTyping } = useSelector((state) => state.chat); // Cur User
 
   const [message, setcurmessage] = useState(""); // CurMessage
   const [messages, setMessages] = useState([]); // Messages List
   const [page, setPage] = useState(1);
+  const [imTyping, setImTyping] = useState(false);
 
   const chat = useRef(); // ref to chat
 
@@ -60,7 +60,6 @@ const Chat = ({ chatid }) => {
   );
 
   useEffect(() => {
-
     dispatch(removeNewMessagesAlert(chatid));
 
     return () => {
@@ -86,20 +85,26 @@ const Chat = ({ chatid }) => {
   };
 
   const onChangeHandler = (e) => {
-    setcurmessage(e.target.value)
-    const filteredMembers = members.filter((i) => i._id.toString() !== user._id.toString())
- if(!isTyping){
-  socket.emit(START_TYPING, { filteredMembers, chatid, username: user.name });
- }
+    setcurmessage(e.target.value);
+    const filteredMembers = members.filter(
+      (i) => i._id.toString() !== user._id.toString()
+    );
+    if (!imTyping) {
+      socket.emit(START_TYPING, {
+        filteredMembers,
+        chatid,
+        username: user.name,
+      });
+      setImTyping(true);
+    }
 
- if(clearTime.current) clearTimeout(clearTime.current)
+    if (clearTime.current) clearTimeout(clearTime.current);
 
- clearTime.current = setTimeout(() => {
-  socket.emit(STOP_TYPING, { filteredMembers, chatid });
- }, [2000])
-
-
-  }
+    clearTime.current = setTimeout(() => {
+      socket.emit(STOP_TYPING, { filteredMembers, chatid });
+      setImTyping(false);
+    }, [2000]);
+  };
 
   // will use newMessages function inside useCallback so that it won't created everytime we got new message
   const newMessageListner = useCallback(
@@ -110,29 +115,26 @@ const Chat = ({ chatid }) => {
     [chatid]
   );
 
-  const startTypingListner = useCallback(
+  const alertListener = useCallback(
     (data) => {
-      if (data?.chatid.toString() !== chatid.toString()) return;
-       dispatch(setTyping(true));
+      const messageForAlert = {
+        content: data,
+        sender: {
+          _id: "ajksdhgoiajwegio",
+          name: "Admin",
+          chat: chatid,
+          createdAt: new Date().toISOString(),
+        },
+      };
+      setMessages((pre) => [...pre, messageForAlert]);
     },
     [chatid]
   );
-
-  const stopTypingListner = useCallback(
-    (data) => {
-      if (data?.chatid.toString() !== chatid.toString()) return;
-       dispatch(setTyping(false));
-    },
-    [chatid]
-  );
-
 
   const events = {
     [NEW_MESSAGE]: newMessageListner,
-    [START_TYPING]: startTypingListner,
-    [STOP_TYPING]: stopTypingListner,
-  }; // [NEW_MESSAGE] -> its value will be read as a string in key
-
+    [ALERT]: alertListener,
+  };
   useSocketEvents(socket, events); // using a custom hook to listen for events array
 
   return chatDetails?.isLoading ? (
@@ -156,10 +158,17 @@ const Chat = ({ chatid }) => {
         </div>
         <div className="chat-person-details">
           <h5>{curChat?.name}</h5>
+          {isTyping && (
+            <span className="chatonlinespan">
+              { allChatsIsTyping?.typingChatid.toString() === chatid.toString() && allChatsIsTyping?.isTyping &&
+                `${allChatsIsTyping?.name} : `}
+              typing ...
+            </span>
+          )}
           {/* {isOnline ? <span>Online</span> : <span>Offline</span>} */}
         </div>
         <span
-          className="morevert"
+          className="morevert chatsettingsSpan"
           onClick={() => {
             if (!chat.current.classList.contains("activesettings")) {
               chat.current.classList.add("activesettings");
@@ -180,6 +189,7 @@ const Chat = ({ chatid }) => {
         allMessages={allMessages}
         chat={chat}
         chatid={chatid}
+        messages={messages}
       />
 
       <form

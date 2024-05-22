@@ -12,6 +12,11 @@ newMessageAlert: getOrSaveFromStorage({key: NEW_MESSAGE_ALERT, get: true}) || [
   }
 ],
 isTyping: false,
+allChatsIsTyping : {
+  isTyping: false,
+  typingChatid: '',
+  name: '',
+}
 };
 
 const chatSlice = createSlice({
@@ -49,6 +54,10 @@ const chatSlice = createSlice({
     state.isTyping = action.payload
   },
 
+  setAllChatsTyping : (state, action) => {
+    state.allChatsIsTyping = action.payload
+  }
+
 }});
 
 export const {
@@ -57,6 +66,7 @@ export const {
   setNewMessagesAlert,
   removeNewMessagesAlert,
   setTyping,
+  setAllChatsTyping,
 } = chatSlice.actions;
 
 export default chatSlice;
