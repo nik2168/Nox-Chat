@@ -16,7 +16,8 @@ allChatsIsTyping : {
   isTyping: false,
   typingChatid: '',
   name: '',
-}
+},
+newGroupAlert: ""
 };
 
 const chatSlice = createSlice({
@@ -56,6 +57,14 @@ const chatSlice = createSlice({
 
   setAllChatsTyping : (state, action) => {
     state.allChatsIsTyping = action.payload
+  },
+
+  setNewGroupAlert: (state, action) => {
+    state.newGroupAlert = action.payload
+  },
+
+  removeNewGroupAlert: (state) => {
+    state.newGroupAlert = " "
   }
 
 }});
@@ -67,6 +76,8 @@ export const {
   removeNewMessagesAlert,
   setTyping,
   setAllChatsTyping,
+  setNewGroupAlert,
+  removeNewGroupAlert,
 } = chatSlice.actions;
 
 export default chatSlice;

@@ -5,7 +5,7 @@ import { fileFormat } from "../../lib/features";
 import RenderAttachment from "./RenderAttachment";
 
 const Messages = ({ chat, allMessages, user, scrollElement, chatid, messages }) => {
-  const { isTyping } = useSelector((state) => state.chat);
+  const { newGroupAlert } = useSelector((state) => state.chat);
 
   const autoScrollDiv = useRef()
 
@@ -22,6 +22,9 @@ const Messages = ({ chat, allMessages, user, scrollElement, chatid, messages }) 
         chat.current.classList.remove("activesettings");
       }}
     >
+
+    {newGroupAlert?.isNewAlert && <p>{newGroupAlert.message}</p>}
+
       {allMessages?.map((i) => {
         const { _id, content, attachments, sender } = i;
         const timeAgo = moment(sender?.createdAt).format("HH:MM");

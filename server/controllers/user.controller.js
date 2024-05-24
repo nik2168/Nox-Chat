@@ -399,7 +399,9 @@ const getNotifications = async (req, res) => {
 };
 
 const getUserFriends = async (req, res) => {
-  const chatId = req.query.chatId;
+  const chatId = req.query?.chatid;
+    const queryName = req.query?.name;
+
 
   try {
     const userChats = await Chat.find({
@@ -407,21 +409,38 @@ const getUserFriends = async (req, res) => {
       groupChat: false,
     }).populate("members", "name avatar");
 
-    const allmembers = userChats
+    const allFriends = userChats
       .map((chat) => chat.members)
       .flat()
       .filter((i) => i._id.toString() !== req.userId.toString());
 
+       const searchedFriends = await User.find({
+        _id: {$in : allFriends},
+         name: { $regex: queryName, $options: "i" },
+       });
+
+           const transformSearchedFriends = searchedFriends.map(({ name, avatar, _id }) => {
+             return {
+               name,
+               _id,
+               avatar: avatar.url,
+             };
+           });
+
+
     if (chatId) {
       const chatFriends = await Chat.findById(chatId);
-      const getfriends = allmembers.filter(
+      const getfriends = transformSearchedFriends.filter(
         (i) => !chatFriends.members.includes(i._id)
       );
 
-      return res.status(200).json({ success: true, allFreinds: getfriends });
+      return res.status(200).json({ success: true, allFriends: getfriends });
     }
 
-    return res.status(200).json({ success: true, allFriends: allmembers });
+    return res
+      .status(200)
+      .json({ success: true, allFriends: transformSearchedFriends });
+
   } catch (err) {
     if (err.name === "CastError") {
       const path = err.path;

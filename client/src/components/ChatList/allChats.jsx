@@ -1,19 +1,15 @@
-import {
-  FilterList,
-  Search
-} from "@mui/icons-material";
+import { FilterList, Search } from "@mui/icons-material";
 import React from "react";
 import { useFileValidator, useName } from "../../hooks/InputValidator";
+import { useErrors } from "../../hooks/hook";
+import { useMyChatsQuery } from "../../redux/api/api";
 import GroupChats from "../ChatList/GroupsChats";
 import SingleChats from "../ChatList/SingleChats";
+import CreateNewGroup from "./CreateNewGroup";
 import CurNotifications from "./CurNotifications";
 import AddFriends from "./addFriend";
-import CreateGroup from "./creategroup";
-import { useMyChatsQuery } from "../../redux/api/api";
-import { useErrors } from "../../hooks/hook";
 
-
-const AllChats = ({ curnav}) => {
+const AllChats = ({ curnav }) => {
   // for create group
 
   const { file, setFile, fileFlag, fileErr } = useFileValidator("");
@@ -22,7 +18,6 @@ const AllChats = ({ curnav}) => {
   // my chats fetching ...
   const { isLoading, data, isError, error, refetch } = useMyChatsQuery("");
   useErrors([{ isError, error }]);
-
 
   const handleDeleteChatOpen = (e, userid, groupchat) => {
     e.preventDefault();
@@ -37,14 +32,14 @@ const AllChats = ({ curnav}) => {
           {curnav === "groups" && <h1>Groups</h1>}
           {curnav === "calls" && <h1>Calls</h1>}
           {curnav === "settings" && <h1>Settings</h1>}
-     
-   <div className="headerAllChats"></div>
+
+          <div className="headerAllChats"></div>
 
           <CurNotifications />
 
           <AddFriends />
 
-          <CreateGroup />
+          <CreateNewGroup />
         </div>
 
         <div className="search-div">

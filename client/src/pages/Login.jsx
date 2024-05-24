@@ -154,6 +154,7 @@ const Login = () => {
               <input
                 type="file"
                 id="image"
+                accept="image/png, image/jpeg, image/gif"
                 onChange={handleImageChange}
                 ref={currentImage}
                 style={{

@@ -101,8 +101,8 @@ const handleDpUpdate = async () => {
             if (ischange) {
               handleProfileUpdate();
             }
-            if(file){
-            handleDpUpdate();
+            if (file) {
+              handleDpUpdate();
             }
             setchange(false);
           }}
@@ -114,7 +114,6 @@ const handleDpUpdate = async () => {
             }}
           />
         </div>
-
 
         <div className="profileimgdiv">
           <img src={curImage} alt="avatar" />
@@ -141,6 +140,7 @@ const handleDpUpdate = async () => {
           <input
             type="file"
             id="image"
+            accept="image/png, image/jpeg, image/gif"
             onChange={(e) => handleImageChange(e)}
             style={{
               margin: "0px",
@@ -152,8 +152,6 @@ const handleDpUpdate = async () => {
             }}
           />
         </div>
-
-
 
         <div className="blackDiv"></div>
         <div className="nameUsername">

@@ -28,9 +28,6 @@ const newGroupChat = async (req, res) => {
 
     const allMembers = [...members, req.userId];
 
-    console.log(allMembers);
-    return res.status(200).json({message: "Ok bro chill !"});
-
     const file = req.file;
 
     let avatar;
@@ -52,6 +49,7 @@ const newGroupChat = async (req, res) => {
       creator: req.userId,
       members: allMembers,
     });
+
 
     emitEvent(req, ALERT, allMembers, `Welcome to ${name} group !`);
 

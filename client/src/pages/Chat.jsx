@@ -16,13 +16,15 @@ import {
   useGetMessagesQuery,
 } from "../redux/api/api.js";
 import { getSocket } from "../socket";
-import { removeNewMessagesAlert, setTyping } from "../redux/reducer/chat.js";
+import { removeNewMessagesAlert, setNewGroupAlert, setTyping } from "../redux/reducer/chat.js";
+import AddMembers from "../components/ChatComp/AddMembers.jsx";
 
 const Chat = ({ chatid }) => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth); // Cur User
   const { isTyping } = useSelector((state) => state.chat);
   const { allChatsIsTyping } = useSelector((state) => state.chat); // Cur User
+  const { newGroupAlert } = useSelector((state) => state.chat); // Cur User
 
   const [message, setcurmessage] = useState(""); // CurMessage
   const [messages, setMessages] = useState([]); // Messages List
@@ -36,6 +38,8 @@ const Chat = ({ chatid }) => {
   const groupsetting = useRef();
 
   const clearTime = useRef();
+
+  const addMemberWindow = useRef();
 
   const chatDetails = useGetChatDetailsQuery({ chatid, populate: true });
   const oldMessagesChunk = useGetMessagesQuery({ chatid, page });
@@ -117,16 +121,9 @@ const Chat = ({ chatid }) => {
 
   const alertListener = useCallback(
     (data) => {
-      const messageForAlert = {
-        content: data,
-        sender: {
-          _id: "ajksdhgoiajwegio",
-          name: "Admin",
-          chat: chatid,
-          createdAt: new Date().toISOString(),
-        },
-      };
-      setMessages((pre) => [...pre, messageForAlert]);
+      console.log(chatid, data)
+            if (data?.chatid?.toString() !== chatid?.toString()) return;
+       setNewGroupAlert(dispatch(data))
     },
     [chatid]
   );
@@ -135,13 +132,19 @@ const Chat = ({ chatid }) => {
     [NEW_MESSAGE]: newMessageListner,
     [ALERT]: alertListener,
   };
+
   useSocketEvents(socket, events); // using a custom hook to listen for events array
 
   return chatDetails?.isLoading ? (
     <Skeleton className="chat" />
   ) : (
     <section className="chat" ref={chat}>
-      <GroupSettings groupsetting={groupsetting} curChat={curChat} />
+      <GroupSettings
+        groupsetting={groupsetting}
+        curChat={curChat}
+        addMemberWindow={addMemberWindow}
+        chatid={chatid}
+      />
 
       <div className="chat-person-div">
         <div
@@ -160,7 +163,9 @@ const Chat = ({ chatid }) => {
           <h5>{curChat?.name}</h5>
           {isTyping && (
             <span className="chatonlinespan">
-              { allChatsIsTyping?.typingChatid.toString() === chatid.toString() && allChatsIsTyping?.isTyping &&
+              {allChatsIsTyping?.typingChatid.toString() ===
+                chatid.toString() &&
+                allChatsIsTyping?.isTyping &&
                 `${allChatsIsTyping?.name} : `}
               typing ...
             </span>
