@@ -18,11 +18,11 @@
 
 .creategroup.groupactive {
   position: absolute;
-  top: 1.3rem;
+  top: 3rem;
   border-radius: 1rem;
-  right: 1.3rem;
+  right: 0rem;
   height: 70vh;
-  width: 24rem;
+  width: 90vw;
   z-index: 3;
   opacity: 1;
   display: flex;
@@ -203,7 +203,7 @@
 
 .nextselectedmembers {
   width: 100%;
-  height: 20rem;
+  height: 13rem;
   background-color: #ffffff1d;
   border-radius: 1rem;
   display: grid;

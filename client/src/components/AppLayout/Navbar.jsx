@@ -1,4 +1,11 @@
-import { Call, Chat, Close, Group, Logout, CameraAlt } from "@mui/icons-material";
+import {
+  Call,
+  Chat,
+  Close,
+  Group,
+  Logout,
+  CameraAlt,
+} from "@mui/icons-material";
 import axios from "axios";
 import moment from "moment";
 import React, { useEffect, useRef, useState } from "react";
@@ -6,7 +13,10 @@ import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { server } from "../../constants/config";
 import { userNotExists } from "../../redux/reducer/authslice";
-import { useUpdateProfileMutation, useUpdateProfilePictureMutation } from "../../redux/api/api";
+import {
+  useUpdateProfileMutation,
+  useUpdateProfilePictureMutation,
+} from "../../redux/api/api";
 import { useAsyncMutation } from "../../hooks/hook";
 
 const Navbar = ({ setnav, curnav }) => {
@@ -16,42 +26,42 @@ const Navbar = ({ setnav, curnav }) => {
   const { avatar, bio, createdAt, name, username } = user;
   const joinDate = new Date(createdAt);
 
-  const [curImage, setImage] = useState(avatar?.url)
-  const [file, setFile] = useState('')
+  const [curImage, setImage] = useState(avatar?.url);
+  const [file, setFile] = useState("");
   const [curbio, setbio] = useState(bio);
   const [curname, setname] = useState(name);
   const [curusername, setusername] = useState(username);
-  const [ischange, setchange] = useState(false) // will update profile only if any value changes
+  const [ischange, setchange] = useState(false); // will update profile only if any value changes
   const maintag = useRef();
 
   // profile picture update
   const handleImageChange = (e) => {
     setImage(URL.createObjectURL(e.target.files[0]));
     setFile(e.target.files[0]);
-  }
+  };
 
   const [sendDpRequest, isLoadingDpRequest] = useAsyncMutation(
     useUpdateProfilePictureMutation
   );
 
-const handleDpUpdate = async () => {
-  const formdata = new FormData()
-  formdata.append("avatar", file)
-   await sendDpRequest("Updating profile picture !", formdata)
-}
+  const handleDpUpdate = async () => {
+    const formdata = new FormData();
+    formdata.append("avatar", file);
+    await sendDpRequest("Updating profile picture !", formdata);
+  };
 
   // profile update
   const [sendRequest, isLoadingSendRequest] = useAsyncMutation(
     useUpdateProfileMutation
   );
 
-  const handleProfileUpdate = async() => {
+  const handleProfileUpdate = async () => {
     const arg = {
       bio: curbio,
       name: curname,
       username: curusername,
-    }
-       await sendRequest("Updating user profile !", arg );
+    };
+    await sendRequest("Updating user profile !", arg);
   };
 
   useEffect(() => {
@@ -201,24 +211,26 @@ const handleDpUpdate = async () => {
 
         <li
           className="NavIcons divgroup"
-          value="groups"
+          value="Nox Verse"
           onClick={(e) => {
             handleNav(e);
-            setnav("groups");
+            setnav("Nox Verse");
           }}
         >
           <Group />
         </li>
+
         <li
           className="NavIcons divcall"
           value="calls"
           onClick={(e) => {
             handleNav(e);
-            setnav("groups");
+            setnav("calls");
           }}
         >
           <Call />
         </li>
+
         <li
           className="NavIcons divsettings"
           value="settings"

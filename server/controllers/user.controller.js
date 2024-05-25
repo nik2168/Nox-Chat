@@ -229,11 +229,13 @@ const searchUser = async (req, res) => {
       name: { $regex: queryName, $options: "i" },
     });
 
-    const users = allUsersExceptMyFriends.map(({ name, avatar, _id }) => {
+    const users = allUsersExceptMyFriends.map(({ name, avatar, _id, bio, username }) => {
       return {
         name,
         _id,
         avatar: avatar.url,
+        bio,
+        username,
       };
     });
 

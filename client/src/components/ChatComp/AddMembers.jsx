@@ -168,6 +168,7 @@ const AddMembers = ({ addMemberWindow, chatid, members }) => {
                   }}
                   value={_id}
                   onClick={(e) => {
+                    if(!selectedMembers.includes(e.currentTarget.value))
                     dispatch(addOneSelectedMember(e.currentTarget.value))
                 }}
                 >

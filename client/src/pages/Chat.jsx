@@ -1,5 +1,11 @@
 import { useInfiniteScrollTop } from "6pp";
-import { Add, EmojiEmotions, MoreVert, Send } from "@mui/icons-material";
+import {
+  Add,
+  EmojiEmotions,
+  MoreVert,
+  Send,
+  ArrowBackIosNew,
+} from "@mui/icons-material";
 import { Skeleton } from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,17 +15,26 @@ import ChatFilesMenu from "../components/ChatComp/ChatFilesMenu.jsx";
 import ChatSettings from "../components/ChatComp/ChatSettings";
 import Messages from "../components/ChatComp/Messages";
 import GroupSettings from "../components/ChatComp/groupsettings";
-import { ALERT, NEW_MESSAGE, START_TYPING, STOP_TYPING } from "../constants/events.js";
+import {
+  ALERT,
+  NEW_MESSAGE,
+  START_TYPING,
+  STOP_TYPING,
+} from "../constants/events.js";
 import { useErrors, useSocketEvents } from "../hooks/hook.jsx";
 import {
   useGetChatDetailsQuery,
   useGetMessagesQuery,
 } from "../redux/api/api.js";
 import { getSocket } from "../socket";
-import { removeNewMessagesAlert, setNewGroupAlert, setTyping } from "../redux/reducer/chat.js";
+import {
+  removeNewMessagesAlert,
+  setNewGroupAlert,
+  setTyping,
+} from "../redux/reducer/chat.js";
 import AddMembers from "../components/ChatComp/AddMembers.jsx";
 
-const Chat = ({ chatid }) => {
+const Chat = ({ chatid, allChats }) => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth); // Cur User
   const { isTyping } = useSelector((state) => state.chat);
@@ -31,8 +46,6 @@ const Chat = ({ chatid }) => {
   const [page, setPage] = useState(1);
   const [imTyping, setImTyping] = useState(false);
 
-  const chat = useRef(); // ref to chat
-
   const scrollElement = useRef(); // for infinite scroll
 
   const groupsetting = useRef();
@@ -40,6 +53,8 @@ const Chat = ({ chatid }) => {
   const clearTime = useRef();
 
   const addMemberWindow = useRef();
+
+  const chat = useRef(); // ref to chat
 
   const chatDetails = useGetChatDetailsQuery({ chatid, populate: true });
   const oldMessagesChunk = useGetMessagesQuery({ chatid, page });
@@ -121,9 +136,9 @@ const Chat = ({ chatid }) => {
 
   const alertListener = useCallback(
     (data) => {
-      console.log(chatid, data)
-            if (data?.chatid?.toString() !== chatid?.toString()) return;
-       setNewGroupAlert(dispatch(data))
+      console.log(chatid, data);
+      if (data?.chatid?.toString() !== chatid?.toString()) return;
+      setNewGroupAlert(dispatch(data));
     },
     [chatid]
   );
@@ -147,6 +162,14 @@ const Chat = ({ chatid }) => {
       />
 
       <div className="chat-person-div">
+        <button
+          className="backButton"
+          onClick={(e) => {
+            allChats.current.style.zIndex = "4";
+          }}
+        >
+          <ArrowBackIosNew sx={{ width: "2rem", height: "2rem" }} />
+        </button>
         <div
           className="person-dp"
           onClick={() => groupsetting.current.classList.add("active")}

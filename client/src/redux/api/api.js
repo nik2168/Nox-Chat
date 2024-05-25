@@ -156,6 +156,23 @@ const api = createApi({
       invalidatesTags: ["Chat", "Groups"],
     }),
 
+    exitGroup: builder.query({
+      query: (chatid) => ({
+        url: `/chat/leave/${chatid}`,
+        credentials: "include",
+      }),
+      invalidatesTags: ["Chat", "Groups"],
+    }),
+
+    updateGroupInfo: builder.mutation({
+      query: ({formdata, chatid}) => ({
+        url: `/chat/${chatid}`,
+        method: "POST",
+        credentials: "include",
+        body: formdata,
+      }),
+      invalidatesTags: ["Chat", "Groups"],
+    }),
   }),
 });
 
@@ -177,4 +194,6 @@ export const {
   useGetGroupsQuery,
   useAddMembersMutation,
   useRemoveMembersMutation,
+  useLazyExitGroupQuery,
+  useUpdateGroupInfoMutation,
 } = api;

@@ -11,7 +11,7 @@ const {
   leaveGroup,
   sendAttachments,
   getChatDetails,
-  renameGroup,
+  updateGroupInfo,
   deleteChat,
   getMessages,
 } = require("../controllers/chat.controller.js");
@@ -76,7 +76,7 @@ router.get(
 router
   .route("/:id")
   .get(getChatDetails)
-  .post(renameGroupValidator(), validateHandler, renameGroup)
+  .post(singleAvatar, renameGroupValidator(), validateHandler, updateGroupInfo)
   .delete(deleteChatValidator(), validateHandler, deleteChat);
 
 module.exports = router;

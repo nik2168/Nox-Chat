@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import "../../Css/allchats.css";
 import "../../Css/chat.css";
 import "../../Css/creategroup.css";
@@ -8,6 +8,7 @@ import "../../Css/navbar.css";
 import "../../Css/responsiveAllChats.css";
 import "../../Css/responsiveChat.css";
 import "../../Css/responsiveNavbar.css";
+import "../../Css/noxVerse.css";
 import Title from "../shared/Title";
 import Navbar from "./Navbar";
 
@@ -28,12 +29,14 @@ import {
   setTyping,
 } from "../../redux/reducer/chat.js";
 import { useParams } from "react-router-dom";
+import NoxVerse from "../Nox Verse/NoxVerse.jsx";
 
 const AppLayout = () => (WrapComp) => {
   return (props) => {
     const { isTyping } = useSelector((state) => state.chat); // Cur User
 
     const { chatid } = useParams();
+    const allChats = useRef(); // ref to chat
 
     const [curnav, setnav] = useState("chats");
     const dispatch = useDispatch();
@@ -55,7 +58,11 @@ const AppLayout = () => (WrapComp) => {
     const startTypingListner = useCallback(
       (data) => {
         dispatch(
-          setAllChatsTyping({ isTyping: true, typingChatid: data?.chatid, name: data?.username })
+          setAllChatsTyping({
+            isTyping: true,
+            typingChatid: data?.chatid,
+            name: data?.username,
+          })
         );
         if (data?.chatid.toString() !== chatid.toString()) return;
         dispatch(setTyping(true));
@@ -92,8 +99,22 @@ const AppLayout = () => (WrapComp) => {
         <Title />
         <main>
           <Navbar setnav={setnav} curnav={curnav} />
-          <AllChats curnav={curnav} />
-          <WrapComp chatid={chatid} />
+
+          {curnav === "chats" && (
+            <AllChats curnav={curnav} allChats={allChats} />
+          )}
+
+          {curnav === "calls" && (
+            <AllChats curnav={curnav} allChats={allChats} />
+          )}
+
+          {curnav === "Nox Verse" && (
+            <NoxVerse curnav={curnav} allChats={allChats} />
+          )}
+
+        
+
+          <WrapComp chatid={chatid} allChats={allChats} />
         </main>
       </>
     );

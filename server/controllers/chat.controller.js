@@ -327,7 +327,7 @@ const leaveGroup = async (req, res) => {
       curGroup.creator = curGroup.members[0];
     }
 
-    if (curGroup.members.length < 2)
+    if (curGroup.members.length <= 2)
       res
         .status(400)
         .json({ success: false, message: "Group must have atleast 2 members" });
@@ -347,7 +347,7 @@ const leaveGroup = async (req, res) => {
 
     return res
       .status(200)
-      .json({ success: true, message: "Members left the group successfully!" });
+      .json({ success: true, message:  `You left the group (${curGroup.name}) successfully!` });
   } catch (err) {
     if (err.name === "CastError") {
       const path = err.path;
@@ -493,29 +493,49 @@ const getChatDetails = async (req, res) => {
   }
 };
 
-const renameGroup = async (req, res) => {
+const updateGroupInfo = async (req, res) => {
+
   const { name } = req.body;
 
   try {
+ 
+
     const curGroup = await Chat.findById(req.params.id);
 
     if (!curGroup)
       return res
         .status(400)
-        .json({ success: false, Message: "group not found" });
+        .json({ success: false, message: "group not found" });
 
     if (!curGroup.groupChat)
       return res
         .status(400)
-        .json({ success: false, Message: "Its not a group" });
+        .json({ success: false, message: "Its not a group" });
 
     curGroup.name = name;
+
+    const file = req.file;
+
+    let avatar;
+
+    if (file) {
+      const result = await uploadFilesToCloudinary([file]);
+
+      avatar = {
+        public_id: result[0].public_id,
+        url: result[0].url,
+      };
+      curGroup.avatar = avatar;
+    }
+    
+
 
     await curGroup.save();
 
     res
       .status(201)
-      .json({ success: true, Message: "Group name changed successfully!" });
+      .json({ success: true, message: "Group info changed successfully!" });
+
   } catch (err) {
     if (err.name === "CastError") {
       const path = err.path;
@@ -529,7 +549,7 @@ const renameGroup = async (req, res) => {
 
     res.status(400).json({
       success: false,
-      message: "error while fetching chat details",
+      message: "error while updating group info",
       Error: err,
     });
   }
@@ -675,7 +695,7 @@ module.exports = {
   leaveGroup,
   sendAttachments,
   getChatDetails,
-  renameGroup,
+  updateGroupInfo,
   deleteChat,
   getMessages,
 };

@@ -1,61 +1,91 @@
-import {
-  Add,
-  ArrowBack,
-  CameraAlt,
-  MoreVertTwoTone,
-} from "@mui/icons-material";
-import { Avatar } from "@mui/material";
-import React, { useEffect, useRef, useState } from "react";
-import { useFileValidator, useName } from "../../hooks/InputValidator";
-import { userdata } from "../../assets/rawusers";
-import AddFriends from "../ChatList/addFriend";
-import { setAllFriends, setSelectedFriends } from "../../redux/reducer/createGroupSlice";
+import { Add, ArrowBack, CameraAlt } from "@mui/icons-material";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import AddMembers from "./AddMembers";
 import { useAsyncMutation } from "../../hooks/hook";
-import { useRemoveMembersMutation } from "../../redux/api/api";
+import {
+  useLazyExitGroupQuery,
+  useRemoveMembersMutation,
+  useUpdateGroupInfoMutation,
+} from "../../redux/api/api";
+import AddMembers from "./AddMembers";
+import toast from "react-hot-toast";
 
 const GroupSettings = ({ curChat, groupsetting, addMemberWindow, chatid }) => {
-
   const dispatch = useDispatch();
 
-   const { selectedMembers } = useSelector((state) => state.addmember);
+  const { selectedMembers } = useSelector((state) => state.addmember);
+  const { user } = useSelector((state) => state.auth);
 
-  const { _id, name, avatar, groupChat, members } = curChat;
+  const { _id, name, avatar, creator, groupChat, members } = curChat;
 
-  const [check, setcheck] = useState(""); // for errors in inputs
+  let isAdmin = false;
+  if (user._id.toString() === creator.toString()) isAdmin = true;
 
-  
-
-  const [curmembers, setCurMembers] = useState([]);
   const [file, setFile] = useState("");
   const [curimage, setImage] = useState("");
   const [curname, setname] = useState("");
+  const [isChange, setChange] = useState(false);
 
   useEffect(() => {
-     setname(name);
-     setImage(avatar?.url);
-     setCurMembers(members)
-  }, [curChat])
- 
+    setname(name);
+    setImage(avatar?.url);
+  }, [curChat]);
 
-    // Remove the selected member
-    const [removeMemberMutation, isLoadingRemoveMemberMutation] = useAsyncMutation(useRemoveMembersMutation)
-    
+  // Remove the selected member
+  const [removeMemberMutation, isLoadingRemoveMemberMutation] =
+    useAsyncMutation(useRemoveMembersMutation);
 
   const removeMemberHandler = async (e) => {
-     const member = [e.currentTarget.value]
-       const data = {
-        chatId: chatid,
-        remove_members : member,
-       }
+    const member = [e.currentTarget.value];
+    const data = {
+      chatId: chatid,
+      remove_members: member,
+    };
 
-       const name = members.find((i) => i._id.toString() === e.currentTarget.value.toString()).name
+    const name = members.find(
+      (i) => i._id.toString() === e.currentTarget.value.toString()
+    ).name;
 
-       await removeMemberMutation(`removing ${name} from the group`, data)
-  }
+    await removeMemberMutation(`removing ${name} from the group`, data);
+  };
+
+  // Exit Group
+  const [useExitGroupQuery] = useLazyExitGroupQuery();
+
+  const exitGroupHandler = async (e) => {
+    try {
+      const res = await useExitGroupQuery(chatid);
+      console.log(res?.data);
+      if (res?.data?.success) toast.success(res?.data?.message);
+      else toast.error(res?.error?.message);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Something went wrong");
+    } finally {
+      groupsetting.current.classList.remove("active");
+    }
+  };
+
+  // Update Group Info -
+  const [updateGroupMutation, isLoadingGroupMutation] = useAsyncMutation(
+    useUpdateGroupInfoMutation
+  );
+
+  const updateGroupInfoHandler = async (e) => {
+    if (!isChange) {
+      groupsetting.current.classList.remove("active");
+      return;
+    }
+    const formdata = new FormData();
+    formdata.append("name", curname);
+    formdata.append("avatar", file);
+
+    await updateGroupMutation("updating group info ...", { formdata, chatid });
+    setChange(false);
+    groupsetting.current.classList.remove("active");
+  };
 
   const handleImageChange = (e) => {
+    setChange(true);
     if (e.target.files[0].size > 3000000) {
       setcheck("Img size must be < 3mb");
     }
@@ -80,7 +110,11 @@ const GroupSettings = ({ curChat, groupsetting, addMemberWindow, chatid }) => {
 
           <h3 style={{ color: "#F4F6F8" }}>Group Details</h3>
 
-          <button type="button" className="groupnextbtn">
+          <button
+            type="button"
+            className="groupnextbtn"
+            onClick={(e) => updateGroupInfoHandler(e)}
+          >
             Save
           </button>
         </div>
@@ -95,12 +129,14 @@ const GroupSettings = ({ curChat, groupsetting, addMemberWindow, chatid }) => {
             alignItems: "center",
             paddingTop: "1rem",
             paddingBottom: "2rem",
+            backgroundColor: "transparent",
           }}
         >
           <div
             className="avatar"
             style={{
               position: "relative",
+              backgroundColor: "transparent",
             }}
           >
             <div className="gsimagediv">
@@ -142,6 +178,7 @@ const GroupSettings = ({ curChat, groupsetting, addMemberWindow, chatid }) => {
               />
             </div>
           </div>
+
           <div
             style={{
               height: "90%",
@@ -171,7 +208,10 @@ const GroupSettings = ({ curChat, groupsetting, addMemberWindow, chatid }) => {
                 type="text"
                 placeholder="Group Name"
                 value={curname}
-                onChange={(e) => setname(e.target.value)}
+                onChange={(e) => {
+                  setChange(true);
+                  setname(e.target.value);
+                }}
                 style={{
                   backgroundColor: "transparent",
                   width: "10rem",
@@ -189,28 +229,7 @@ const GroupSettings = ({ curChat, groupsetting, addMemberWindow, chatid }) => {
           </div>
         </div>
 
-        {check ? (
-          <p
-            style={{
-              height: "1rem",
-              fontSize: "0.8rem",
-              color: "red",
-            }}
-          >
-            {check}
-          </p>
-        ) : (
-          <p
-            style={{
-              height: "1rem",
-              fontSize: "0.8rem",
-              color: "darkred",
-              backgroundColor: "red",
-            }}
-          ></p>
-        )}
-
-        <ul className="addMemberOUterDiv">
+        <div className="addMemberOUterDiv" style={{ height: "6rem" }}>
           <button
             className="AddMembersButton"
             onClick={(e) => {
@@ -226,12 +245,16 @@ const GroupSettings = ({ curChat, groupsetting, addMemberWindow, chatid }) => {
           <div className="addMembers">
             <p>Add Member</p>
           </div>
-        </ul>
+        </div>
 
         <ul className="groupsettingsmembersdiv">
-          {members.map((member, index) => {
+          {members.map((member) => {
+            // let isAdmin = false;
+            // console.log(creator);
+            // if (member?._id === creator.toString()) isAdmin = true;
+
             return (
-              <li key={index} className="groupsettingsmembers">
+              <li key={member?._id} className="groupsettingsmembers">
                 <img
                   src={member?.avatar?.url}
                   style={{
@@ -243,27 +266,52 @@ const GroupSettings = ({ curChat, groupsetting, addMemberWindow, chatid }) => {
                   alt=""
                 />
                 <div style={{ width: "70%" }}>
-                  <p>{member.name}</p>
+                  <p>
+                    {member.name}{" "}
+                    {member?._id.toString() === user._id.toString() &&
+                      " ( You )"}
+                  </p>
+                  {isAdmin &&
+                    user._id.toString() === member?._id.toString() && (
+                      <span
+                        style={{
+                          fontSize: "0.7rem",
+                          color: "green",
+                          fontWeight: "600",
+                        }}
+                      >
+                        Admin
+                      </span>
+                    )}
                 </div>
-                <button
-                  value={member?._id}
-                  className="gsremovebtn"
-                  onClick={(e) => removeMemberHandler(e)}
-                >
-                  remove
-                </button>
+                {isAdmin &&
+                  !(creator.toString() === member?._id.toString()) && (
+                    <button
+                      value={member?._id}
+                      className="gsremovebtn"
+                      onClick={(e) => removeMemberHandler(e)}
+                    >
+                      remove
+                    </button>
+                  )}
               </li>
             );
           })}
         </ul>
-        <li className="gsexit">
+
+        <div className="gsexit" onClick={(e) => exitGroupHandler(e)}>
           <button className="gsexitbtn">Exit Group</button>
-        </li>
-        <li className="clearchatdiv">
+        </div>
+        <div className="clearchatdiv">
           <button className="clearchat">Clear Chat</button>
-        </li>
+        </div>
       </article>
-      <AddMembers addMemberWindow={addMemberWindow} chatid={chatid} members={members} />
+
+      <AddMembers
+        addMemberWindow={addMemberWindow}
+        chatid={chatid}
+        members={members}
+      />
     </>
   );
 };

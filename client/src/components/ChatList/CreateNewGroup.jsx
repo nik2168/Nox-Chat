@@ -4,6 +4,7 @@ import {
   Cancel,
   NoteAddOutlined,
   Search,
+  ArrowBackIosNew,
 } from "@mui/icons-material";
 import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -118,7 +119,7 @@ const CreateNewGroup = () => {
                 creategroup.current.classList.remove("groupactive");
               }}
             >
-              <ArrowBack />
+              <ArrowBackIosNew />
             </button>
 
             <h3>Group Details</h3>
