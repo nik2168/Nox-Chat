@@ -1,22 +1,26 @@
 import { FilterList, Search } from "@mui/icons-material";
-import React from "react";
-import { useFileValidator, useName } from "../../hooks/InputValidator";
-import { useErrors } from "../../hooks/hook";
-import { useMyChatsQuery } from "../../redux/api/api";
-import SingleChats from "../ChatList/SingleChats";
-import CreateNewGroup from "./CreateNewGroup";
-import CurNotifications from "./CurNotifications";
-import AddFriends from "./addFriend";
+import { Skeleton } from "@mui/material";
+import React, { Suspense, lazy, useState } from "react";
+const SingleChats = lazy(() =>
+  import("../ChatList/SingleChats")
+);
+const CreateNewGroup = lazy(() =>
+  import("./CreateNewGroup")
+);
+const CurNotifications = lazy(() =>
+  import("./CurNotifications")
+);
 
-const AllChats = ({ curnav, chat, allChats }) => {
-  // for create group
-
-  const { file, setFile, fileFlag, fileErr } = useFileValidator("");
-  const { curname, setname, nameFlag, nameErr } = useName("");
-
-  // my chats fetching ...
-  const { isLoading, data, isError, error, refetch } = useMyChatsQuery("");
-  useErrors([{ isError, error }]);
+const AllChats = ({
+  curnav,
+  allChats,
+  navbarref,
+  isLoading,
+  data,
+  setSearch,
+  search,
+}) => {
+  const [curChats, setChats] = useState([]);
 
   const handleDeleteChatOpen = (e, userid, groupchat) => {
     e.preventDefault();
@@ -34,9 +38,13 @@ const AllChats = ({ curnav, chat, allChats }) => {
 
           <div className="headerAllChats"></div>
 
-          <CurNotifications />
+          <Suspense fallback={<Skeleton />}>
+            <CurNotifications />
+          </Suspense>
 
-          <CreateNewGroup />
+          <Suspense fallback={<Skeleton />}>
+            <CreateNewGroup />
+          </Suspense>
         </div>
 
         <div className="search-div">
@@ -46,6 +54,8 @@ const AllChats = ({ curnav, chat, allChats }) => {
             id="search"
             className="search"
             placeholder="Search . . ."
+            value={search}
+            onChange={(e) => setSearch(e.currentTarget.value)}
           />
           <Search
             sx={{
@@ -66,14 +76,19 @@ const AllChats = ({ curnav, chat, allChats }) => {
       </div>
 
       <article className="allchats-users">
-        {curnav === "chats" && (
-          <SingleChats
-            data={data}
-            isLoading={isLoading}
-            handleDeleteChatOpen={handleDeleteChatOpen}
-            allChats={allChats}
-          />
-        )}
+        {curnav === "chats" &&
+          (isLoading ? (
+            <Skeleton />
+          ) : (
+            <Suspense fallback={<Skeleton />}>
+              <SingleChats
+                data={data}
+                handleDeleteChatOpen={handleDeleteChatOpen}
+                allChats={allChats}
+                navbarref={navbarref}
+              />
+            </Suspense>
+          ))}
       </article>
     </section>
   );

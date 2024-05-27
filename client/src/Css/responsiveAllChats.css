@@ -8,7 +8,7 @@
 }
 
 .allchats-header {
-  height: 20vh;
+  height: 23vh;
   width: 100%;
   position: absolute;
   background-color: #161c24;
@@ -237,7 +237,7 @@
 
 .allchats-users {
   width: 100%;
-  padding-top: 20vh;
+  padding-top: 23vh;
   padding-bottom: 25vh;
   height: 100vh;
   z-index: 0;
@@ -342,7 +342,8 @@
 }
 
 .person-details h5 {
-  font-size: 1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
 }
 
 .person-div span {

@@ -30,7 +30,7 @@ main {
   justify-content: flex-start;
   align-items: center;
   position: absolute;
-  z-index: 7;
+  z-index: 5;
   bottom: 0;
   width: 100vw;
   min-width: 100vw;
@@ -92,16 +92,16 @@ main {
 }
 
 .divchat:hover {
-  background-color: #2d99ff;
+  background-color: #6e7277;
 }
 .divgroup:hover {
-  background-color: #2d99ff;
+  background-color: #6e7277;
 }
 .divcall:hover {
-  background-color: #2d99ff;
+  background-color: #6e7277;
 }
 .divsettings:hover {
-  background-color: #2d99ff;
+  background-color: #6e7277;
 }
 
 .navbar span {
@@ -154,7 +154,7 @@ main {
   transition: all 0.4s ease-out;
 }
 
-.navbar.active .profile {
+.profile.active {
   position: absolute;
   top: -34rem;
   left: 3%;
@@ -210,7 +210,7 @@ main {
   object-fit: cover;
 }
 
-.navbar.active .profileimgdiv img {
+.profile.active .profileimgdiv img {
   height: 100%;
   width: 100%;
   border-radius: 3rem;

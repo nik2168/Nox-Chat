@@ -17,6 +17,10 @@ const messageSchema = new Schema(
       },
     },
     ],
+    isAlert: {
+     type: Boolean,
+     default: false,
+    },
     sender: {
       type: Types.ObjectId,
       ref: "User",

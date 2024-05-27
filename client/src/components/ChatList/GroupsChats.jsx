@@ -1,30 +1,16 @@
-import { Skeleton } from "@mui/material";
 import moment from "moment";
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React from "react";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { getOrSaveFromStorage, transformImage } from "../../lib/features";
-import { NEW_MESSAGE_ALERT } from "../../constants/events";
-import { useGetGroupsQuery } from "../../redux/api/api";
-import { useErrors } from "../../hooks/hook";
+import { transformImage } from "../../lib/features";
+import { Delete } from "@mui/icons-material";
 
-const GroupChats = ({ allChats, chat }) => {
+
+const GroupChats = ({ allChats, chat, navbarref, handleDeleteChatOpen }) => {
   const { allChatsIsTyping } = useSelector((state) => state.chat); // Cur User
 
   const { newMessageAlert } = useSelector((state) => state.chat);
   const { typing } = useSelector((state) => state.chat);
-
-  // const { isError, error, data, isLoading, refetch } = useGetGroupsQuery();
-  // useErrors([{ isError, error }]);
-
-  // useEffect(() => {
-  //   getOrSaveFromStorage({
-  //     key: NEW_MESSAGE_ALERT,
-  //     value: newMessageAlert,
-  //   });
-  // }, [newMessageAlert]);
-
-  // const groupChats = data?.groupChats;
 
   const { _id, name, avatar, groupChat } = chat;
 
@@ -44,6 +30,8 @@ const GroupChats = ({ allChats, chat }) => {
   }
 
   if (!groupChat) return;
+
+  
 
   return (
     <>
@@ -67,7 +55,10 @@ const GroupChats = ({ allChats, chat }) => {
         <Link
           to={`/chat/${_id}`}
           className="person-details"
-          onClick={() => (allChats.current.style.zIndex = "0")}
+          onClick={() => {
+            navbarref.current.style.zIndex = "0";
+            allChats.current.style.zIndex = "0";
+          }}
         >
           <h5>{name}</h5>
           {startTyping ? (
@@ -79,7 +70,7 @@ const GroupChats = ({ allChats, chat }) => {
           )}
         </Link>
         <span className="person-time">
-          {moment(messageAlert?.sender?.createdAt).format("HH:MM")}
+          {moment(messageAlert?.sender?.createdAt).format("DD/MM/YYYY")}
         </span>
         {notificationCount !== 0 && (
           <span className="person-notification-count">{notificationCount}</span>

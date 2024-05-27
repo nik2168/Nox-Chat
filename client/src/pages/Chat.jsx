@@ -1,20 +1,19 @@
 import { useInfiniteScrollTop } from "6pp";
 import {
   Add,
+  ArrowBackIosNew,
   EmojiEmotions,
   MoreVert,
   Send,
-  ArrowBackIosNew,
 } from "@mui/icons-material";
 import { Skeleton } from "@mui/material";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import AppLayout from "../components/AppLayout/AppLayout";
 import ChatFilesMenu from "../components/ChatComp/ChatFilesMenu.jsx";
 import ChatSettings from "../components/ChatComp/ChatSettings";
 import Messages from "../components/ChatComp/Messages";
-import GroupSettings from "../components/ChatComp/groupsettings";
 import {
   ALERT,
   NEW_MESSAGE,
@@ -26,15 +25,23 @@ import {
   useGetChatDetailsQuery,
   useGetMessagesQuery,
 } from "../redux/api/api.js";
-import { getSocket } from "../socket";
 import {
   removeNewMessagesAlert,
-  setNewGroupAlert,
-  setTyping,
+  setNewGroupAlert
 } from "../redux/reducer/chat.js";
-import AddMembers from "../components/ChatComp/AddMembers.jsx";
+import { getSocket } from "../socket";
 
-const Chat = ({ chatid, allChats }) => {
+// import GroupSettings from "../components/ChatComp/groupsettings";
+const GroupSettings = lazy(() =>
+  import("../components/ChatComp/groupsettings")
+);
+
+
+
+
+
+
+const Chat = ({ chatid, allChats, navbarref }) => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth); // Cur User
   const { isTyping } = useSelector((state) => state.chat);
@@ -45,6 +52,8 @@ const Chat = ({ chatid, allChats }) => {
   const [messages, setMessages] = useState([]); // Messages List
   const [page, setPage] = useState(1);
   const [imTyping, setImTyping] = useState(false);
+
+  const navigate = useNavigate();
 
   const scrollElement = useRef(); // for infinite scroll
 
@@ -64,7 +73,13 @@ const Chat = ({ chatid, allChats }) => {
     { error: oldMessagesChunk?.error, isError: oldMessagesChunk?.isError },
   ];
 
+
+  useEffect(() => {
+    if (!chatDetails?.data?.curchat) return navigate("/");
+  }, [chatDetails]);
+
   useErrors(error);
+
 
   const curChat = chatDetails?.data?.curchat;
   const members = curChat?.members;
@@ -150,51 +165,81 @@ const Chat = ({ chatid, allChats }) => {
 
   useSocketEvents(socket, events); // using a custom hook to listen for events array
 
+
+
+  const curChatMembersName = curChat?.members.map((i) => i.name).join(", ");
+   let avatar = curChat?.avatar?.url;
+   let name = curChat?.name
+   if(!curChat?.groupChat) {
+    const otherMember = curChat?.members.find((i) => i._id.toString() !== user._id.toString())
+    avatar = otherMember?.avatar?.url
+    name = otherMember?.name
+   }
+
   return chatDetails?.isLoading ? (
     <Skeleton className="chat" />
   ) : (
     <section className="chat" ref={chat}>
-      <GroupSettings
-        groupsetting={groupsetting}
-        curChat={curChat}
-        addMemberWindow={addMemberWindow}
-        chatid={chatid}
-      />
+      {curChat.groupChat && (
+        <Suspense fallback={<Skeleton/>}>
+        <GroupSettings
+          groupsetting={groupsetting}
+          curChat={curChat}
+          addMemberWindow={addMemberWindow}
+          chatid={chatid}
+          />
+          </Suspense>
+      )}
 
       <div className="chat-person-div">
         <button
           className="backButton"
-          onClick={(e) => {
+          onClick={() => {
             allChats.current.style.zIndex = "4";
+            navbarref.current.style.zIndex = "5";
           }}
         >
           <ArrowBackIosNew sx={{ width: "2rem", height: "2rem" }} />
         </button>
+
         <div
           className="person-dp"
           onClick={() => groupsetting.current.classList.add("active")}
         >
           <img
-            src={curChat?.avatar?.url}
+            src={avatar}
             alt="img"
             className="person-image"
             style={{ height: "70px", width: "70px" }}
           />
           {/* {isOnline && <div className="online"></div>} */}
         </div>
+
         <div className="chat-person-details">
-          <h5>{curChat?.name}</h5>
-          {isTyping && (
-            <span className="chatonlinespan">
-              {allChatsIsTyping?.typingChatid.toString() ===
-                chatid.toString() &&
-                allChatsIsTyping?.isTyping &&
-                `${allChatsIsTyping?.name} : `}
-              typing ...
-            </span>
+          <h5>{name}</h5>
+          {isTyping ? (
+            curChat?.groupChat ? (
+              <p className="chattypingspan">
+                {allChatsIsTyping?.typingChatid.toString() ===
+                  chatid.toString() &&
+                  allChatsIsTyping?.isTyping &&
+                  `${allChatsIsTyping?.name}: `}
+                typing ...
+              </p>
+            ) : (
+              <p className="chattypingspan">typing ...</p>
+            )
+          ) : (
+            curChat?.groupChat && (
+              <p className="chattypingspan" style={{ color: "whitesmoke" }}>
+                {curChatMembersName.slice(0, 30)}
+                {curChatMembersName.length > 29 && " ..."}
+              </p>
+            )
           )}
           {/* {isOnline ? <span>Online</span> : <span>Offline</span>} */}
         </div>
+
         <span
           className="morevert chatsettingsSpan"
           onClick={() => {

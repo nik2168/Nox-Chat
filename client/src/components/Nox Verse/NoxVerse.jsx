@@ -95,58 +95,56 @@ const addUserWindow = useRef(); // open close window
         <hr />
       </div>
 
-      <article className="allchats-users">
-          {users.map(({ name, _id, avatar, bio, username }) => {
-            return (
-              <li className="user-div" key={_id} value={_id}>
-                <div
-                  className="user-dp"
-                  onClick={() => (allChats.current.style.zIndex = "0")}
-                >
-                  <img
-                    src={
-                      avatar ||
-                      "https://res.cloudinary.com/dki615p7n/image/upload/v1715486888/default_avatar_tvgr8w.jpg"
-                    }
-                    alt=""
-                    style={{height: "100px", width: "100px"}}
-                    className="user-image"
-                  />
-                </div>
+      <article className="noxverse-users">
 
-                <div
-            
-                  className="userinfo"
-                >
-                  <p className="noxVerseName" >{name.slice(0,12)} </p>
-                  <p className="noxVerseUsername" >{username.slice(0,12)} </p>
-                  <p className="noxVerseBio" >Bio : {bio} </p>
-                </div>
-
-                <button
-                  style={{
-                    width: "20%",
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    backgroundColor: "transparent",
-                    border: "none",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                  value={_id}
-                  onClick={(e) => handleSendRequest(e.currentTarget.value)}
-                >
-                  {
-                    <AddCircle
-                      sx={{ color: "#2d99ff", width: "2rem", height: "2rem" }}
-                      onClick={(e) => (e.currentTarget.style.color = "white")}
-                    />
+        {  users.map(({ name, _id, avatar, bio, username }) => {
+          return (
+            <li className="user-div" key={_id} value={_id}>
+              <div
+                className="user-dp"
+                onClick={() => (allChats.current.style.zIndex = "0")}
+              >
+                <img
+                  src={
+                    avatar ||
+                    "https://res.cloudinary.com/dki615p7n/image/upload/v1715486888/default_avatar_tvgr8w.jpg"
                   }
-                </button>
-              </li>
-            );
-          })}
+                  alt=""
+                  style={{ height: "100px", width: "100px" }}
+                  className="user-image"
+                />
+              </div>
+
+              <div className="userinfo">
+                <p className="noxVerseName">{name.slice(0, 18)} </p>
+                <p className="noxVerseUsername">{username.slice(0, 18)} </p>
+                <p className="noxVerseBio">Bio : {bio} </p>
+              </div>
+
+              <button
+                style={{
+                  width: "20%",
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  backgroundColor: "transparent",
+                  border: "none",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+                value={_id}
+                onClick={(e) => handleSendRequest(e.currentTarget.value)}
+              >
+                {
+                  <AddCircle
+                    sx={{ color: "#2d99ff", width: "2rem", height: "2rem" }}
+                    onClick={(e) => (e.currentTarget.style.color = "white")}
+                  />
+                }
+              </button>
+            </li>
+          );
+        })}
       </article>
     </section>
   );

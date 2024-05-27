@@ -1,3 +1,6 @@
+@media (max-width: 800px) {
+
+
 .creategroup {
   position: absolute;
   top: 1.3rem;
@@ -22,7 +25,7 @@
   border-radius: 1rem;
   right: 0rem;
   height: 70vh;
-  width: 25rem;
+  width: 90vw;
   z-index: 3;
   opacity: 1;
   display: flex;
@@ -211,4 +214,6 @@
   grid-template-rows: repeat(4, 1fr);
   gap: 0px;
   overflow-y: scroll;
+}
+
 }

@@ -9,16 +9,20 @@ import "../../Css/responsiveAllChats.css";
 import "../../Css/responsiveChat.css";
 import "../../Css/responsiveNavbar.css";
 import "../../Css/noxVerse.css";
+import "../../Css/noxVerseResponsive.css";
+import "../../Css/responsiveCreateGroup.css";
 import Title from "../shared/Title";
 import Navbar from "./Navbar";
 
 import {
+  MEMBER_REMOVED,
   NEW_MESSAGE_ALERT,
   NEW_REQUEST,
+  REFETCH_CHATS,
   START_TYPING,
   STOP_TYPING,
 } from "../../constants/events.js";
-import { useSocketEvents } from "../../hooks/hook.jsx";
+import { useErrors, useSocketEvents } from "../../hooks/hook.jsx";
 import { getSocket } from "../../socket.jsx";
 import AllChats from "../ChatList/allChats";
 import { useDispatch, useSelector } from "react-redux";
@@ -28,20 +32,31 @@ import {
   setNewMessagesAlert,
   setTyping,
 } from "../../redux/reducer/chat.js";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import NoxVerse from "../Nox Verse/NoxVerse.jsx";
+import { useMyChatsQuery } from "../../redux/api/api.js";
 
 const AppLayout = () => (WrapComp) => {
   return (props) => {
     const { isTyping } = useSelector((state) => state.chat); // Cur User
+    const { user } = useSelector((state) => state.auth); // Cur User
+    const navigate = useNavigate();
 
     const { chatid } = useParams();
     const allChats = useRef(); // ref to chat
+    const navbarref = useRef(); // ref to chat
 
     const [curnav, setnav] = useState("chats");
     const dispatch = useDispatch();
 
     const socket = getSocket();
+
+    const [search, setSearch] = useState("");
+
+    // my chats fetching ...
+    const { isLoading, data, isError, error, refetch } =
+      useMyChatsQuery(search);
+    useErrors([{ isError, error }]);
 
     const newMessagesAlert = useCallback(
       (data) => {
@@ -85,11 +100,26 @@ const AppLayout = () => (WrapComp) => {
       [chatid]
     );
 
+    const refetchListner = useCallback(() => {
+      refetch();
+    }, [refetch]);
+
+    const refetchNewMembers = useCallback(
+      (data) => {
+        if (data?.userId === user._id.toString()) navigate(`/`);
+        else navigate(`/chat/${data?.curChatId}`);
+        refetch();
+      },
+      [refetch, navigate]
+    );
+
     const eventHandler = {
       [NEW_MESSAGE_ALERT]: newMessagesAlert,
       [NEW_REQUEST]: newRequestAlert,
       [START_TYPING]: startTypingListner,
       [STOP_TYPING]: stopTypingListner,
+      [REFETCH_CHATS]: refetchListner,
+      [MEMBER_REMOVED]: refetchNewMembers,
     };
 
     useSocketEvents(socket, eventHandler);
@@ -98,10 +128,19 @@ const AppLayout = () => (WrapComp) => {
       <>
         <Title />
         <main>
-          <Navbar setnav={setnav} curnav={curnav} />
+          <Navbar setnav={setnav} curnav={curnav} navbarref={navbarref} />
 
           {curnav === "chats" && (
-            <AllChats curnav={curnav} allChats={allChats} />
+            <AllChats
+              curnav={curnav}
+              allChats={allChats}
+              navbarref={navbarref}
+              isLoading={isLoading}
+              data={data}
+              refetch={refetch}
+              setSearch={setSearch}
+              search={search}
+            />
           )}
 
           {curnav === "calls" && (
@@ -112,9 +151,7 @@ const AppLayout = () => (WrapComp) => {
             <NoxVerse curnav={curnav} allChats={allChats} />
           )}
 
-        
-
-          <WrapComp chatid={chatid} allChats={allChats} />
+          <WrapComp chatid={chatid} allChats={allChats} navbarref={navbarref} />
         </main>
       </>
     );

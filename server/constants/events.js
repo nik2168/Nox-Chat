@@ -6,6 +6,7 @@ const NEW_REQUEST = "NEW_REQUEST";
 const NEW_MESSAGE = "NEW_MESSAGE";
 const START_TYPING = "START_TYPING";
 const STOP_TYPING = "STOP_TYPING";
+const MEMBER_REMOVED = "MEMBER_REMOVED";
 
 module.exports = {
   ALERT,
@@ -16,4 +17,5 @@ module.exports = {
   NEW_MESSAGE,
   START_TYPING,
   STOP_TYPING,
+  MEMBER_REMOVED,
 };

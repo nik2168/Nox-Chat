@@ -19,7 +19,7 @@ import {
 } from "../../redux/api/api";
 import { useAsyncMutation } from "../../hooks/hook";
 
-const Navbar = ({ setnav, curnav }) => {
+const Navbar = ({ setnav, curnav, navbarref }) => {
   const dispatch = useDispatch();
 
   const { user } = useSelector((state) => state.auth);
@@ -94,7 +94,7 @@ const Navbar = ({ setnav, curnav }) => {
   };
 
   return (
-    <nav className="navbar" ref={maintag}>
+    <nav className="navbar" ref={navbarref}>
       <div
         className="Icondiv"
         onClick={() => {
@@ -103,7 +103,7 @@ const Navbar = ({ setnav, curnav }) => {
       >
         <img src={curImage} alt="avatar" className="NavIcon" />
       </div>
-      <article className="profile">
+      <article className="profile" ref={maintag}>
         <div
           className="profileclose"
           onClick={() => {

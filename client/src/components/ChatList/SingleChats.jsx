@@ -7,7 +7,7 @@ import { getOrSaveFromStorage } from "../../lib/features";
 import { NEW_MESSAGE_ALERT } from "../../constants/events";
 import GroupChats from "./GroupsChats";
 
-const SingleChats = ({ data, isLoading, allChats }) => {
+const SingleChats = ({ data, allChats, navbarref }) => {
   const { allChatsIsTyping } = useSelector((state) => state.chat); // Cur User
 
   const { newMessageAlert } = useSelector((state) => state.chat);
@@ -17,20 +17,27 @@ const SingleChats = ({ data, isLoading, allChats }) => {
     getOrSaveFromStorage({ key: NEW_MESSAGE_ALERT, value: newMessageAlert });
   }, [newMessageAlert]);
 
+
+
+const handleDeleteChatOpen = (e, _id, groupChat) => {
+  e.preventDefault()
+  console.log(_id, groupChat)
+}
+
+
   const myChats = data?.mychats;
 
+
+
   return (
-    <>
-      {isLoading ? (
-        <Skeleton />
-      ) : (
+
         <>
           {myChats?.map((chat, index) => {
             const { _id, name, avatar, creator, groupChat } = chat;
 
-            const msgAlert = newMessageAlert?.find(
-              (i) => i.chatid.toString() === _id.toString()
-            );
+    const msgAlert = newMessageAlert?.find(
+      (i) => i.chatid.toString() === _id.toString()
+    );
             const notificationCount = msgAlert?.count || 0;
             const messageAlert = msgAlert?.message || "No new message";
             let msg = messageAlert?.content?.slice(0, 18) || [];
@@ -41,18 +48,23 @@ const SingleChats = ({ data, isLoading, allChats }) => {
               startTyping = allChatsIsTyping.isTyping;
 
             if (groupChat)
-              return <GroupChats key={_id} chat={chat} allChats={allChats} />;
+              return (
+                <GroupChats
+                  key={_id}
+                  chat={chat}
+                  allChats={allChats}
+                  navbarref={navbarref}
+                  handleDeleteChatOpen={handleDeleteChatOpen}
+                />
+              );
             else
               return (
                 <div
-                  // onContextMenu={(e) => handleDeleteChatOpen(e, _id, groupChat)}
+                  onContextMenu={(e) => handleDeleteChatOpen(e, _id, groupChat)}
                   className="person-div"
                   key={index}
                 >
-                  <div
-                    className="person-dp"
-                    onClick={() => (allChats.current.style.zIndex = "0")}
-                  >
+                  <div className="person-dp">
                     <img
                       src={
                         avatar ||
@@ -64,7 +76,14 @@ const SingleChats = ({ data, isLoading, allChats }) => {
                     />
                     {false && <div className="online"></div>}
                   </div>
-                  <Link to={`/chat/${_id}`} className="person-details">
+                  <Link
+                    to={`/chat/${_id}`}
+                    className="person-details"
+                    onClick={() => {
+                      allChats.current.style.zIndex = "0"
+                      navbarref.current.style.zIndex = "0"
+                    }}
+                  >
                     <h5>{name}</h5>
                     {startTyping ? (
                       <span style={{ color: "green" }}>typing ...</span>
@@ -73,7 +92,7 @@ const SingleChats = ({ data, isLoading, allChats }) => {
                     )}
                   </Link>
                   <span className="person-time">
-                    {moment(messageAlert?.sender?.createdAt).format("HH:MM")}
+                    {moment(messageAlert?.sender?.createdAt).format("DD/MM/YYYY")}
                   </span>
                   {notificationCount !== 0 && (
                     <span className="person-notification-count">
@@ -84,9 +103,7 @@ const SingleChats = ({ data, isLoading, allChats }) => {
               );
           })}
         </>
-      )}
-    </>
-  );
+      );
 };
 
 export default SingleChats;

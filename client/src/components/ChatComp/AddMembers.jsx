@@ -174,6 +174,7 @@ const AddMembers = ({ addMemberWindow, chatid, members }) => {
                 >
                     <AddCircle
                       sx={{ color: "#2d99ff", width: "2rem", height: "2rem" }}
+                      onClick={(e) => e.currentTarget.style.color="white"}
                     /> 
                 </button>
               </li>

@@ -1,9 +1,13 @@
-/* .friendlistdivs p {
-  color: #dfe3e8;
-  font-weight: 600;
-  font-size: 0.8rem;
-  transition: all 0.4s ease-out;
-} */
+
+.noxverse-users {
+  width: 30rem;
+  padding-top: 25vh;
+  padding-bottom: 25vh;
+  height: 100vh;
+  z-index: 0;
+  overflow-y: scroll;
+}
+
 
 .accept:hover {
   color: #2d99ff;

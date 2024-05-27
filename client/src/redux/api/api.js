@@ -8,8 +8,8 @@ const api = createApi({
 
   endpoints: (builder) => ({
     myChats: builder.query({
-      query: () => ({
-        url: "/chat/chats",
+      query: (name) => ({
+        url: `/chat/chats?name=${name}`,
         credentials: "include",
       }),
       providesTags: ["Chat"],
@@ -173,6 +173,17 @@ const api = createApi({
       }),
       invalidatesTags: ["Chat", "Groups"],
     }),
+
+    deleteChat: builder.mutation({
+      query: (chatid) => ({
+        url: `/chat/${chatid}`,
+        method: "DELETE",
+        credentials: "include",
+      }),
+      invalidatesTags: ["Chat", "Groups"],
+    }),
+
+
   }),
 });
 
@@ -196,4 +207,5 @@ export const {
   useRemoveMembersMutation,
   useLazyExitGroupQuery,
   useUpdateGroupInfoMutation,
+  useDeleteChatMutation,
 } = api;

@@ -4,7 +4,9 @@ const {
   NEW_ATTACHMENT,
   NEW_MESSAGE_ALERT,
   NEW_MESSAGE,
+  MEMBER_REMOVED,
 } = require("../constants/events.js");
+const { v4 } = require("uuid");
 const Chat = require("../models/chat.model.js");
 const Message = require("../models/message.model.js");
 const User = require("../models/user.model.js");
@@ -40,7 +42,6 @@ const newGroupChat = async (req, res) => {
         url: result[0].url,
       };
     }
- 
 
     const temp = await Chat.create({
       name: name,
@@ -49,7 +50,6 @@ const newGroupChat = async (req, res) => {
       creator: req.userId,
       members: allMembers,
     });
-
 
     emitEvent(req, ALERT, allMembers, `Welcome to ${name} group !`);
 
@@ -67,11 +67,13 @@ const newGroupChat = async (req, res) => {
 
 // get personal chats
 const getMyChats = async (req, res) => {
+  const queryName = req.query.name;
 
   try {
     const chats = await Chat.find({
       members: req.userId,
-    }).populate("members", "name avatar"); // will provide the user details from the members key. ...
+      name: { $regex: queryName, $options: "i" },
+    }).populate("members", "name avatar createdAt bio"); // will provide the user details from the members key. ...
 
     const transformChats = chats.map(
       ({ _id, name, avatar, groupChat, members }) => {
@@ -86,11 +88,11 @@ const getMyChats = async (req, res) => {
           groupChat,
           members: members.reduce((pre, cur) => {
             if (cur._id.toString() !== req.userId.toString()) {
-              pre.push(cur._id);
+              pre.push(cur);
             }
             return pre;
           }, []),
-         // lastMessage: lastMessage
+          // lastMessage: lastMessage
         };
       }
     );
@@ -178,12 +180,34 @@ const addMembers = async (req, res) => {
 
     const allMembersName = newMembers.map((i) => i.name).join(",");
 
-    emitEvent(
-      req,
-      ALERT,
-      curGroup.members,
-      `${allMembersName} added to this group `
-    );
+    const admin = await User.findById(req.userId);
+
+    // message for real time
+    const messageForRealTime = {
+      content: `${allMembersName} added by ${admin.name}`,
+      attachments: [],
+      _id: v4(),
+      isAlert: true,
+      sender: {
+        _id: admin._id,
+        name: admin.name,
+        chat: chatId,
+        createdAt: new Date().toISOString(),
+      },
+    };
+
+    emitEvent(req, NEW_MESSAGE, curGroup.members, {
+      chatid: chatId,
+      message: messageForRealTime,
+    });
+
+    // message for db
+    await Message.create({
+      sender: req.adminId,
+      content: `${allMembersName} added by ${admin.name}`,
+      isAlert: true,
+      chat: chatId,
+    });
 
     emitEvent(req, REFETCH_CHATS, curGroup.members);
 
@@ -245,6 +269,8 @@ const removeMembers = async (req, res) => {
       });
     }
 
+    const allChatMembers = curGroup.members.map((i) => i.toString());
+
     const uniqueMembers = remove_members.filter((i) =>
       curGroup.members.includes(i)
     ); // if admin send a members to remove from group who is already in the group this will check it
@@ -268,14 +294,41 @@ const removeMembers = async (req, res) => {
 
     const allMembersName = newMembers.map((i) => i.name).join(",");
 
-    emitEvent(
-      req,
-      ALERT,
-      curGroup.members,
-      `${allMembersName} removed from this group `
-    );
+    const admin = await User.findById(req.userId);
 
-    emitEvent(req, REFETCH_CHATS, curGroup.members);
+    // message for real time
+    const messageForRealTime = {
+      content: `${allMembersName} removed from the group by ${admin.name}`,
+      attachments: [],
+      _id: v4(),
+      isAlert: true,
+      sender: {
+        _id: admin._id,
+        name: admin.name,
+        chat: chatId,
+        createdAt: new Date().toISOString(),
+      },
+    };
+
+    emitEvent(req, NEW_MESSAGE, allChatMembers, {
+      chatid: chatId,
+      message: messageForRealTime,
+    });
+
+    // message for db
+    await Message.create({
+      sender: req.userId,
+      content: `${allMembersName} removed by ${admin.name}`,
+      isAlert: true,
+      chat: chatId,
+    });
+
+    const removedMemberId = remove_members[0];
+
+    emitEvent(req, MEMBER_REMOVED, allChatMembers, {
+      curChatId: chatId.toString(),
+      userId: removedMemberId.toString(),
+    });
 
     return res
       .status(200)
@@ -334,20 +387,44 @@ const leaveGroup = async (req, res) => {
 
     await curGroup.save();
 
-    const leftUser = await User.findById(req.userId, "name");
+    const admin = await User.findById(req.userId);
 
-    emitEvent(
-      req,
-      ALERT,
-      curGroup.members,
-      `${leftUser.name} has left the group `
-    );
+    // message for real time
+    const messageForRealTime = {
+      content: `${admin.name} left the group, ${
+        curGroup.creator.toString() === req.userId.toString() &&
+        "new random admin will be selected from rest of the group members !"
+      }`,
+      attachments: [],
+      _id: v4(),
+      isAlert: true,
+      sender: {
+        _id: admin._id,
+        name: admin.name,
+        chat: chatId,
+        createdAt: new Date().toISOString(),
+      },
+    };
+
+    emitEvent(req, NEW_MESSAGE, curGroup.members, {
+      chatid: chatId,
+      message: messageForRealTime,
+    });
+
+    // message for db
+    await Message.create({
+      sender: req.userId,
+      content: `${leftUser.name} left the group `,
+      isAlert: true,
+      chat: chatId,
+    });
 
     emitEvent(req, REFETCH_CHATS, curGroup.members);
 
-    return res
-      .status(200)
-      .json({ success: true, message:  `You left the group (${curGroup.name}) successfully!` });
+    return res.status(200).json({
+      success: true,
+      message: `You left the group (${curGroup.name}) successfully!`,
+    });
   } catch (err) {
     if (err.name === "CastError") {
       const path = err.path;
@@ -386,16 +463,17 @@ const sendAttachments = async (req, res) => {
     const user = await User.findById(req.userId, "name");
 
     if (!chat)
-      return res
-        .status(400)
-        .json({ success: false, matchMediaessage: "Error while finding the chatId" });
+      return res.status(400).json({
+        success: false,
+        matchMediaessage: "Error while finding the chatId",
+      });
 
     if (files.length < 1)
       return res
         .status(400)
         .json({ success: "false", message: "please provide attachment!" });
 
-   // upload file here
+    // upload file here
 
     const attachments = await uploadFilesToCloudinary(files);
 
@@ -422,13 +500,12 @@ const sendAttachments = async (req, res) => {
       message: messageForRealTime,
       chatid: chatId,
     });
-    emitEvent(req, NEW_MESSAGE_ALERT, chat.members, { chatId });
+    // emitEvent(req, NEW_MESSAGE_ALERT, chat.members, { chatId });
 
     res.status(201).json({
       success: true,
       message: message,
     });
-
   } catch (err) {
     if (err.name === "CastError") {
       const path = err.path;
@@ -449,8 +526,6 @@ const sendAttachments = async (req, res) => {
 };
 
 const getChatDetails = async (req, res) => {
-
-
   try {
     if (req.query.populate === "true") {
       // will send members with name and avatar
@@ -459,7 +534,18 @@ const getChatDetails = async (req, res) => {
         .lean();
 
       if (!chat)
-        res.status(400).json({ success: false, Message: "chat not found" });
+        res.status(400).json({ success: false, message: "chat not found" });
+
+      const curChatMembers = chat.members.map((i) => i._id.toString());
+
+      if (!curChatMembers.includes(req.userId.toString())) {
+        return res
+          .status(400)
+          .json({
+            success: false,
+            message: "you are not a member of this group",
+          });
+      }
 
       return res.status(200).json({ success: true, curchat: chat });
     }
@@ -472,6 +558,16 @@ const getChatDetails = async (req, res) => {
           success: false,
           Message: "chat not found",
         });
+
+      if (!chat.members.includes(req.userId.toString())) {
+        return res
+          .status(400)
+          .json({
+            success: false,
+            message: "you are not a member of this group",
+          });
+      }
+
       return res.status(200).json({ success: true, curchat: chat });
     }
   } catch (err) {
@@ -494,12 +590,10 @@ const getChatDetails = async (req, res) => {
 };
 
 const updateGroupInfo = async (req, res) => {
-
   const { name } = req.body;
+  const chatId = req.params.id;
 
   try {
- 
-
     const curGroup = await Chat.findById(req.params.id);
 
     if (!curGroup)
@@ -527,15 +621,43 @@ const updateGroupInfo = async (req, res) => {
       };
       curGroup.avatar = avatar;
     }
-    
-
 
     await curGroup.save();
+
+    const admin = await User.findById(req.userId);
+
+    // message for real time
+    const messageForRealTime = {
+      content: `${admin.name} changed the group profile picture & name `,
+      attachments: [],
+      _id: v4(),
+      isAlert: true,
+      sender: {
+        _id: admin._id,
+        name: admin.name,
+        chat: chatId,
+        createdAt: new Date().toISOString(),
+      },
+    };
+
+    emitEvent(req, NEW_MESSAGE, curGroup.members, {
+      chatid: chatId,
+      message: messageForRealTime,
+    });
+
+    // message for db
+    await Message.create({
+      sender: req.userId,
+      content: `${admin.name} changed the group profile picture & name`,
+      isAlert: true,
+      chat: chatId,
+    });
+
+    emitEvent(req, REFETCH_CHATS, curGroup.members);
 
     res
       .status(201)
       .json({ success: true, message: "Group info changed successfully!" });
-
   } catch (err) {
     if (err.name === "CastError") {
       const path = err.path;
@@ -562,7 +684,7 @@ const deleteChat = async (req, res) => {
     if (!curGroup)
       return res
         .status(400)
-        .json({ success: false, Message: "group not found" });
+        .json({ success: false, message: "group not found" });
 
     if (
       curGroup.groupChat &&
@@ -570,7 +692,7 @@ const deleteChat = async (req, res) => {
     )
       return res
         .status(400)
-        .json({ success: false, Message: "Only Admin can delete Group" });
+        .json({ success: false, message: "Only Admin can delete Group" });
 
     if (
       !curGroup.groupChat &&
@@ -578,7 +700,7 @@ const deleteChat = async (req, res) => {
     )
       return res.status(400).json({
         success: false,
-        Message: "Do you even know what you are doing brahh?",
+        message: "Do you even know what you are doing brahh?",
       });
 
     const members = curGroup.members;
@@ -604,17 +726,20 @@ const deleteChat = async (req, res) => {
       Message.deleteMany({ chat: req.params.id }),
     ]);
 
-    emitEvent(
-      req,
-      ALERT,
-      members,
-      "Guys the group is deleted by that stupid admin!"
-    );
+    // emitEvent(
+    //   req,
+    //   ALERT,
+    //   members,
+    //   "Guys the group is deleted by that stupid admin!"
+    // );
+
     emitEvent(req, REFETCH_CHATS, members);
+
 
     return res
       .status(201)
-      .json({ success: true, Message: "Group deleted successfully!" });
+      .json({ success: true, message: "Group deleted successfully!" });
+      
   } catch (err) {
     if (err.name === "CastError") {
       const path = err.path;
@@ -643,12 +768,30 @@ const getMessages = async (req, res) => {
     const limit = 20;
     const skip = (page - 1) * limit;
 
-      const chat = await Chat.findById(chatId);
+    const chat = await Chat.findById(chatId);
 
-      if (!chat) return res.status(404).json({success: true, message: "chat not found !"});
+    if (!chat)
+      return res
+        .status(404)
+        .json({ success: true, message: "chat not found !" });
 
-      if (!chat.members.includes(req.userId.toString()))
-        return  res.status(403).json({success: true, message: "You are not allowed to access this chat !"});
+    if (!chat.members.includes(req.userId.toString()))
+      return res.status(403).json({
+        success: true,
+        message: "You are not allowed to access this chat !",
+      });
+
+    const curChat = await Chat.findById(chatId);
+
+    if (!curChat)
+      return res
+        .status(400)
+        .json({ success: false, message: "group not found !" });
+
+    if (!curChat.members.includes(req.userId.toString()))
+      return res
+        .status(400)
+        .json({ sucess: false, message: "you are not a member of this group" });
 
     const [messages, totalMessagesCount] = await Promise.all([
       Message.find({ chat: chatId })
@@ -666,7 +809,6 @@ const getMessages = async (req, res) => {
     res
       .status(200)
       .json({ success: true, messages: messages.reverse(), totalPages });
-
   } catch (err) {
     if (err.name === "CastError") {
       const path = err.path;

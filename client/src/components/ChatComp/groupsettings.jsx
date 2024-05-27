@@ -3,17 +3,20 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useAsyncMutation } from "../../hooks/hook";
 import {
+  useDeleteChatMutation,
   useLazyExitGroupQuery,
   useRemoveMembersMutation,
   useUpdateGroupInfoMutation,
 } from "../../redux/api/api";
 import AddMembers from "./AddMembers";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const GroupSettings = ({ curChat, groupsetting, addMemberWindow, chatid }) => {
-  const dispatch = useDispatch();
 
-  const { selectedMembers } = useSelector((state) => state.addmember);
+  const dispatch = useDispatch();
+  const navigate = useNavigate()
+
   const { user } = useSelector((state) => state.auth);
 
   const { _id, name, avatar, creator, groupChat, members } = curChat;
@@ -84,6 +87,17 @@ const GroupSettings = ({ curChat, groupsetting, addMemberWindow, chatid }) => {
     groupsetting.current.classList.remove("active");
   };
 
+
+  // Delete Group Handler -
+  const [deleteChatMutation, isLoadingDeleteChatMutation] = useAsyncMutation( useDeleteChatMutation );
+
+  const deleteChatHandler = async (e) => {
+
+    await deleteChatMutation( "deleting group ...", chatid)
+        groupsetting.current.classList.remove("active");
+      navigate('/')
+  };
+
   const handleImageChange = (e) => {
     setChange(true);
     if (e.target.files[0].size > 3000000) {
@@ -122,6 +136,7 @@ const GroupSettings = ({ curChat, groupsetting, addMemberWindow, chatid }) => {
         <div
           style={{
             height: "30%",
+            margin: "1rem",
             width: "100%",
             display: "flex",
             flexDirection: "column",
@@ -140,7 +155,15 @@ const GroupSettings = ({ curChat, groupsetting, addMemberWindow, chatid }) => {
             }}
           >
             <div className="gsimagediv">
-              <img src={curimage} className="gsimage" />
+              <img
+                src={curimage}
+                className="gsimage"
+                style={{
+                  height: "12rem",
+                  width: "12rem",
+                  backgroundColor: "transparent",
+                }}
+              />
             </div>
 
             <div
@@ -271,18 +294,17 @@ const GroupSettings = ({ curChat, groupsetting, addMemberWindow, chatid }) => {
                     {member?._id.toString() === user._id.toString() &&
                       " ( You )"}
                   </p>
-                  {isAdmin &&
-                    user._id.toString() === member?._id.toString() && (
-                      <span
-                        style={{
-                          fontSize: "0.7rem",
-                          color: "green",
-                          fontWeight: "600",
-                        }}
-                      >
-                        Admin
-                      </span>
-                    )}
+                  {creator.toString() === member?._id.toString() && (
+                    <span
+                      style={{
+                        fontSize: "0.7rem",
+                        color: "green",
+                        fontWeight: "600",
+                      }}
+                    >
+                      Admin
+                    </span>
+                  )}
                 </div>
                 {isAdmin &&
                   !(creator.toString() === member?._id.toString()) && (
@@ -302,8 +324,8 @@ const GroupSettings = ({ curChat, groupsetting, addMemberWindow, chatid }) => {
         <div className="gsexit" onClick={(e) => exitGroupHandler(e)}>
           <button className="gsexitbtn">Exit Group</button>
         </div>
-        <div className="clearchatdiv">
-          <button className="clearchat">Clear Chat</button>
+        <div className="clearchatdiv" onClick={(e) => deleteChatHandler(e)}>
+          <button className="clearchat">Delete Chat</button>
         </div>
       </article>
 

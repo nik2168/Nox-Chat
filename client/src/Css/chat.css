@@ -36,7 +36,7 @@
   align-items: center;
   position: relative;
 }
-.backButton{
+.backButton {
   height: 0;
   width: 0;
   display: flex;
@@ -70,9 +70,9 @@
   border: 3px solid transparent;
   transition: all 0.3s ease-in-out;
 }
-.person-dp img:hover {
+/* .person-dp img:hover {
   border: 3px solid #dfe3e8;
-}
+} */
 
 .chatsettingsSpan {
   font-size: 0.7rem;
@@ -87,11 +87,11 @@
   transition: all 0.4s ease-in-out;
 }
 
-.chatonlinespan{
-  width: 13rem;
+.chattypingspan {
+  width: 70%;
   height: 2rem;
   font-size: 0.8rem;
-  color:  yellowgreen;
+  color: yellowgreen;
 }
 
 .chat-person-div span:hover {
@@ -203,6 +203,8 @@
   width: fit-content;
   background-color: #c4cdd5;
   padding: 0.5rem;
+    padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
   border-radius: 1.4rem;
   border-bottom-left-radius: 0rem;
   position: relative;
@@ -218,7 +220,8 @@
 
 .textsinboxp {
   color: #161c24;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 530;
   padding-left: 0.5rem;
   padding-right: 0.5rem;
 }
@@ -249,6 +252,8 @@
   width: fit-content;
   background-color: #2d99ff;
   padding: 0.5rem;
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
   border-radius: 1.4rem;
   border-bottom-right-radius: 0rem;
   position: relative;
@@ -256,7 +261,8 @@
 
 .textssentp {
   color: white;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 530;
   padding-left: 0.5rem;
   padding-right: 0.5rem;
 }
@@ -271,6 +277,37 @@
   bottom: -0.8rem;
   right: -5.5rem;
   padding-left: 0.5rem;
+}
+
+.chatmessagesalert {
+  width: 100%;
+  height: fit-content;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.messagealertinnerdiv {
+  width: fit-content;
+  height: fit-content;
+  background-color: #4d555d;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.3rem;
+  padding-left: 0.8rem;
+  padding-right: 0.8rem;
+  border-radius: 1rem;
+  align-items: center;
+}
+
+.messagealertinnerdiv p {
+  font-size: 0.8rem;
+  color: #c4cdd5;
+  font-weight: 500;
 }
 
 .chat-message-div {
