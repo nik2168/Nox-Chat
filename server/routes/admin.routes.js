@@ -23,13 +23,12 @@ const { adminAuthenticate } = require("../middlewares/auth.mw");
 router.put("/login", adminValidator(), validateHandler, adminLogin);
 router.get("/logout", adminLogout);
 
-// only accessable if admin is loggedin
+// only accessable if admin is loggedIn
 router.use(adminAuthenticate)
 router.get("/", adminVerify);
 router.get("/users", getAllUsers);
 router.get("/chats", getAllChats);
 router.get("/messages", getAllMessages);
-
 router.get("/stats", getDashboard);
 
 module.exports = router;

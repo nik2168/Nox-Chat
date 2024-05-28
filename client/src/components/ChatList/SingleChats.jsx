@@ -6,6 +6,8 @@ import { Link } from "react-router-dom";
 import { getOrSaveFromStorage } from "../../lib/features";
 import { NEW_MESSAGE_ALERT } from "../../constants/events";
 import GroupChats from "./GroupsChats";
+import { motion } from "framer-motion";
+
 
 const SingleChats = ({ data, allChats, navbarref }) => {
   const { allChatsIsTyping } = useSelector((state) => state.chat); // Cur User
@@ -52,6 +54,7 @@ const handleDeleteChatOpen = (e, _id, groupChat) => {
                 <GroupChats
                   key={_id}
                   chat={chat}
+                  index={index}
                   allChats={allChats}
                   navbarref={navbarref}
                   handleDeleteChatOpen={handleDeleteChatOpen}
@@ -60,6 +63,8 @@ const handleDeleteChatOpen = (e, _id, groupChat) => {
             else
               return (
                 <div
+              
+
                   onContextMenu={(e) => handleDeleteChatOpen(e, _id, groupChat)}
                   className="person-div"
                   key={index}
@@ -80,8 +85,8 @@ const handleDeleteChatOpen = (e, _id, groupChat) => {
                     to={`/chat/${_id}`}
                     className="person-details"
                     onClick={() => {
-                      allChats.current.style.zIndex = "0"
-                      navbarref.current.style.zIndex = "0"
+                      allChats.current.style.zIndex = "0";
+                      navbarref.current.style.zIndex = "0";
                     }}
                   >
                     <h5>{name}</h5>
@@ -92,7 +97,7 @@ const handleDeleteChatOpen = (e, _id, groupChat) => {
                     )}
                   </Link>
                   <span className="person-time">
-                    {moment(messageAlert?.sender?.createdAt).format("DD/MM/YYYY")}
+                    {moment(messageAlert?.sender?.createdAt).fromNow()}
                   </span>
                   {notificationCount !== 0 && (
                     <span className="person-notification-count">

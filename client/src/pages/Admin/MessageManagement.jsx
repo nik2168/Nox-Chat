@@ -1,11 +1,12 @@
+import { Avatar, Box, Skeleton, Stack } from "@mui/material";
+import moment from "moment";
 import React, { useEffect, useState } from "react";
 import AdminLayout from "../../components/AdminLayout/AdminLayout";
-import { Avatar, Box, Stack } from "@mui/material";
 import Table from "../../components/AdminLayout/Table";
-import { dashboardData } from "../../assets/dashboarddata";
-import { fileFormat, transformImage } from "../../lib/features";
-import moment from "moment";
 import RenderAttachment from "../../components/ChatComp/RenderAttachment";
+import { useErrors } from "../../hooks/hook";
+import { fileFormat, transformImage } from "../../lib/features";
+import { useGetMessagesDataQuery } from "../../redux/api/adminApi";
 
 const columns = [
   {
@@ -91,9 +92,13 @@ const columns = [
 const Messages = () => {
   const [rows, setRows] = useState([]);
 
+
+    const { isError, error, data, refetch, isLoading } = useGetMessagesDataQuery();
+    useErrors([{ isError, error }]);
+
   useEffect(() => {
     setRows(
-      dashboardData.messages.map((i) => {
+      data.messages.map((i) => {
         return {
           ...i,
           id: i._id,
@@ -106,12 +111,16 @@ const Messages = () => {
 
   return (
     <AdminLayout>
-      <Table
-        heading={"All Messages"}
-        rows={rows}
-        columns={columns}
-        rowHeight={200}
-      />
+      {isLoading ? (
+        <Skeleton height={"100vh"} />
+      ) : (
+        <Table
+          heading={"All Messages"}
+          rows={rows}
+          columns={columns}
+          rowHeight={200}
+        />
+      )}
     </AdminLayout>
   );
 };

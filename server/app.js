@@ -100,6 +100,7 @@ io.on("connection", (socket) => {
   // will get all the users currently connected to socket
   // temp user
 
+
   userSocketIds.set(user._id.toString(), socket.id); // all the socket connected users are in this map
 
   console.log("a user connected", socket.id);
@@ -137,6 +138,8 @@ io.on("connection", (socket) => {
     const membersSockets = members.map((user) =>
       userSocketIds.get(user._id.toString())
     ); // will get all the socketIds of a sepecific chat's members to whom we need to send the message ...
+
+   
 
     io.to(membersSockets).emit(NEW_MESSAGE, {
       chatid,

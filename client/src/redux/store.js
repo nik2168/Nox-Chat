@@ -5,6 +5,7 @@ import miscSlice from "./reducer/miscslice.js";
 import chatSlice from "./reducer/chat.js";
 import createGroupSlice from "./reducer/createGroupSlice.js";
 import addMembersSlice from "./reducer/addMembersslice.js";
+import adminapi from "./api/adminApi.js";
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     create: createGroupSlice.reducer,
     addmember: addMembersSlice.reducer,
     api: api.reducer,
+    adminapi: adminapi.reducer,
   },
-  middleware: (defaultMiddleware) => [...defaultMiddleware(), api.middleware],
+  middleware: (defaultMiddleware) => [...defaultMiddleware(), api.middleware, adminapi.middleware],
 });

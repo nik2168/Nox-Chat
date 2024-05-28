@@ -1,3 +1,45 @@
+.chatsetting {
+  position: absolute;
+  top: 0rem;
+  left: 0rem;
+  z-index: 7;
+  right: 3rem;
+  height: 0;
+  width: 100%;
+  z-index: 3;
+  opacity: 0;
+  display: flex;
+  background-color: #212b36;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  overflow: hidden;
+  padding: 0.5rem;
+  transition: all 0.3s ease-in-out;
+}
+
+.chatsetting.active {
+  position: absolute;
+  top: 0rem;
+  left: 0rem;
+  z-index: 7;
+  right: 3rem;
+  height: 100%;
+  width: 100%;
+  z-index: 3;
+  opacity: 1;
+  display: flex;
+  background-color: #212b36;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  overflow: hidden;
+  padding: 0.5rem;
+  transition: all 0.3s ease-in-out;
+    overflow-y: scroll;
+}
+
+
 .groupsettings {
   position: absolute;
   top: 0rem;
@@ -17,6 +59,8 @@
   padding: 0.5rem;
   transition: all 0.3s ease-in-out;
 }
+
+
 
 .groupsettings.active {
   position: absolute;

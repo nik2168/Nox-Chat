@@ -458,9 +458,10 @@ const sendAttachments = async (req, res) => {
       });
     }
 
-    // const {chat, user}  = await Promise.all([Chat.findById(chatId), User.findById(req.userId, "name")])
-    const chat = await Chat.findById(chatId);
-    const user = await User.findById(req.userId, "name");
+      const [chat, user] = await Promise.all([
+    Chat.findById(chatId),
+    User.findById(req.userId, "name"),
+  ]);
 
     if (!chat)
       return res.status(400).json({
@@ -491,7 +492,7 @@ const sendAttachments = async (req, res) => {
       content: "",
       attachments,
       chat: chatId,
-      sender: req.userId,
+      sender: user._id,
     };
 
     const message = await Message.create(messageForDb);
@@ -500,7 +501,8 @@ const sendAttachments = async (req, res) => {
       message: messageForRealTime,
       chatid: chatId,
     });
-    // emitEvent(req, NEW_MESSAGE_ALERT, chat.members, { chatId });
+
+    emitEvent(req, NEW_MESSAGE_ALERT, chat?.members, { chatid : chatId, message: "ATTACHMENT" });
 
     res.status(201).json({
       success: true,
@@ -763,6 +765,7 @@ const getMessages = async (req, res) => {
   const chatId = req.params.id;
 
   try {
+
     const { page = 1 } = req.query;
 
     const limit = 20;
@@ -806,7 +809,7 @@ const getMessages = async (req, res) => {
 
     const totalPages = Math.ceil(totalMessagesCount / limit) || 0; // math ceil will roundoff the value
 
-    res
+   return  res
       .status(200)
       .json({ success: true, messages: messages.reverse(), totalPages });
   } catch (err) {

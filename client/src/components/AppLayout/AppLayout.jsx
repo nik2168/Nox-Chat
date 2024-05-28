@@ -57,6 +57,7 @@ const AppLayout = () => (WrapComp) => {
     const { isLoading, data, isError, error, refetch } =
       useMyChatsQuery(search);
     useErrors([{ isError, error }]);
+    
 
     const newMessagesAlert = useCallback(
       (data) => {

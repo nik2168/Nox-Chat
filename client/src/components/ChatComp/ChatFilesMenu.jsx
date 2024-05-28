@@ -13,8 +13,9 @@ const ChatFilesMenu = ({ chat, chatid }) => {
     const [sendAttachments] = useSendAttachmentsMutation()
 
   const fileChangeHandler = async (e, key) => {
-    e.preventDefault();
+
     const files = Array.from(e.target.files);
+    
     if (files.length <= 0) return;
     if (files.length > 5)
       return toast.error(`You can only send 5 ${key} at a time`);
@@ -89,7 +90,7 @@ const ChatFilesMenu = ({ chat, chatid }) => {
             fontSize: "2.3rem",
           }}
         />
-        <span>Document</span>
+        <span>File</span>
         <input
           type="file"
           id="image"

@@ -2,6 +2,8 @@ const jwt = require("jsonwebtoken");
 const Chat = require("../models/chat.model");
 const Message = require("../models/message.model");
 const User = require("../models/user.model");
+const { v4 } = require("uuid");
+
 
 const cookieObj = {
   maxAge: 15 * 60 * 1000,
@@ -24,7 +26,7 @@ try{
 
         const token = jwt.sign({key: adminSecretKey}, process.env.secret);
 
-      return  res.status(200).cookie(process.env.ADMIN_TOKEN_NAME, token, cookieObj).json({sucess: 'true', message: 'Login successfull as Admin '})
+      return  res.status(200).cookie(process.env.ADMIN_TOKEN_NAME, token, {...cookieObj, maxAge: 1000 * 60 * 15}).json({sucess: 'true', message: 'Login successfull as Admin '})
 
 }catch(err){
     res.status(400).json({success: false, message: 'error during admin login !'})
@@ -110,29 +112,45 @@ const getAllChats = async (req, res) => {
           ]);
 
           return {
+            // _id,
+            // name,
+            // totalMember: members.length,
+            // members: members.map(({ _id, name, avatar }) => ({
+            //   name,
+            //   _id,
+            //   avatar: avatar.url,
+            // })),
+            // totalMessages,
+            // avatar: members.slice(0, 3).map((member) => member.avatar.url),
+            // creator: {
+            //   name: creator?.name || "none",
+            //   _id: creator?._id || "",
+            //   avatar: creator?.avatar.url || "",
+            // },
+            // groupChat,
+            _id,
+            groupChat,
             name,
-            totalMember: members.length,
+            avatar: members.slice(0, 3).map((member) => member.avatar.url),
             members: members.map(({ _id, name, avatar }) => ({
-              name,
               _id,
+              name,
               avatar: avatar.url,
             })),
-            totalMessages,
-            avatar: avatar.url,
             creator: {
-              name: creator?.name || "none",
-              _id: creator?._id || "",
+              name: creator?.name || "None",
               avatar: creator?.avatar.url || "",
             },
-            groupChat,
+            totalMembers: members.length,
+            totalMessages,
           };
         }
       )
     );
 
-    res.status(200).json({ success: true, chats: transformChat });
+   return res.status(200).json({ success: true, chats: transformChat });
   } catch (err) {
-    res
+   return  res
       .status(400)
       .json({ success: false, message: "Error while getting all chats" });
   }
@@ -140,35 +158,43 @@ const getAllChats = async (req, res) => {
 
 const getAllMessages = async (req, res) => {
   try {
-    const allMessages = await Message.find()
-      .populate("sender", "name username avatar")
-      .populate("chat", "groupChat");
+  const messages = await Message.find({})
+    .populate("sender", "name avatar")
+    .populate("chat", "groupChat");
 
-    const transformMessage = allMessages.map(
-      ({ _id, content, sender, attachments, chat, createdAt }) => ({
-        _id: sender.username,
-        attachments: attachments || "none",
-        content,
-        sender: {
-          _id: sender._id,
-          name: sender.name,
-          avatar: sender.avatar.url,
-        },
-        chatId: chat._id,
-        groupChat: chat.groupChat,
-        createdAt,
-      })
-    );
 
-    res.status(200).json({ success: true, messages: transformMessage });
+  const transformedMessages = messages.map(
+    ({ content, attachments, _id, sender, createdAt, chat }) => ({
+      _id,
+      attachments,
+      content,
+      createdAt,
+      chat: chat?._id || v4(),
+      groupChat: chat?.groupChat || false,
+      sender: {
+        _id: sender._id,
+        name: sender.name,
+        avatar: sender.avatar?.url,
+      },
+    })
+  );
+
+  console.log( "here : ", transformedMessages[0])
+
+  return res.status(200).json({
+    success: true,
+    messages: transformedMessages,
+  });
+
   } catch (err) {
-    res
+   return  res
       .status(400)
-      .json({ success: false, message: "Error while getting all users" });
+      .json({ success: false, message: "Error while getting all messages" });
   }
 };
 
 const getDashboard = async (req, res) => {
+
   try {
     const [msgCount, chatCount, usersCount, groupChatCount] = await Promise.all(
       [
@@ -210,7 +236,7 @@ last7DaysMessages.forEach(message => {
       messageChart: messages,
     };
 
-    res.status(200).json({ success: true, messages: stats });
+    res.status(200).json({ success: true, stats: stats });
   } catch (err) {
     res
       .status(400)

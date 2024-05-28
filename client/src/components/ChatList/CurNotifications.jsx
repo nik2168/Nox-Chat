@@ -1,9 +1,9 @@
 import {
   Notifications
 } from "@mui/icons-material";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import toast from "react-hot-toast";
-import { useErrors } from "../../hooks/hook";
+import { useAsyncMutation, useErrors } from "../../hooks/hook";
 import { useFetchRequestsQuery, useRequestResponseMutation } from "../../redux/api/api";
 import { useDispatch, useSelector } from "react-redux";
 import { Badge } from "@mui/material";
@@ -19,35 +19,24 @@ const CurNotifications = () => {
 
 
    // Fetch requests for curr user
-  const { data, isError, error, isLoading, reFetch } = useFetchRequestsQuery();
+  const { data, isError, error, isLoading, refetch } = useFetchRequestsQuery();
   useErrors([{ isError, error }]);
 
-  
+  useEffect(() => {
+  refetch()
+  }, [notificationCount])
 
   // accept or decline requests handler
-       const [requestRes] = useRequestResponseMutation()
+       const [acceptRequestMutation, isLoadingAcceptReqMutation] = useAsyncMutation(useRequestResponseMutation)
 
   const handleSendRequest = async (e, accept) => {
 
-    try{
         const data = {
           requestId: e.currentTarget.value,
           accept,
         };
-           const res = await requestRes(data)
-
-           if(res?.success){
-            console.log("use socket here for users")
-                       toast.success(res?.data?.message);
-           }
-           else{
-            toast.error(res?.error?.message || "Something went wrong !")
-           }
-
-      }catch(err){
-        console.log(err)
-        toast.error("Something went wrong!")
-      }
+           await acceptRequestMutation( `${accept? "accepting" : "rejecting"} friend request`,data);
+           refetch();
   }
 
   // window close/open
@@ -146,7 +135,7 @@ const CurNotifications = () => {
                     value={_id}
                     onClick={(e) => handleSendRequest(e, false)}
                   >
-                    {<p className="cancel">cancel</p>}
+                    {<p className="cancel" style={{color: "white"}}>cancel</p>}
                   </button>
                   <button
                     style={{

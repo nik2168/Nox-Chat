@@ -35,6 +35,9 @@ import { getSocket } from "../socket";
 const GroupSettings = lazy(() =>
   import("../components/ChatComp/groupsettings")
 );
+const ChatSetting = lazy(() =>
+  import("../components/ChatComp/chatsetting.jsx")
+);
 
 
 
@@ -59,6 +62,8 @@ const Chat = ({ chatid, allChats, navbarref }) => {
 
   const groupsetting = useRef();
 
+  const chatsetting = useRef();
+
   const clearTime = useRef();
 
   const addMemberWindow = useRef();
@@ -75,8 +80,8 @@ const Chat = ({ chatid, allChats, navbarref }) => {
 
 
   useEffect(() => {
-    if (!chatDetails?.data?.curchat) return navigate("/");
-  }, [chatDetails]);
+    if (chatDetails.error) return navigate("/");
+  }, [chatDetails.error]);
 
   useErrors(error);
 
@@ -180,15 +185,26 @@ const Chat = ({ chatid, allChats, navbarref }) => {
     <Skeleton className="chat" />
   ) : (
     <section className="chat" ref={chat}>
-      {curChat.groupChat && (
-        <Suspense fallback={<Skeleton/>}>
-        <GroupSettings
-          groupsetting={groupsetting}
-          curChat={curChat}
-          addMemberWindow={addMemberWindow}
-          chatid={chatid}
+      {curChat?.groupChat ? (
+        <Suspense fallback={<Skeleton />}>
+          <GroupSettings
+            groupsetting={groupsetting}
+            curChat={curChat}
+            addMemberWindow={addMemberWindow}
+            chatid={chatid}
           />
-          </Suspense>
+        </Suspense>
+      ) : (
+        <Suspense fallback={<Skeleton />}>
+          <ChatSetting
+            chatsetting={chatsetting}
+            curChat={curChat}
+            avatar={avatar}
+            name={name}
+            addMemberWindow={addMemberWindow}
+            chatid={chatid}
+          />
+        </Suspense>
       )}
 
       <div className="chat-person-div">
@@ -204,7 +220,13 @@ const Chat = ({ chatid, allChats, navbarref }) => {
 
         <div
           className="person-dp"
-          onClick={() => groupsetting.current.classList.add("active")}
+          onClick={() => {
+            if (curChat?.groupChat) {
+              groupsetting.current.classList.add("active");
+              return;
+            }
+            chatsetting.current.classList.add("active")
+          }}
         >
           <img
             src={avatar}
@@ -256,14 +278,15 @@ const Chat = ({ chatid, allChats, navbarref }) => {
 
       <ChatSettings />
 
-      <Messages
+     {chatDetails.isLoading ? <Skeleton/> : <Messages
         user={user}
         scrollElement={scrollElement}
         allMessages={allMessages}
         chat={chat}
         chatid={chatid}
         messages={messages}
-      />
+        groupChat={curChat?.groupChat}
+      /> }
 
       <form
         className="chat-message-div"

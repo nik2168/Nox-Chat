@@ -54,13 +54,14 @@ const createUser = async (req, res) => {
     }
     return res
       .status(500)
-      .json({ message: "error while trying to signup", Error: err });
+      .json({ success: false, message: "error while trying to signup", err: err });
   }
 };
 
 // LOG IN :
 const userLogin = async (req, res) => {
   const { username, password } = req.body;
+
 
   try {
     // check if user is present

@@ -7,6 +7,8 @@ const NEW_MESSAGE = "NEW_MESSAGE";
 const START_TYPING = "START_TYPING";
 const STOP_TYPING = "STOP_TYPING";
 const MEMBER_REMOVED = "MEMBER_REMOVED";
+const ONLINE_NOW = "ONLINE_NOW";
+const OFFLINE_NOW = "OFFLINE_NOW";
 
 module.exports = {
   ALERT,
@@ -18,4 +20,6 @@ module.exports = {
   START_TYPING,
   STOP_TYPING,
   MEMBER_REMOVED,
+  ONLINE_NOW,
+  OFFLINE_NOW,
 };

@@ -1,6 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { getOrSaveFromStorage } from "../../lib/features";
 import { NEW_MESSAGE_ALERT } from "../../constants/events";
+import { FileOpen } from "@mui/icons-material";
+
 
 const initialState = {
 notificationCount: 0,
@@ -37,15 +39,14 @@ const chatSlice = createSlice({
     const index = state.newMessageAlert.findIndex((i) => i.chatid === action.payload.chatid)
     if(index !== -1) {
       state.newMessageAlert[index].count += 1
-      state.newMessageAlert[index].message = action.payload.message
+      state.newMessageAlert[index].message = action?.payload?.message
     }
     else{
       state.newMessageAlert.push({
-       chatid: action.payload.chatid,
+        chatid: action.payload.chatid,
         count: 1,
-        message: action.payload.message
-      }
-      )}},
+        message: action.payload?.message
+      });}},
       
    removeNewMessagesAlert : (state, action) => {
     state.newMessageAlert = state.newMessageAlert.filter((i) => i.chatid !== action.payload)
@@ -67,7 +68,10 @@ const chatSlice = createSlice({
     state.newGroupAlert = " "
   }
 
-}});
+},
+
+
+});
 
 export const {
   incrementNotification,

@@ -1,21 +1,29 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import '../../Css/admin.css'
 import { usePassword } from '../../hooks/InputValidator';
 import { Navigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { adminLogin, getAdmin } from '../../redux/thunks/admin';
 
 const AdminLogin = () => {
 
-    const isAdmin = true;
+    // const isAdmin = false;
 
-  const { pass, setpass, passFlag, passErr } = usePassword("");
+    const { isAdmin } = useSelector((state) => state.auth) 
+     const dispatch = useDispatch() 
 
+const [pass, setpass] = useState('')
 
       const signInSubmitHandler = (e) => {
         e.preventDefault();
-      if (!passFlag) setcheck(passErr);
-      else setcheck('')
-        console.log("Sign In");
+    
+      dispatch(adminLogin(pass))
       };
+
+      useEffect(() => {
+        dispatch(getAdmin())
+      }, [dispatch])
+
 
       if(isAdmin) return <Navigate to='/admin/dashboard' />
 

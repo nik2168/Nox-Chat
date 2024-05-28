@@ -4,9 +4,11 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { transformImage } from "../../lib/features";
 import { Delete } from "@mui/icons-material";
+import { motion } from "framer-motion";
 
 
-const GroupChats = ({ allChats, chat, navbarref, handleDeleteChatOpen }) => {
+
+const GroupChats = ({ allChats, chat, navbarref, handleDeleteChatOpen, index }) => {
   const { allChatsIsTyping } = useSelector((state) => state.chat); // Cur User
 
   const { newMessageAlert } = useSelector((state) => state.chat);
@@ -36,6 +38,7 @@ const GroupChats = ({ allChats, chat, navbarref, handleDeleteChatOpen }) => {
   return (
     <>
       <div
+    
         // onContextMenu={(e) => handleDeleteChatOpen(e, _id, groupChat)}
         className="person-div"
       >
@@ -70,7 +73,7 @@ const GroupChats = ({ allChats, chat, navbarref, handleDeleteChatOpen }) => {
           )}
         </Link>
         <span className="person-time">
-          {moment(messageAlert?.sender?.createdAt).format("DD/MM/YYYY")}
+          {moment(messageAlert?.sender?.createdAt).fromNow()}
         </span>
         {notificationCount !== 0 && (
           <span className="person-notification-count">{notificationCount}</span>

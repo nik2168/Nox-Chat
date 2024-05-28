@@ -32,13 +32,12 @@ const adminAuthenticate = (req, res, next) => {
 
   try {
     const token = req.cookies[process.env.ADMIN_TOKEN_NAME];
-    console.log(token, "yes")
 
     // If there is no token
     if (!token)
       return res.status(400).json({
         success: false,
-        message: "Please login to access this route",
+        message: "Please login to access this route, token not here",
       });
 
     const decode = jwt.verify(token, process.env.secret);

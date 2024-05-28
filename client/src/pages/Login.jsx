@@ -14,7 +14,9 @@ import { userExists, userNotExists } from "../redux/reducer/authslice"; // alt +
 import toast from "react-hot-toast";
 
 const Login = () => {
+  
   const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false)
 
   const contain = useRef(); // for container's singnin & singup animation
   const currentImage = useRef();
@@ -26,9 +28,15 @@ const Login = () => {
   const [file, setFile] = useState("");
   const [image, setImage] = useState("");
 
+
+
   // SIGN UP
   const signUpSubmitHandler = async (e) => {
     e.preventDefault();
+
+    const toastId = toast.loading("Signing Up...");
+
+    setIsLoading(true)
 
     if (!nameFlag) setcheck(nameErr);
     else if (!userFlag) setcheck(userErr);
@@ -53,23 +61,27 @@ const Login = () => {
     };
 
     try {
-      const data = await axios.post(
+  const {data} = await axios.post(
         `${server}/api/v1/user/signup`,
         formdata,
         config
       );
       dispatch(userExists(data?.user));
-      toast.success(data?.message);
+      toast.success(data?.message, {id:toastId});
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Something went wrong");
+      toast.error(err?.response?.data?.message || "Something went wrong", {id: toastId});
     } finally {
-      setIsLoading(false);
+          setIsLoading(false);
     }
   };
 
   // LOGIN
   const signInSubmitHandler = async (e) => {
+
     e.preventDefault();
+        const toastId = toast.loading("Signing Ip...");
+
+    setIsLoading(true)
 
     const config = {
       withCredentials: true,
@@ -85,13 +97,16 @@ const Login = () => {
         config
       );
       dispatch(userExists(data?.user));
-      toast.success(data.message);
+      toast.success(data?.message, {id: toastId});
     } catch (err) {
       console.log(err);
-      toast.error(err?.response?.data?.message || "something went wrong !");
+      toast.error(err?.response?.data?.message || "something went wrong !", {id: toastId});
+    }finally{
+      setIsLoading(false)
     }
   };
 
+  
   // IMG
   const handleImageChange = (e) => {
     if (e.target.files[0].size > 3000000) {
@@ -201,7 +216,7 @@ const Login = () => {
               {check}
             </span>
           )}
-          <button type="submit">Sign Up</button>
+          <button disabled={isLoading} type="submit">Sign Up</button>
         </form>
       </div>
 
@@ -241,7 +256,7 @@ const Login = () => {
             </span>
           )}
           <a href="#">Forget Your Password?</a>
-          <button>Sign In</button>
+          <button disabled={isLoading}>Sign In</button>
         </form>
       </div>
 

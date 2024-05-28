@@ -202,13 +202,37 @@
   height: fit-content;
   width: fit-content;
   background-color: #c4cdd5;
-  padding: 0.5rem;
-    padding-top: 0.4rem;
-  padding-bottom: 0.4rem;
-  border-radius: 1.4rem;
+  padding: 0.2rem;
+  padding-top: 0.3rem;
+  padding-bottom: 0.3rem;
+  border-radius: 0.6rem;
   border-bottom-left-radius: 0rem;
   position: relative;
 }
+
+
+.inboxAttachmentsOuterdiv {
+  width: 100%;
+  height: fit-content;
+  padding: 0.7rem;
+  padding-right: 6rem;
+}
+
+
+.inboxAttachments {
+  height: fit-content;
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border-radius: 0.6rem;
+  background-color: #c4cdd5;
+  padding: 0.3rem;
+  position: relative;
+}
+
 
 .textsender {
   font-weight: 800;
@@ -227,13 +251,16 @@
 }
 
 .textsinboxtimeStamps {
-  font-size: 0.6rem;
+  font-size: 0.63rem;
   font-weight: 1000;
-  color: #c4cdd5;
-  position: absolute;
-  bottom: -1rem;
-  left: -0.3rem;
-  padding-left: 0.5rem;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  color: #212b36;
+    padding-left: 0.5rem;
+  padding-right: 0.5rem;
 }
 
 .textssentOuterDiv {
@@ -247,15 +274,42 @@
   padding-left: 6rem;
 }
 
+
 .textssentdiv {
   height: fit-content;
   width: fit-content;
   background-color: #2d99ff;
-  padding: 0.5rem;
-  padding-top: 0.4rem;
-  padding-bottom: 0.4rem;
-  border-radius: 1.4rem;
-  border-bottom-right-radius: 0rem;
+ padding: 0.2rem;
+  padding-top: 0.3rem;
+  padding-bottom: 0.3rem;
+  border-radius: 0.6rem;
+  border-bottom-left-radius: 0rem;
+  position: relative;
+}
+
+.sentAttachmentsOuterdiv {
+  width: 100%;
+  height: fit-content;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0.6rem;
+  padding-left: 6rem;
+}
+
+
+.sentAttachments {
+  height: fit-content;
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border-radius: 0.6rem;
+  background-color: #637381;
+  padding: 0.3rem;
   position: relative;
 }
 
@@ -268,15 +322,16 @@
 }
 
 .textssenttimeStamps {
-  font-size: 0.6rem;
-  font-weight: 800;
-  width: 8rem;
-  color: #dfe3e8;
-  color: #c4cdd5;
-  position: absolute;
-  bottom: -0.8rem;
-  right: -5.5rem;
+   font-size: 0.63rem;
+  font-weight: 1000;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
   padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  color: #f9fafb;
 }
 
 .chatmessagesalert {
