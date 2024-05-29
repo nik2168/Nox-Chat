@@ -7,14 +7,17 @@ import { getOrSaveFromStorage } from "../../lib/features";
 import { NEW_MESSAGE_ALERT } from "../../constants/events";
 import GroupChats from "./GroupsChats";
 import { motion } from "framer-motion";
+import { useGetLastMessageTimeQuery } from "../../redux/api/api";
+import { useErrors } from "../../hooks/hook";
 
 
 const SingleChats = ({
-  data,
+  chat,
   allChats,
   navbarref,
   profilewindow,
   setCurChatId,
+  index
 }) => {
   
   const { allChatsIsTyping } = useSelector((state) => state.chat); // Cur User
@@ -33,37 +36,38 @@ const SingleChats = ({
   };
 
 
-  const myChats = data?.mychats;
+        const { _id, name, avatar, creator, members, groupChat } = chat;
+
+        const {isLoading, isError, error, data, refetch} = useGetLastMessageTimeQuery(_id)
+        const lastMessageTime = data?.lastMessage?.createdAt
+        let lastMsgData = "..."
+                if(lastMessageTime)  lastMsgData = moment(data?.lastMessage?.createdAt).fromNow();
+        useErrors([{isError, error}])
+
+
+              let isOnline = false;
+              if (!groupChat) {
+                const otherMember = members[0]?._id;
+                if (onlineMembers.includes(otherMember.toString()))
+                  isOnline = true;
+              }
+
+              const msgAlert = newMessageAlert?.find(
+                (i) => i.chatid.toString() === _id.toString()
+              );
+              const notificationCount = msgAlert?.count || 0;
+              const messageAlert = msgAlert?.message || "No new message";
+              let msg = messageAlert?.content?.slice(0, 18) || [];
+              if (msg.length === 18) msg += "...";
+
+              let startTyping = false;
+              if (_id.toString() === allChatsIsTyping.typingChatid.toString())
+                startTyping = allChatsIsTyping.isTyping;
+
 
   return (
     <>
-      {myChats?.map((chat, index) => {
-        const { _id, name, avatar, creator, members, groupChat } = chat;
-
-
-
-        let isOnline = false;
-        if(!groupChat ){
-          const otherMember = members[0]?._id
-          if (onlineMembers.includes(otherMember.toString())) isOnline = true;
-        }
-
-
-        const msgAlert = newMessageAlert?.find(
-          (i) => i.chatid.toString() === _id.toString()
-        );
-        const notificationCount = msgAlert?.count || 0;
-        const messageAlert = msgAlert?.message || "No new message";
-        let msg = messageAlert?.content?.slice(0, 18) || [];
-        if (msg.length === 18) msg += "...";
-
-
-        let startTyping = false;
-        if (_id.toString() === allChatsIsTyping.typingChatid.toString())
-          startTyping = allChatsIsTyping.isTyping;
-
-        if (groupChat)
-          return (
+     {groupChat ? (
             <GroupChats
               key={_id}
               chat={chat}
@@ -74,9 +78,7 @@ const SingleChats = ({
               profilewindow={profilewindow}
               setCurChatId={setCurChatId}
             />
-          );
-        else
-          return (
+          ) : (
             <div
               onContextMenu={(e) => handleDeleteChatOpen(e, _id, groupChat)}
               className="person-div"
@@ -118,17 +120,20 @@ const SingleChats = ({
                   <span>{msg}</span>
                 )}
               </Link>
-              <span className="person-time">
-                {moment(messageAlert?.sender?.createdAt).fromNow()}
-              </span>
+
+             {isLoading ? <Skeleton/> : (<span className="person-time">
+                {lastMsgData}
+              </span>)
+              }
+              
               {notificationCount !== 0 && (
                 <span className="person-notification-count">
                   {notificationCount}
                 </span>
               )}
             </div>
-          );
-      })}
+          ) }
+
     </>
   );
 };

@@ -897,6 +897,80 @@ const getMessages = async (req, res) => {
   }
 };
 
+const getLastMessageTime = async (req, res) => {
+  const chatId = req.params.id;
+
+  try {
+
+    const { page = 1 } = req.query;
+
+    const limit = 20;
+    const skip = (page - 1) * limit;
+
+    const chat = await Chat.findById(chatId);
+
+    if (!chat)
+      return res
+        .status(404)
+        .json({ success: true, message: "chat not found !" });
+
+    if (!chat.members.includes(req.userId.toString()))
+      return res.status(403).json({
+        success: true,
+        message: "You are not allowed to access this chat !",
+      });
+
+    const curChat = await Chat.findById(chatId);
+
+    if (!curChat)
+      return res
+        .status(400)
+        .json({ success: false, message: "group not found !" });
+
+    if (!curChat.members.includes(req.userId.toString()))
+      return res
+        .status(400)
+        .json({ sucess: false, message: "you are not a member of this group" });
+
+    const [messages, totalMessagesCount] = await Promise.all([
+      Message.find({ chat: chatId })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate("sender", "name avatar")
+        .lean(),
+
+      Message.countDocuments({ chat: chatId }),
+    ]);
+
+    const totalPages = Math.ceil(totalMessagesCount / limit) || 0; // math ceil will roundoff the value
+
+    // const transformMessages = messages.reverse()
+    const lastMsg = messages[0]
+
+   return  res
+      .status(200)
+      .json({ success: true, lastMessage: lastMsg, totalPages });
+      
+  } catch (err) {
+    if (err.name === "CastError") {
+      const path = err.path;
+      err.message = `Invalid format of ${path}`;
+
+      return res.status(400).json({
+        success: false,
+        message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
+      });
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: "error while fetching the last messages  !",
+      Error: err,
+    });
+  }
+};
+
 module.exports = {
   newGroupChat,
   getMyChats,
@@ -910,4 +984,5 @@ module.exports = {
   deleteChat,
   getMessages,
   getChatProfileData,
+  getLastMessageTime,
 };

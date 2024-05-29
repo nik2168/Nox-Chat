@@ -15,6 +15,7 @@ const {
   deleteChat,
   getMessages,
   getChatProfileData,
+  getLastMessageTime,
 } = require("../controllers/chat.controller.js");
 
 // middle wares
@@ -75,6 +76,8 @@ router.get(
   validateHandler,
   getMessages
 );
+
+router.get("/getlastmessagetime/:id", getLastMessageTime);
 
 router
   .route("/:id")

@@ -2,9 +2,10 @@ import { FilterList, Search } from "@mui/icons-material";
 import { Skeleton } from "@mui/material";
 import React, { Suspense, lazy, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-const SingleChats = lazy(() =>
-  import("../ChatList/SingleChats")
-);
+import SingleChats from "../ChatList/SingleChats";
+// const SingleChats = lazy(() =>
+//   import("../ChatList/SingleChats")
+// );
 const CreateNewGroup = lazy(() =>
   import("./CreateNewGroup")
 );
@@ -38,7 +39,7 @@ const AllChats = ({
     console.log(`User with id = ${userid} deleted`);
   };
 
-    // const myChats = data?.mychats;
+    const myChats = data?.mychats;
 
 
   return (
@@ -94,23 +95,28 @@ const AllChats = ({
         <hr />
       </div>
 
-      <article className="allchats-users">
+      {isLoading ? <Skeleton/> : ( 
+        <article className="allchats-users">
         {curnav === "chats" &&
-          (isLoading ? (
-            <Skeleton />
-          ) : (
-            <Suspense fallback={<Skeleton />}>
-              <SingleChats
-                data={data}
+
+                 myChats?.map((chat, index) => {
+
+             return <SingleChats
+
+                chat={chat}
                 handleDeleteChatOpen={handleDeleteChatOpen}
                 allChats={allChats}
                 navbarref={navbarref}
                 profilewindow={profilewindow}
                 setCurChatId={setCurChatId}
+                index={index}
               />
-            </Suspense>
-          ))}
+
+                 }
+
+          )}
       </article>
+      )}
     </section>
   );
 };

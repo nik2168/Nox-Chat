@@ -190,7 +190,17 @@ const api = createApi({
       }),
       keepUnusedDataFor: 0,
     }),
+
+    getLastMessageTime: builder.query({
+      query: (chatid) => ({
+        url: `/chat/getlastmessagetime/${chatid}`,
+        credentials: "include",
+      }),
+invalidatesTags: ["LastMessage"]
+    }),
     
+   
+
   }),
 });
 
@@ -216,4 +226,5 @@ export const {
   useUpdateGroupInfoMutation,
   useDeleteChatMutation,
   useLazyGetChatProfileDataQuery,
+  useGetLastMessageTimeQuery,
 } = api;
