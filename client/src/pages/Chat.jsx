@@ -49,6 +49,7 @@ const ChatSetting = lazy(() =>
 const Chat = ({ chatid, allChats, navbarref }) => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth); // Cur User
+  const { onlineMembers } = useSelector((state) => state.chat); // Cur User
   const { isTyping } = useSelector((state) => state.chat);
   const { allChatsIsTyping } = useSelector((state) => state.chat); // Cur User
   const { newGroupAlert } = useSelector((state) => state.chat); // Cur User
@@ -185,11 +186,16 @@ const Chat = ({ chatid, allChats, navbarref }) => {
   const curChatMembersName = curChat?.members.map((i) => i.name).join(", ");
    let avatar = curChat?.avatar?.url;
    let name = curChat?.name
+   let otherMember;
    if(!curChat?.groupChat) {
-    const otherMember = curChat?.members.find((i) => i._id.toString() !== user._id.toString())
+     otherMember = curChat?.members.find((i) => i._id.toString() !== user._id.toString())
     avatar = otherMember?.avatar?.url
     name = otherMember?.name
    }
+
+   let isOnline = false;
+   if(!curChat?.groupChat && onlineMembers.includes(otherMember?._id)) isOnline = true;
+
 
   return chatDetails?.isLoading ? (
     <Skeleton className="chat" />
@@ -244,7 +250,7 @@ const Chat = ({ chatid, allChats, navbarref }) => {
             className="person-image"
             style={{ height: "70px", width: "70px" }}
           />
-          {/* {isOnline && <div className="online"></div>} */}
+          {isOnline && <div className="online"></div>}
         </div>
 
         <div className="chat-person-details">
@@ -269,6 +275,7 @@ const Chat = ({ chatid, allChats, navbarref }) => {
               </p>
             )
           )}
+          {!isTyping && !curChat?.groupChat && isOnline && <p className="chattypingspan">online</p> || !curChat?.groupChat && isOnline && <p className="chattypingspan">offline</p>}
           {/* {isOnline ? <span>Online</span> : <span>Offline</span>} */}
         </div>
 

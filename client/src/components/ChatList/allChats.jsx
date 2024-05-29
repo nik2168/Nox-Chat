@@ -1,6 +1,7 @@
 import { FilterList, Search } from "@mui/icons-material";
 import { Skeleton } from "@mui/material";
 import React, { Suspense, lazy, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 const SingleChats = lazy(() =>
   import("../ChatList/SingleChats")
 );
@@ -25,6 +26,8 @@ const AllChats = ({
   search,
 }) => {
 
+  const {onlinemeMembers} = useSelector((state) => state.chat)
+
     const profilewindow = useRef();
 
 
@@ -34,6 +37,9 @@ const AllChats = ({
     e.preventDefault();
     console.log(`User with id = ${userid} deleted`);
   };
+
+    // const myChats = data?.mychats;
+
 
   return (
     <section className="allchats" ref={allChats}>

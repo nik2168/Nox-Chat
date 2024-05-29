@@ -16,7 +16,9 @@ const SingleChats = ({
   profilewindow,
   setCurChatId,
 }) => {
+  
   const { allChatsIsTyping } = useSelector((state) => state.chat); // Cur User
+    const { onlineMembers } = useSelector((state) => state.chat);
 
   const { newMessageAlert } = useSelector((state) => state.chat);
   const { typing } = useSelector((state) => state.chat);
@@ -30,12 +32,22 @@ const SingleChats = ({
     console.log(_id, groupChat);
   };
 
+
   const myChats = data?.mychats;
 
   return (
     <>
       {myChats?.map((chat, index) => {
-        const { _id, name, avatar, creator, groupChat } = chat;
+        const { _id, name, avatar, creator, members, groupChat } = chat;
+
+
+
+        let isOnline = false;
+        if(!groupChat ){
+          const otherMember = members[0]?._id
+          if (onlineMembers.includes(otherMember.toString())) isOnline = true;
+        }
+
 
         const msgAlert = newMessageAlert?.find(
           (i) => i.chatid.toString() === _id.toString()
@@ -44,6 +56,7 @@ const SingleChats = ({
         const messageAlert = msgAlert?.message || "No new message";
         let msg = messageAlert?.content?.slice(0, 18) || [];
         if (msg.length === 18) msg += "...";
+
 
         let startTyping = false;
         if (_id.toString() === allChatsIsTyping.typingChatid.toString())
@@ -87,7 +100,7 @@ const SingleChats = ({
                   className="person-image"
                   style={{ height: "70px", width: "70px" }}
                 />
-                {false && <div className="online"></div>}
+                {isOnline && <div className="online"></div>}
               </button>
 
               <Link

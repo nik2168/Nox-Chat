@@ -3,74 +3,82 @@ import { getOrSaveFromStorage } from "../../lib/features";
 import { NEW_MESSAGE_ALERT } from "../../constants/events";
 import { FileOpen } from "@mui/icons-material";
 
-
 const initialState = {
-notificationCount: 0,
-newMessageAlert: getOrSaveFromStorage({key: NEW_MESSAGE_ALERT, get: true}) || [
-  {
-    chatid: '',
-    count: 0,
-    message: '',
-  }
-],
-isTyping: false,
-allChatsIsTyping : {
+  onlineMembers: [],
+  notificationCount: 0,
+  newMessageAlert: getOrSaveFromStorage({
+    key: NEW_MESSAGE_ALERT,
+    get: true,
+  }) || [
+    {
+      chatid: "",
+      count: 0,
+      message: "",
+    },
+  ],
   isTyping: false,
-  typingChatid: '',
-  name: '',
-},
-newGroupAlert: ""
+  allChatsIsTyping: {
+    isTyping: false,
+    typingChatid: "",
+    name: "",
+  },
+  newGroupAlert: "",
 };
 
 const chatSlice = createSlice({
   name: "chat",
   initialState,
   reducers: {
+    incrementNotification: (state) => {
+      state.notificationCount += 1;
+    },
 
-   incrementNotification : (state) => {
-    state.notificationCount += 1;
-   },
+    resetNotification: (state) => {
+      state.notificationCount = 0;
+    },
 
-   resetNotification : (state) => {
-    state.notificationCount = 0;
-   },
+    setNewMessagesAlert: (state, action) => {
+      const index = state.newMessageAlert.findIndex(
+        (i) => i.chatid === action.payload.chatid
+      );
+      if (index !== -1) {
+        state.newMessageAlert[index].count += 1;
+        state.newMessageAlert[index].message = action?.payload?.message;
+      } else {
+        state.newMessageAlert.push({
+          chatid: action.payload.chatid,
+          count: 1,
+          message: action.payload?.message,
+        });
+      }
+    },
 
-   setNewMessagesAlert : (state, action) => {
-    const index = state.newMessageAlert.findIndex((i) => i.chatid === action.payload.chatid)
-    if(index !== -1) {
-      state.newMessageAlert[index].count += 1
-      state.newMessageAlert[index].message = action?.payload?.message
-    }
-    else{
-      state.newMessageAlert.push({
-        chatid: action.payload.chatid,
-        count: 1,
-        message: action.payload?.message
-      });}},
-      
-   removeNewMessagesAlert : (state, action) => {
-    state.newMessageAlert = state.newMessageAlert.filter((i) => i.chatid !== action.payload)
+    removeNewMessagesAlert: (state, action) => {
+      state.newMessageAlert = state.newMessageAlert.filter(
+        (i) => i.chatid !== action.payload
+      );
+    },
+
+    setTyping: (state, action) => {
+      state.isTyping = action.payload;
+    },
+
+    setAllChatsTyping: (state, action) => {
+      state.allChatsIsTyping = action.payload;
+    },
+
+    setNewGroupAlert: (state, action) => {
+      state.newGroupAlert = action.payload;
+    },
+
+    removeNewGroupAlert: (state) => {
+      state.newGroupAlert = " ";
+    },
+
+    setOnlineMembers: (state, action) => {
+      state.onlineMembers = action.payload;
+    },
   },
-
-  setTyping: (state, action) => {
-    state.isTyping = action.payload
-  },
-
-  setAllChatsTyping : (state, action) => {
-    state.allChatsIsTyping = action.payload
-  },
-
-  setNewGroupAlert: (state, action) => {
-    state.newGroupAlert = action.payload
-  },
-
-  removeNewGroupAlert: (state) => {
-    state.newGroupAlert = " "
-  }
-
-},
-
-
 });
 
 export const {
@@ -82,6 +90,7 @@ export const {
   setAllChatsTyping,
   setNewGroupAlert,
   removeNewGroupAlert,
+  setOnlineMembers,
 } = chatSlice.actions;
 
 export default chatSlice;

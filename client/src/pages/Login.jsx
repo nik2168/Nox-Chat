@@ -79,7 +79,7 @@ const Login = () => {
   const signInSubmitHandler = async (e) => {
 
     e.preventDefault();
-        const toastId = toast.loading("Signing Ip...");
+        const toastId = toast.loading("Signing In...");
 
     setIsLoading(true)
 

@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import "../../Css/allchats.css";
 import "../../Css/chat.css";
 import "../../Css/creategroup.css";
@@ -32,6 +32,7 @@ import {
   incrementNotification,
   setAllChatsTyping,
   setNewMessagesAlert,
+  setOnlineMembers,
   setTyping,
 } from "../../redux/reducer/chat.js";
 import { useNavigate, useParams } from "react-router-dom";
@@ -47,6 +48,10 @@ const AppLayout = () => (WrapComp) => {
     const { chatid } = useParams();
     const allChats = useRef(); // ref to chat
     const navbarref = useRef(); // ref to chat
+    const [playsound, setPlaySound] = useState(false)
+
+
+  
 
     const [curnav, setnav] = useState("chats");
     const dispatch = useDispatch();
@@ -70,6 +75,7 @@ const AppLayout = () => (WrapComp) => {
     );
 
     const newRequestAlert = useCallback(() => {
+    
       dispatch(incrementNotification());
     }, [dispatch]);
 
@@ -118,9 +124,9 @@ const AppLayout = () => (WrapComp) => {
 
     const onlineUsersListener = useCallback(
       (data) => {
-       console.log( "online Users :",data)
+        dispatch(setOnlineMembers(data))
       },
-      []
+      [dispatch]
     );
 
     const eventHandler = {

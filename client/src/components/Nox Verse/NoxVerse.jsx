@@ -8,9 +8,12 @@ import CurNotifications from "../ChatList/CurNotifications";
 import AddFriends from "../ChatList/addFriend";
 import { useAsyncMutation } from "../../hooks/hook";
 import { useLazySearchUserQuery, useSendRequestMutation } from "../../redux/api/api";
+import { useSelector } from "react-redux";
 
 
 const NoxVerse = ({ curnav, allChats }) => {
+
+  const {onlineMembers} = useSelector((state) => state.chat)
 
 
 const [search, setSearch] = useState("");
@@ -98,6 +101,10 @@ const addUserWindow = useRef(); // open close window
       <article className="noxverse-users">
 
         {  users.map(({ name, _id, avatar, bio, username }) => {
+
+  let isOnline = false;
+  if(onlineMembers.includes(_id.toString())) isOnline = true;
+
           return (
             <li className="user-div" key={_id} value={_id}>
               <div
@@ -113,6 +120,7 @@ const addUserWindow = useRef(); // open close window
                   style={{ height: "100px", width: "100px" }}
                   className="user-image"
                 />
+                {isOnline && <div className="noxverseonline"></div>}
               </div>
 
               <div className="userinfo">

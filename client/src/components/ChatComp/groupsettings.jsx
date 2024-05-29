@@ -18,8 +18,11 @@ const GroupSettings = ({ curChat, groupsetting, addMemberWindow, chatid }) => {
   const navigate = useNavigate()
 
   const { user } = useSelector((state) => state.auth);
+  const { onlineMembers } = useSelector((state) => state.chat);
 
   const { _id, name, avatar, creator, groupChat, members } = curChat;
+
+
 
   let isAdmin = false;
   if (user._id.toString() === creator.toString()) isAdmin = true;
@@ -275,6 +278,10 @@ const GroupSettings = ({ curChat, groupsetting, addMemberWindow, chatid }) => {
             // let isAdmin = false;
             // console.log(creator);
             // if (member?._id === creator.toString()) isAdmin = true;
+              let isOnline = false;
+              if (onlineMembers.includes(member?._id.toString())) isOnline = true;
+
+              console.log(member?.name, isOnline)
 
             return (
               <li key={member?._id} className="groupsettingsmembers">
@@ -288,6 +295,8 @@ const GroupSettings = ({ curChat, groupsetting, addMemberWindow, chatid }) => {
                   className="groupsettingsimage"
                   alt=""
                 />
+                {isOnline && <div className="groupsettingsonline"></div>}
+
                 <div style={{ width: "70%" }}>
                   <p>
                     {member.name}{" "}
