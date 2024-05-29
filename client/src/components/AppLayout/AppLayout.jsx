@@ -5,6 +5,7 @@ import "../../Css/creategroup.css";
 import "../../Css/groupsettings.css";
 import "../../Css/login.css";
 import "../../Css/navbar.css";
+import "../../Css/profilewindow.css";
 import "../../Css/responsiveAllChats.css";
 import "../../Css/responsiveChat.css";
 import "../../Css/responsiveNavbar.css";
@@ -18,6 +19,7 @@ import {
   MEMBER_REMOVED,
   NEW_MESSAGE_ALERT,
   NEW_REQUEST,
+  ONLINE_USERS,
   REFETCH_CHATS,
   START_TYPING,
   STOP_TYPING,
@@ -114,6 +116,13 @@ const AppLayout = () => (WrapComp) => {
       [refetch, navigate]
     );
 
+    const onlineUsersListener = useCallback(
+      (data) => {
+       console.log( "online Users :",data)
+      },
+      []
+    );
+
     const eventHandler = {
       [NEW_MESSAGE_ALERT]: newMessagesAlert,
       [NEW_REQUEST]: newRequestAlert,
@@ -121,6 +130,7 @@ const AppLayout = () => (WrapComp) => {
       [STOP_TYPING]: stopTypingListner,
       [REFETCH_CHATS]: refetchListner,
       [MEMBER_REMOVED]: refetchNewMembers,
+      [ONLINE_USERS] : onlineUsersListener,
     };
 
     useSocketEvents(socket, eventHandler);

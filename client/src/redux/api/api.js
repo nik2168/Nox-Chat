@@ -4,7 +4,7 @@ import { server } from "../../constants/config";
 const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({ baseUrl: `${server}/api/v1` }),
-  tagTypes: ["Chat", "User", "Message", "Groups"],
+  tagTypes: ["Chat", "User", "Message", "Groups", "ChatProfile"],
 
   endpoints: (builder) => ({
     myChats: builder.query({
@@ -165,7 +165,7 @@ const api = createApi({
     }),
 
     updateGroupInfo: builder.mutation({
-      query: ({formdata, chatid}) => ({
+      query: ({ formdata, chatid }) => ({
         url: `/chat/${chatid}`,
         method: "POST",
         credentials: "include",
@@ -183,7 +183,14 @@ const api = createApi({
       invalidatesTags: ["Chat", "Groups"],
     }),
 
-
+    getChatProfileData: builder.query({
+      query: (chatid) => ({
+        url: `/chat/getchatprofiledata/${chatid}`,
+        credentials: "include",
+      }),
+      keepUnusedDataFor: 0,
+    }),
+    
   }),
 });
 
@@ -208,4 +215,5 @@ export const {
   useLazyExitGroupQuery,
   useUpdateGroupInfoMutation,
   useDeleteChatMutation,
+  useLazyGetChatProfileDataQuery,
 } = api;

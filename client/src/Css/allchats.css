@@ -6,12 +6,22 @@
   z-index: 4;
 }
 
+.allchats.lightblur .allchats-header{
+  filter: blur(3px);
+}
+.allchats.lightblur .allchats-users{
+  filter: blur(3px);
+}
+
+
 .allchats-header {
   height: 23vh;
   width: 30rem;
   position: absolute;
   background-color: #161c24;
   z-index: 1;
+    transition: all 0.4s ease-in;
+
 }
 
 .allchats-div {
@@ -175,6 +185,8 @@
   height: 100vh;
   z-index: 0;
   overflow-y: scroll;
+    transition: all 0.4s ease-in;
+
 }
 
 .person-div {
@@ -190,7 +202,6 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  overflow: hidden;
   color: #f9fafb;
   position: relative;
 }
@@ -198,6 +209,8 @@
 .person-dp {
   width: 110px;
   height: 100%;
+  background-color: transparent;
+  border: none;
   display: flex;
   flex-direction: row;
   justify-content: center;

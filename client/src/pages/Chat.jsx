@@ -16,6 +16,8 @@ import ChatSettings from "../components/ChatComp/ChatSettings";
 import Messages from "../components/ChatComp/Messages";
 import {
   ALERT,
+  CHAT_JOINED,
+  CHAT_LEAVE,
   NEW_MESSAGE,
   START_TYPING,
   STOP_TYPING,
@@ -89,6 +91,7 @@ const Chat = ({ chatid, allChats, navbarref }) => {
   const curChat = chatDetails?.data?.curchat;
   const members = curChat?.members;
 
+
   // infinite scroll
   const { data: oldMessages, setData: setOldMessages } = useInfiniteScrollTop(
     scrollElement,
@@ -99,15 +102,22 @@ const Chat = ({ chatid, allChats, navbarref }) => {
   );
 
   useEffect(() => {
+   if(members)
+    socket.emit(CHAT_JOINED, {userId: user._id, members})
+
     dispatch(removeNewMessagesAlert(chatid));
+
 
     return () => {
       setOldMessages([]);
       setPage(1);
       setMessages([]);
       setcurmessage("");
+       if(members)
+      socket.emit(CHAT_LEAVE, { userId: user._id, members });
     };
-  }, [chatid]);
+
+  }, [chatid, members]);
 
   const allMessages = [...oldMessages, ...messages];
 

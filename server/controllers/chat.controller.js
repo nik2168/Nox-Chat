@@ -527,6 +527,72 @@ const sendAttachments = async (req, res) => {
   }
 };
 
+const getChatProfileData = async (req, res) => {
+const chatId = req.params.id
+
+  try {
+      const chat = await Chat.findById(chatId)
+        .populate("members", "name avatar")
+        .lean();
+
+      if (!chat)
+        res.status(400).json({ success: false, message: "chat not found" });
+
+      const curChatMembers = chat.members.map((i) => i._id.toString());
+
+      if (!curChatMembers.includes(req.userId.toString())) {
+        return res
+          .status(400)
+          .json({
+            success: false,
+            message: "you are not a member of this group",
+          });
+      }
+
+      let profileData;
+
+      if(!chat.groupChat){
+
+        const othermember = chat.members.find((i) => i._id.toString() !== req.userId.toString())
+       
+        const otherUser = await User.find({_id : othermember._id})
+        profileData = otherUser[0]
+     
+      }
+      else{
+        profileData = {
+          _id: chat._id,
+          avatar: chat.avatar,
+          createdAt: chat.createdAt,
+          name: chat.name,
+          creator: chat.creator,
+        }
+      }
+
+
+      return res.status(200).json({ success: true,  profileData });
+
+  } catch (err) {
+       if (err.name === "CastError") {
+         const path = err.path;
+         err.message = `Invalid format of ${path}`;
+
+         return res.status(400).json({
+           success: false,
+           message: process.env.NODE_ENV === "DEVELOPMENT" ? err : err.message,
+         });
+       }
+
+    return res.status(400).json({
+      success: false,
+      message: "error while fetching chat profile details",
+      Error: err,
+    });
+
+  }
+};
+
+
 const getChatDetails = async (req, res) => {
   try {
     if (req.query.populate === "true") {
@@ -843,4 +909,5 @@ module.exports = {
   updateGroupInfo,
   deleteChat,
   getMessages,
+  getChatProfileData,
 };

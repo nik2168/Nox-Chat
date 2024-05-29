@@ -1,6 +1,6 @@
 import { FilterList, Search } from "@mui/icons-material";
 import { Skeleton } from "@mui/material";
-import React, { Suspense, lazy, useState } from "react";
+import React, { Suspense, lazy, useRef, useState } from "react";
 const SingleChats = lazy(() =>
   import("../ChatList/SingleChats")
 );
@@ -10,6 +10,10 @@ const CreateNewGroup = lazy(() =>
 const CurNotifications = lazy(() =>
   import("./CurNotifications")
 );
+const ProfileWindow = lazy(() => import("./ProfileWindow"));
+
+
+
 
 const AllChats = ({
   curnav,
@@ -20,7 +24,11 @@ const AllChats = ({
   setSearch,
   search,
 }) => {
-  const [curChats, setChats] = useState([]);
+
+    const profilewindow = useRef();
+
+
+  const [curChatId, setCurChatId] = useState('');
 
   const handleDeleteChatOpen = (e, userid, groupchat) => {
     e.preventDefault();
@@ -29,6 +37,11 @@ const AllChats = ({
 
   return (
     <section className="allchats" ref={allChats}>
+
+      <Suspense fallback={<Skeleton/>}>
+      <ProfileWindow profilewindow={profilewindow} curChatId={curChatId} allChats={allChats}/>
+      </Suspense>
+
       <div className="allchats-header">
         <div className="allchats-div">
           {curnav === "chats" && <h1>Chats</h1>}
@@ -86,6 +99,8 @@ const AllChats = ({
                 handleDeleteChatOpen={handleDeleteChatOpen}
                 allChats={allChats}
                 navbarref={navbarref}
+                profilewindow={profilewindow}
+                setCurChatId={setCurChatId}
               />
             </Suspense>
           ))}

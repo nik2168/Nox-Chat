@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 
 
 
-const GroupChats = ({ allChats, chat, navbarref, handleDeleteChatOpen, index }) => {
+const GroupChats = ({ allChats, chat, navbarref, handleDeleteChatOpen, index, profilewindow, setCurChatId }) => {
   const { allChatsIsTyping } = useSelector((state) => state.chat); // Cur User
 
   const { newMessageAlert } = useSelector((state) => state.chat);
@@ -42,7 +42,11 @@ const GroupChats = ({ allChats, chat, navbarref, handleDeleteChatOpen, index }) 
         // onContextMenu={(e) => handleDeleteChatOpen(e, _id, groupChat)}
         className="person-div"
       >
-        <div className="person-dp">
+        <button value={_id} className="person-dp" onClick={(e) => {
+           profilewindow.current.classList.add("active");
+           allChats.current.classList.add("lightblur");
+           setCurChatId(e.currentTarget.value);
+        }}>
           <div className="groupbg1"> </div>
           <div className="groupbg2"></div>
           <img
@@ -54,7 +58,7 @@ const GroupChats = ({ allChats, chat, navbarref, handleDeleteChatOpen, index }) 
             className="group-image"
             style={{ height: "58px", width: "58px" }}
           />
-        </div>
+        </button>
         <Link
           to={`/chat/${_id}`}
           className="person-details"

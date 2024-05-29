@@ -14,6 +14,7 @@ const {
   updateGroupInfo,
   deleteChat,
   getMessages,
+  getChatProfileData,
 } = require("../controllers/chat.controller.js");
 
 // middle wares
@@ -57,6 +58,8 @@ router.get("/chats", getMyChats);
 router.get("/groups", getMyGroups);
 
 router.get("/leave/:id", leaveGroupValidator(), validateHandler, leaveGroup);
+
+router.get("/getchatprofiledata/:id", getChatProfileData);
 
 router.post(
   "/sendattachments",

@@ -25,11 +25,15 @@ const {
   NEW_MESSAGE_ALERT,
   START_TYPING,
   STOP_TYPING,
+  CHAT_JOINED,
+  CHAT_LEAVE,
+  ONLINE_USERS,
 } = require("./constants/events.js");
 const Message = require("./models/message.model.js");
 const { socketAuthenticator } = require("./middlewares/auth.mw.js");
 const { errorMiddleWare } = require("./middlewares/error.mw.js");
 const { userSocketIds } = require("./utils/features.js");
+const onlineUsers = new Set();
 const server = createServer(app);
 const io = new Server(server, { cors: corsOptions });
 
@@ -100,7 +104,6 @@ io.on("connection", (socket) => {
   // will get all the users currently connected to socket
   // temp user
 
-
   userSocketIds.set(user._id.toString(), socket.id); // all the socket connected users are in this map
 
   console.log("a user connected", socket.id);
@@ -139,8 +142,6 @@ io.on("connection", (socket) => {
       userSocketIds.get(user._id.toString())
     ); // will get all the socketIds of a sepecific chat's members to whom we need to send the message ...
 
-   
-
     io.to(membersSockets).emit(NEW_MESSAGE, {
       chatid,
       message: messageForRealTime,
@@ -165,7 +166,33 @@ io.on("connection", (socket) => {
     io.to(membersSockets).emit(STOP_TYPING, { chatid });
   });
 
+   onlineUsers.add(user._id.toString());
+
+    io.emit(ONLINE_USERS, Array.from(onlineUsers));
+
+  // socket.on(CHAT_JOINED, ({ userId, members }) => {
+  //       onlineUsers.add(userId.toString());
+  //   const membersSockets = members.map((member) =>
+  //     userSocketIds.get(member._id.toString())
+  //   );
+  //   console.log(membersSockets)
+
+  //   io.to(membersSockets).emit(ONLINE_USERS, Array.from(onlineUsers));
+  // });
+
+  // socket.on(CHAT_LEAVE, ({ userId, members }) => {
+  //       onlineUsers.delete(userId.toString());
+
+  //   const membersSockets = members.map((member) =>
+  //     userSocketIds.get(member._id.toString())
+  //   );
+
+  //   io.to(membersSockets).emit(ONLINE_USERS, Array.from(onlineUsers));
+  // });
+
   socket.on("disconnect", () => {
+        onlineUsers.delete(user._id.toString());
+        io.emit(ONLINE_USERS, Array.from(onlineUsers));
     userSocketIds.delete(user._id.toString()); // will remove members from map once they dissconnected ...
     console.log("user dissconnected");
   });
