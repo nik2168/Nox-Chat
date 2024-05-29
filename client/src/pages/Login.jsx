@@ -223,7 +223,7 @@ const Login = () => {
       <div className="form-container sign-in">
         <form onSubmit={signInSubmitHandler}>
           <h1>Sign In</h1>
-          <div className="social-icons">
+          {/* <div className="social-icons">
             <a href="#" className="icon">
               <i className="fa-brands fa-facebook-f"></i>
             </a>
@@ -233,7 +233,7 @@ const Login = () => {
             <a href="#" className="icon">
               <i className="fa-brands fa-linkedin-in"></i>
             </a>
-          </div>
+          </div> */}
           <span>or use your username & password</span>
           <input
             type="username"
@@ -247,14 +247,14 @@ const Login = () => {
             value={pass}
             onChange={(e) => setpass(e.currentTarget.value)}
           />
-          {check && (
+          {/* {check && (
             <span
               className="validationWarning"
               style={{ color: "red", fontWeight: "800" }}
             >
               {check}
             </span>
-          )}
+          )} */}
           <a href="#">Forget Your Password?</a>
           <button disabled={isLoading}>Sign In</button>
         </form>
