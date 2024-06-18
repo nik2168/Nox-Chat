@@ -16,6 +16,7 @@ import Title from "../shared/Title";
 import Navbar from "./Navbar";
 
 import {
+  CHAT_ONLINE_USERS,
   MEMBER_REMOVED,
   NEW_MESSAGE_ALERT,
   NEW_REQUEST,
@@ -31,13 +32,17 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   incrementNotification,
   setAllChatsTyping,
+  setChatOnlineMembers,
   setNewMessagesAlert,
   setOnlineMembers,
   setTyping,
 } from "../../redux/reducer/chat.js";
 import { useNavigate, useParams } from "react-router-dom";
 import NoxVerse from "../Nox Verse/NoxVerse.jsx";
-import { useMyChatsQuery } from "../../redux/api/api.js";
+import {
+  useLazyChangeMessageToOnlineQuery,
+  useMyChatsQuery,
+} from "../../redux/api/api.js";
 
 const AppLayout = () => (WrapComp) => {
   return (props) => {
@@ -48,10 +53,7 @@ const AppLayout = () => (WrapComp) => {
     const { chatid } = useParams();
     const allChats = useRef(); // ref to chat
     const navbarref = useRef(); // ref to chat
-    const [playsound, setPlaySound] = useState(false)
-
-
-  
+    const [playsound, setPlaySound] = useState(false);
 
     const [curnav, setnav] = useState("chats");
     const dispatch = useDispatch();
@@ -60,11 +62,21 @@ const AppLayout = () => (WrapComp) => {
 
     const [search, setSearch] = useState("");
 
+    // // marked all messages to online
+    // const [updateMessageSendToOnline] = useLazyChangeMessageToOnlineQuery();
+
+    // useEffect(() => {
+    //   // marked all send messages to online if user is online
+
+    //   updateMessageSendToOnline()
+    //     .then(({ data }) => console.log(data?.message))
+    //     .catch((e) => console.log(e));
+    // }, []);
+
     // my chats fetching ...
     const { isLoading, data, isError, error, refetch } =
       useMyChatsQuery(search);
     useErrors([{ isError, error }]);
-    
 
     const newMessagesAlert = useCallback(
       (data) => {
@@ -75,7 +87,6 @@ const AppLayout = () => (WrapComp) => {
     );
 
     const newRequestAlert = useCallback(() => {
-    
       dispatch(incrementNotification());
     }, [dispatch]);
 
@@ -116,18 +127,19 @@ const AppLayout = () => (WrapComp) => {
     const refetchNewMembers = useCallback(
       (data) => {
         if (data?.userId === user._id.toString()) navigate(`/`);
-        else navigate(`/chat/${data?.curChatId}`);
         refetch();
       },
       [refetch, navigate]
     );
 
-    const onlineUsersListener = useCallback(
-      (data) => {
-        dispatch(setOnlineMembers(data))
-      },
-      [dispatch]
-    );
+    const onlineUsersListener = useCallback((data) => {
+      dispatch(setOnlineMembers(data));
+    }, []);
+
+    const chatOnlineUsersListener = useCallback(({ chatOnlineMembers }) => {
+
+      dispatch(setChatOnlineMembers(chatOnlineMembers));
+    }, []);
 
     const eventHandler = {
       [NEW_MESSAGE_ALERT]: newMessagesAlert,
@@ -136,7 +148,8 @@ const AppLayout = () => (WrapComp) => {
       [STOP_TYPING]: stopTypingListner,
       [REFETCH_CHATS]: refetchListner,
       [MEMBER_REMOVED]: refetchNewMembers,
-      [ONLINE_USERS] : onlineUsersListener,
+      [ONLINE_USERS]: onlineUsersListener,
+      [CHAT_ONLINE_USERS]: chatOnlineUsersListener,
     };
 
     useSocketEvents(socket, eventHandler);

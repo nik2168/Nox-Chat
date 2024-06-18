@@ -7,9 +7,16 @@ import {
   Send,
 } from "@mui/icons-material";
 import { Skeleton } from "@mui/material";
-import React, { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  Suspense,
+  lazy,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import AppLayout from "../components/AppLayout/AppLayout";
 import ChatFilesMenu from "../components/ChatComp/ChatFilesMenu.jsx";
 import ChatSettings from "../components/ChatComp/ChatSettings";
@@ -19,6 +26,8 @@ import {
   CHAT_JOINED,
   CHAT_LEAVE,
   NEW_MESSAGE,
+  REFETCH_CHATS,
+  REFETCH_MESSAGES,
   START_TYPING,
   STOP_TYPING,
 } from "../constants/events.js";
@@ -26,10 +35,12 @@ import { useErrors, useSocketEvents } from "../hooks/hook.jsx";
 import {
   useGetChatDetailsQuery,
   useGetMessagesQuery,
+  useLazyChangeMessageToOnlineQuery,
+  useLazyChangeMessageToSeenQuery,
 } from "../redux/api/api.js";
 import {
   removeNewMessagesAlert,
-  setNewGroupAlert
+  setNewGroupAlert,
 } from "../redux/reducer/chat.js";
 import { getSocket } from "../socket";
 
@@ -41,21 +52,18 @@ const ChatSetting = lazy(() =>
   import("../components/ChatComp/chatsetting.jsx")
 );
 
-
-
-
-
-
 const Chat = ({ chatid, allChats, navbarref }) => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth); // Cur User
   const { onlineMembers } = useSelector((state) => state.chat); // Cur User
+  const { onlineChatMembers } = useSelector((state) => state.chat);
   const { isTyping } = useSelector((state) => state.chat);
   const { allChatsIsTyping } = useSelector((state) => state.chat); // Cur User
   const { newGroupAlert } = useSelector((state) => state.chat); // Cur User
 
   const [message, setcurmessage] = useState(""); // CurMessage
   const [messages, setMessages] = useState([]); // Messages List
+    const [allMessages, setAllMessages] = useState([]); 
   const [page, setPage] = useState(1);
   const [imTyping, setImTyping] = useState(false);
 
@@ -73,14 +81,17 @@ const Chat = ({ chatid, allChats, navbarref }) => {
 
   const chat = useRef(); // ref to chat
 
+
+
   const chatDetails = useGetChatDetailsQuery({ chatid, populate: true });
   const oldMessagesChunk = useGetMessagesQuery({ chatid, page });
+
+
 
   const error = [
     { error: chatDetails?.error, isError: chatDetails?.isError },
     { error: oldMessagesChunk?.error, isError: oldMessagesChunk?.isError },
   ];
-
 
   useEffect(() => {
     if (chatDetails.error) return navigate("/");
@@ -88,9 +99,32 @@ const Chat = ({ chatid, allChats, navbarref }) => {
 
   useErrors(error);
 
-
   const curChat = chatDetails?.data?.curchat;
   const members = curChat?.members;
+
+
+    const chatOnlineUsersMap = new Map(Object.entries(onlineChatMembers));
+
+  const curChatMembersName = curChat?.members.map((i) => i.name).join(", ");
+  let avatar = curChat?.avatar?.url;
+  let name = curChat?.name;
+  let otherMember = '';
+  if (!curChat?.groupChat) {
+    otherMember = curChat?.members.find(
+      (i) => i._id.toString() !== user._id.toString()
+    );
+    avatar = otherMember?.avatar?.url;
+    name = otherMember?.name;
+  }
+  
+  let isOnline = false;
+  let isChatOnline = false;
+  if (!curChat?.groupChat) {
+    isOnline = onlineMembers.includes(otherMember?._id.toString());
+    if(chatOnlineUsersMap?.has(otherMember?._id?.toString()) && chatOnlineUsersMap?.get(otherMember?._id?.toString()).toString() === chatid.toString()){
+    isChatOnline = true;
+    }
+  }
 
 
   // infinite scroll
@@ -103,36 +137,42 @@ const Chat = ({ chatid, allChats, navbarref }) => {
   );
 
   useEffect(() => {
-   if(members)
-    socket.emit(CHAT_JOINED, {userId: user._id, members})
+    if (members) socket.emit(CHAT_JOINED, { userId: user._id, members, chatid });
+    // console.log("chat joined", onlineMembers, onlineChatMembers)
 
     dispatch(removeNewMessagesAlert(chatid));
-
 
     return () => {
       setOldMessages([]);
       setPage(1);
       setMessages([]);
       setcurmessage("");
-       if(members)
-      socket.emit(CHAT_LEAVE, { userId: user._id, members });
+      if (members) socket.emit(CHAT_LEAVE, { userId: user._id, members, chatid });
+      // console.log("chat leave", members )
     };
-
   }, [chatid, members]);
 
-  const allMessages = [...oldMessages, ...messages];
+
+  useEffect(() => {
+
+  setAllMessages([...oldMessages, ...messages]);
+
+  }, [oldMessages, messages])
+
+
 
   const socket = getSocket();
+
 
   const messageSubmitHandler = (e) => {
     e.preventDefault();
     if (!message.trim()) return;
 
     // emitting message to the server ...
-    socket.emit(NEW_MESSAGE, { chatid, members, message });
-
+    socket.emit(NEW_MESSAGE, { chatid, members, message, otherMember, isChatOnline });
     setcurmessage("");
   };
+
 
   const onChangeHandler = (e) => {
     setcurmessage(e.target.value);
@@ -156,18 +196,48 @@ const Chat = ({ chatid, allChats, navbarref }) => {
     }, [2000]);
   };
 
+
+
+
+
   // will use newMessages function inside useCallback so that it won't created everytime we got new message
   const newMessageListner = useCallback(
     (data) => {
-      if (data?.chatid.toString() !== chatid.toString()) return;
+
+      if (data?.chatid.toString() !== chatid.toString()) {
+        console.log("return chat id not matched !")
+        return;
+      }
+      console.log(data.message.content, isChatOnline)
       setMessages((pre) => [...pre, data.message]);
     },
-    [chatid]
+    []
   );
+
+ // update message status for other users
+  const refetchMessages = useCallback((data) => {
+
+// console.log("allMessages : ", allMessages);
+const updatedStatus = allMessages.map((message) => {
+  if(message.status.toString() === "send" && data.toString() === "online") {
+    message["status"] = "online"
+  }
+  if(message.status.toString() == "online" && data.toString() === "seen") {
+    message["status"] = "seen"
+  }
+  return message;
+})
+setAllMessages(updatedStatus)
+
+// console.log("updatedStatus : ", updatedStatus);
+
+  }, [allMessages]);
+
+
 
   const alertListener = useCallback(
     (data) => {
-      console.log(chatid, data);
+      // console.log(chatid, data);
       if (data?.chatid?.toString() !== chatid?.toString()) return;
       setNewGroupAlert(dispatch(data));
     },
@@ -177,24 +247,11 @@ const Chat = ({ chatid, allChats, navbarref }) => {
   const events = {
     [NEW_MESSAGE]: newMessageListner,
     [ALERT]: alertListener,
+    [REFETCH_MESSAGES]: refetchMessages,
   };
 
   useSocketEvents(socket, events); // using a custom hook to listen for events array
 
-
-
-  const curChatMembersName = curChat?.members.map((i) => i.name).join(", ");
-   let avatar = curChat?.avatar?.url;
-   let name = curChat?.name
-   let otherMember;
-   if(!curChat?.groupChat) {
-     otherMember = curChat?.members.find((i) => i._id.toString() !== user._id.toString())
-    avatar = otherMember?.avatar?.url
-    name = otherMember?.name
-   }
-
-   let isOnline = false;
-   if(!curChat?.groupChat && onlineMembers.includes(otherMember?._id)) isOnline = true;
 
 
   return chatDetails?.isLoading ? (
@@ -208,6 +265,7 @@ const Chat = ({ chatid, allChats, navbarref }) => {
             curChat={curChat}
             addMemberWindow={addMemberWindow}
             chatid={chatid}
+            oldMessagesChunk={oldMessagesChunk}
           />
         </Suspense>
       ) : (
@@ -227,8 +285,14 @@ const Chat = ({ chatid, allChats, navbarref }) => {
         <button
           className="backButton"
           onClick={() => {
-            allChats.current.style.zIndex = "4";
-            navbarref.current.style.zIndex = "5";
+            // allChats.current.style.zIndex = "4";
+            // navbarref.current.style.zIndex = "5";
+            navigate("/");
+            setOldMessages([]);
+            setPage(1);
+            setMessages([]);
+            setcurmessage("");
+            if (members) socket.emit(CHAT_LEAVE, { userId: user._id, members });
           }}
         >
           <ArrowBackIosNew sx={{ width: "2rem", height: "2rem" }} />
@@ -241,7 +305,7 @@ const Chat = ({ chatid, allChats, navbarref }) => {
               groupsetting.current.classList.add("active");
               return;
             }
-            chatsetting.current.classList.add("active")
+            chatsetting.current.classList.add("active");
           }}
         >
           <img
@@ -275,7 +339,14 @@ const Chat = ({ chatid, allChats, navbarref }) => {
               </p>
             )
           )}
-          {!isTyping && !curChat?.groupChat && isOnline && <p className="chattypingspan">online</p> || !curChat?.groupChat && !isOnline && <p className="chattypingspan" style={{color: "whitesmoke"}}>offline</p>}
+          {(!isTyping && !curChat?.groupChat && isChatOnline && (
+            <p className="chattypingspan">online</p>
+          )) ||
+            (!curChat?.groupChat && !isOnline && (
+              <p className="chattypingspan" style={{ color: "whitesmoke" }}>
+                offline
+              </p>
+            ))}
           {/* {isOnline ? <span>Online</span> : <span>Offline</span>} */}
         </div>
 
@@ -295,15 +366,21 @@ const Chat = ({ chatid, allChats, navbarref }) => {
 
       <ChatSettings />
 
-     {chatDetails.isLoading ? <Skeleton/> : <Messages
-        user={user}
-        scrollElement={scrollElement}
-        allMessages={allMessages}
-        chat={chat}
-        chatid={chatid}
-        messages={messages}
-        groupChat={curChat?.groupChat}
-      /> }
+      {chatDetails?.isLoading ? (
+        <Skeleton />
+      ) : (
+        <Messages
+          user={user}
+          scrollElement={scrollElement}
+          allMessages={allMessages}
+          chat={chat}
+          chatid={chatid}
+          messages={messages}
+          members={members}
+          groupChat={curChat?.groupChat}
+          otherMember={otherMember}
+        />
+      )}
 
       <form
         className="chat-message-div"
@@ -330,7 +407,6 @@ const Chat = ({ chatid, allChats, navbarref }) => {
             className="chat-message"
             value={message}
             onChange={(e) => onChangeHandler(e)}
-            autoFocus
           />
 
           <EmojiEmotions
