@@ -5,6 +5,7 @@ import {
   EmojiEmotions,
   MoreVert,
   Send,
+  Timer,
 } from "@mui/icons-material";
 import { Skeleton } from "@mui/material";
 import React, {
@@ -25,9 +26,12 @@ import {
   ALERT,
   CHAT_JOINED,
   CHAT_LEAVE,
+  LAST_CHAT_ONLINE,
+  LAST_ONLINE,
   NEW_MESSAGE,
   REFETCH_CHATS,
   REFETCH_MESSAGES,
+  SCHEDULE_MESSAGE,
   START_TYPING,
   STOP_TYPING,
 } from "../constants/events.js";
@@ -43,6 +47,7 @@ import {
   setNewGroupAlert,
 } from "../redux/reducer/chat.js";
 import { getSocket } from "../socket";
+import moment from "moment";
 
 // import GroupSettings from "../components/ChatComp/groupsettings";
 const GroupSettings = lazy(() =>
@@ -55,6 +60,7 @@ const ChatSetting = lazy(() =>
 const Chat = ({ chatid, allChats, navbarref }) => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth); // Cur User
+
   const { onlineMembers } = useSelector((state) => state.chat); // Cur User
   const { onlineChatMembers } = useSelector((state) => state.chat);
   const { isTyping } = useSelector((state) => state.chat);
@@ -63,9 +69,11 @@ const Chat = ({ chatid, allChats, navbarref }) => {
 
   const [message, setcurmessage] = useState(""); // CurMessage
   const [messages, setMessages] = useState([]); // Messages List
-    const [allMessages, setAllMessages] = useState([]); 
+  const [allMessages, setAllMessages] = useState([]);
   const [page, setPage] = useState(1);
   const [imTyping, setImTyping] = useState(false);
+  const [onlineLastSeen, setOnlineLastSeen] = useState("");
+  const [scheduleTime, setScheduleTime] = useState("");
 
   const navigate = useNavigate();
 
@@ -75,18 +83,16 @@ const Chat = ({ chatid, allChats, navbarref }) => {
 
   const chatsetting = useRef();
 
+  const scheduleMessage = useRef();
+
   const clearTime = useRef();
 
   const addMemberWindow = useRef();
 
   const chat = useRef(); // ref to chat
 
-
-
   const chatDetails = useGetChatDetailsQuery({ chatid, populate: true });
   const oldMessagesChunk = useGetMessagesQuery({ chatid, page });
-
-
 
   const error = [
     { error: chatDetails?.error, isError: chatDetails?.isError },
@@ -102,13 +108,12 @@ const Chat = ({ chatid, allChats, navbarref }) => {
   const curChat = chatDetails?.data?.curchat;
   const members = curChat?.members;
 
-
-    const chatOnlineUsersMap = new Map(Object.entries(onlineChatMembers));
+  const chatOnlineUsersMap = new Map(Object.entries(onlineChatMembers));
 
   const curChatMembersName = curChat?.members.map((i) => i.name).join(", ");
   let avatar = curChat?.avatar?.url;
   let name = curChat?.name;
-  let otherMember = '';
+  let otherMember = "";
   if (!curChat?.groupChat) {
     otherMember = curChat?.members.find(
       (i) => i._id.toString() !== user._id.toString()
@@ -116,16 +121,26 @@ const Chat = ({ chatid, allChats, navbarref }) => {
     avatar = otherMember?.avatar?.url;
     name = otherMember?.name;
   }
-  
+
+  const lastSeenTime = otherMember?.lastSeen;
+
   let isOnline = false;
   let isChatOnline = false;
   if (!curChat?.groupChat) {
     isOnline = onlineMembers.includes(otherMember?._id.toString());
-    if(chatOnlineUsersMap?.has(otherMember?._id?.toString()) && chatOnlineUsersMap?.get(otherMember?._id?.toString()).toString() === chatid.toString()){
-    isChatOnline = true;
+    if (
+      chatOnlineUsersMap?.has(otherMember?._id?.toString()) &&
+      chatOnlineUsersMap?.get(otherMember?._id?.toString()).toString() ===
+        chatid.toString()
+    ) {
+      isChatOnline = true;
     }
   }
 
+  // last seen for message seen, received status ....
+  useEffect(() => {
+    setOnlineLastSeen(otherMember?.lastSeen);
+  }, [chatDetails?.data]);
 
   // infinite scroll
   const { data: oldMessages, setData: setOldMessages } = useInfiniteScrollTop(
@@ -137,8 +152,8 @@ const Chat = ({ chatid, allChats, navbarref }) => {
   );
 
   useEffect(() => {
-    if (members) socket.emit(CHAT_JOINED, { userId: user._id, members, chatid });
-    // console.log("chat joined", onlineMembers, onlineChatMembers)
+    if (members)
+      socket.emit(CHAT_JOINED, { userId: user._id, members, chatid });
 
     dispatch(removeNewMessagesAlert(chatid));
 
@@ -147,32 +162,50 @@ const Chat = ({ chatid, allChats, navbarref }) => {
       setPage(1);
       setMessages([]);
       setcurmessage("");
-      if (members) socket.emit(CHAT_LEAVE, { userId: user._id, members, chatid });
-      // console.log("chat leave", members )
+      if (members)
+        socket.emit(CHAT_LEAVE, { userId: user._id, members, chatid });
     };
   }, [chatid, members]);
 
-
   useEffect(() => {
-
-  setAllMessages([...oldMessages, ...messages]);
-
-  }, [oldMessages, messages])
-
-
+    setAllMessages([...oldMessages, ...messages]);
+  }, [oldMessages, messages]);
 
   const socket = getSocket();
-
 
   const messageSubmitHandler = (e) => {
     e.preventDefault();
     if (!message.trim()) return;
 
     // emitting message to the server ...
-    socket.emit(NEW_MESSAGE, { chatid, members, message, otherMember, isChatOnline });
+    socket.emit(NEW_MESSAGE, {
+      chatid,
+      members,
+      message,
+      otherMember,
+      isChatOnline,
+    });
     setcurmessage("");
   };
 
+  const scheduleMessageHandler = (e) => {
+    e.preventDefault();
+    if (!message.trim()) return;
+
+    // emitting message to the server ...
+    socket.emit(SCHEDULE_MESSAGE, {
+      chatid,
+      members,
+      message,
+      otherMember,
+      scheduleTime,
+    });
+
+    setcurmessage("");
+    setScheduleTime("");
+
+    scheduleMessage.current.classList.remove("active");
+  };
 
   const onChangeHandler = (e) => {
     setcurmessage(e.target.value);
@@ -196,48 +229,23 @@ const Chat = ({ chatid, allChats, navbarref }) => {
     }, [2000]);
   };
 
-
-
-
-
   // will use newMessages function inside useCallback so that it won't created everytime we got new message
-  const newMessageListner = useCallback(
-    (data) => {
+  const newMessageListner = useCallback(({ chatId, message }) => {
+    if (chatId.toString() !== chatid.toString()) {
+      console.log("return chat id not matched !");
+      return;
+    }
 
-      if (data?.chatid.toString() !== chatid.toString()) {
-        console.log("return chat id not matched !")
-        return;
-      }
-      console.log(data.message.content, isChatOnline)
-      setMessages((pre) => [...pre, data.message]);
-    },
-    []
-  );
+    setMessages((pre) => [...pre, message]);
+  }, []);
 
- // update message status for other users
-  const refetchMessages = useCallback((data) => {
-
-// console.log("allMessages : ", allMessages);
-const updatedStatus = allMessages.map((message) => {
-  if(message.status.toString() === "send" && data.toString() === "online") {
-    message["status"] = "online"
-  }
-  if(message.status.toString() == "online" && data.toString() === "seen") {
-    message["status"] = "seen"
-  }
-  return message;
-})
-setAllMessages(updatedStatus)
-
-// console.log("updatedStatus : ", updatedStatus);
-
-  }, [allMessages]);
-
-
+  // update message status for other users
+  const lastOnlineListner = useCallback((data) => {
+    setOnlineLastSeen(data);
+  }, []);
 
   const alertListener = useCallback(
     (data) => {
-      // console.log(chatid, data);
       if (data?.chatid?.toString() !== chatid?.toString()) return;
       setNewGroupAlert(dispatch(data));
     },
@@ -247,12 +255,10 @@ setAllMessages(updatedStatus)
   const events = {
     [NEW_MESSAGE]: newMessageListner,
     [ALERT]: alertListener,
-    [REFETCH_MESSAGES]: refetchMessages,
+    [LAST_ONLINE]: lastOnlineListner,
   };
 
   useSocketEvents(socket, events); // using a custom hook to listen for events array
-
-
 
   return chatDetails?.isLoading ? (
     <Skeleton className="chat" />
@@ -344,7 +350,7 @@ setAllMessages(updatedStatus)
           )) ||
             (!curChat?.groupChat && !isOnline && (
               <p className="chattypingspan" style={{ color: "whitesmoke" }}>
-                offline
+                {`last seen ${moment(lastSeenTime).fromNow()}`}
               </p>
             ))}
           {/* {isOnline ? <span>Online</span> : <span>Offline</span>} */}
@@ -374,11 +380,11 @@ setAllMessages(updatedStatus)
           scrollElement={scrollElement}
           allMessages={allMessages}
           chat={chat}
-          chatid={chatid}
           messages={messages}
-          members={members}
           groupChat={curChat?.groupChat}
           otherMember={otherMember}
+          isOnline={isOnline}
+          isChatOnline={isChatOnline}
         />
       )}
 
@@ -409,12 +415,51 @@ setAllMessages(updatedStatus)
             onChange={(e) => onChangeHandler(e)}
           />
 
-          <EmojiEmotions
-            sx={{
-              position: "absolute",
-              right: "0.5rem",
+          <div className="scheduleMessage" ref={scheduleMessage}>
+            <div className="scheduleCross">
+              <p>Schedule a message</p>
+            </div>
+            <div className="scheduleInputDiv">
+              <input
+                type="number"
+                className="scheduleInput"
+                value={scheduleTime}
+                onChange={(e) => setScheduleTime(e.currentTarget.value)}
+              />
+              <p className="scheduleText">MIN</p>
+            </div>
+            <div className="sendButtonDiv">
+              <button
+                className="scheduleCancel"
+                onClick={() => {
+                  scheduleMessage.current.classList.remove("active");
+                  setScheduleTime("");
+                }}
+              >
+                CANCEL
+              </button>
+              <button
+                className="scheduleSend"
+                onClick={(e) => scheduleMessageHandler(e)}
+              >
+                SCHEDULE
+              </button>
+            </div>
+          </div>
+
+          <div
+            className="scheduleIconDiv"
+            onClick={() => {
+              if (scheduleMessage.current.classList.contains("active")) {
+                scheduleMessage.current.classList.remove("active");
+                setScheduleTime("");
+                return;
+              }
+              scheduleMessage.current.classList.add("active");
             }}
-          />
+          >
+            <Timer className="scheduleIcon" />
+          </div>
         </div>
 
         <button
